@@ -77,7 +77,7 @@
 | 스타일 | Vanilla Extract. `pnpm lint:css`로 Stylelint 검사 |
 | React Compiler | Babel 플러그인으로 활성화 |
 
-- 하위 레이어가 상위 레이어를 import하지 않음 [확인 필요: ESLint 규칙으로 강제되는지]
+- 하위 레이어가 상위 레이어를 import하지 않음 (2026-11-25 기준 `eslint.config.js`에 레이어 간 import를 막는 규칙 없음. ESLint로 강제되지 않음)
 
 ## API 타입 생성
 
@@ -123,9 +123,9 @@
 |---|---|
 | 배포 경로 | `main` push → 워크플로 `deploy-www.yml`: 빌드 → S3 동기화(삭제 포함) → CloudFront 캐시 무효화 |
 | 빌드 환경 변수 | `VITE_API_BASE_URL`, `VITE_APP_URL`(GitHub 저장소 변수) |
-| 승인 | 배포 job이 `production` 환경을 사용 [확인 필요: 환경 승인자 설정 여부] |
+| 승인 | 배포 job이 `production` 환경을 사용. 2026-11-25 기준 환경 승인자는 서비스운영팀(`2nd-PMO` 팀)으로 설정됨. 본인 승인 금지, 관리자 우회 금지, 배포 브랜치는 `main`만 허용 |
 | 확인 방법 | [확인 필요: 배포 후 점검 항목] |
-| 되돌리는 방법 | [확인 필요: 이전 빌드로 되돌리는 절차] |
+| 되돌리는 방법 | 2026-11-25 기준 워크플로에 롤백 전용 절차 없음. 배포가 `main` push마다 빌드해 S3를 덮어쓰고(삭제 포함) 캐시를 무효화하므로, 문제 커밋을 되돌리는(revert) PR을 `main`에 머지해 재배포함 [확인 필요: 공식 롤백 절차 확정 여부, 긴급 시 PR 승인 생략 허용 여부] |
 
 - 백엔드 변경과 함께 배포할 때 순서: `contracts/release-order.md`
 
