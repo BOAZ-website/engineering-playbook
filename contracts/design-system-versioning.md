@@ -1,5 +1,5 @@
 > 담당 역할: PM | Product Engineer
-> 최종 검토일: 2026-11-24
+> 최종 검토일: 2026-11-25
 > 적용 범위: design-system, frontend, frontend_admin
 > 상태: 초안
 
@@ -46,7 +46,7 @@
 | 2 | `package.json`의 `version`을 올리는 PR을 `dev`에 머지 | Product Engineer |
 | 3 | `dev` → `main` 릴리스 PR 생성 | Product Engineer |
 | 4 | 리뷰어 승인과 검사 통과 후 merge commit으로 머지 | 리뷰어 |
-| 5 | 릴리스 태그 생성 | 저장소 문서 기준 디자인 시스템 리드. 다음 기수 체계에서는 PM |
+| 5 | 릴리스 태그 생성 | PM(디자인 시스템 저장소 문서에는 디자인 시스템 리드로 적혀 있음) |
 
 - 순서 2와 3은 `v0.1.1` 릴리스의 선례(버전 지정 PR, 릴리스 PR)를 따름
 - 빌드 결과(`dist/`)는 커밋에 포함되어 있어 태그만으로 설치 가능
@@ -90,5 +90,5 @@
 | 질문 | 결정 필요 주체 | 필요 시점 |
 |---|---|---|
 | design-system 저장소 `AGENTS.md`의 호환되지 않는 변경 정책 대조 | Product Engineer | `v0.2.0` 릴리스 전 |
-| 두 앱의 현재 설치 버전과 적용 여부 확인 | Product Engineer | `v0.2.0` 앱 반영 전 |
-| 릴리스 태그 생성 담당을 새 체계의 역할로 확정 | PM | 다음 기수 시작 전 |
+| 두 앱의 설치 버전과 적용 여부 확인 | Product Engineer | `v0.2.0` 앱 반영 전 |
+| 릴리스 태그 생성 담당을 27&28기 체계의 역할(PM, Product Engineer)로 확정 | PM | 27&28기 시작 전 |
