@@ -31,6 +31,7 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 | 티켓과 이슈를 만들고 진행 상태를 남긴다 | [process/dev-cycle.md](process/dev-cycle.md) |
 | 운영에 배포하거나 급한 수정(hotfix)을 한다 | [process/release.md](process/release.md) |
 | 누가 결정하는지, 어떤 권한이 필요한지 알고 싶다 | [org/roles-and-authority.md](org/roles-and-authority.md) |
+| PM으로서 우선순위·결정·보고를 판단한다 | [org/pm-guide.md](org/pm-guide.md) |
 | 백엔드 작업을 처음 한다 | [products/backend.md](products/backend.md) |
 | 웹사이트, 관리자 페이지, 인프라, 디자인 시스템 작업을 처음 한다 | [products/website.md](products/website.md), [products/admin.md](products/admin.md), [products/infra.md](products/infra.md), [products/design-system.md](products/design-system.md) |
 | API 응답 형식, 인증, 배포 순서를 확인한다 | [contracts/api.md](contracts/api.md), [contracts/auth.md](contracts/auth.md), [contracts/release-order.md](contracts/release-order.md) |
