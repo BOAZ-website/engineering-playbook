@@ -60,6 +60,22 @@
 
 - 상세: `org/access.md`
 
+## PM 팀 교체
+
+기수마다 PM 팀을 새로 만들어 운영 배포 승인자와 playbook PM 예외를 넘김. 팀 이름 규칙: `process/release.md`의 "PM 팀 이름"
+
+| 순서 | 작업 | 담당 |
+|---|---|---|
+| 1 | 새 기수 PM 팀(`n`th-PM) 생성, 신임 PM 추가 | GitHub 조직 소유자 |
+| 2 | 새 팀에 backend, frontend, frontend_admin, product-infra 읽기 권한 부여 | GitHub 조직 소유자 |
+| 3 | 4개 저장소 `production` 환경 승인자에 새 팀 추가, Product 담당 승인자를 새 담당자로 교체 | 저장소 관리자 |
+| 4 | engineering-playbook `main` 보호 규칙의 PM 예외 팀을 새 팀으로 교체, 저장소 maintain 권한 부여 | GitHub 조직 소유자 |
+| 5 | 다음 운영 배포에서 신임 PM 또는 새 담당자가 승인할 수 있는지 확인 | 신임 PM |
+| 6 | 이전 PM 팀을 환경 승인자와 playbook 예외에서 제거 | GitHub 조직 소유자 |
+
+- 새 팀을 먼저 추가하고 확인한 뒤 이전 팀을 제거함. 순서를 바꾸면 승인자가 없는 기간이 생김
+- 승인자는 저장소 읽기 권한 이상이 있어야 함
+
 ## 시크릿과 키 교체 대상
 
 | 종류 | 교체 조건 |
