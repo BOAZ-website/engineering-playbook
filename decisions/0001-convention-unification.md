@@ -1,7 +1,7 @@
 > 담당 역할: PM
 > 최종 검토일: 2026-11-25
 > 적용 범위: backend, frontend, frontend_admin, product-infra, design-system
-> 상태: 초안
+> 상태: 확정
 
 # 0001 Git 규칙 통일
 
