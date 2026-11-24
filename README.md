@@ -1,9 +1,9 @@
+# engineering-playbook
+
 > 담당 역할: PM | Product Engineer
 > 최종 검토일: 2026-11-24
 > 적용 범위: BOAZ 서비스운영팀의 5개 Product 전체
 > 상태: 초안
-
-# engineering-playbook
 
 ## 목적
 
