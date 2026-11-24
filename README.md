@@ -29,6 +29,11 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 | 운영에 배포하거나 급한 수정(hotfix)을 한다 | [process/release.md](process/release.md) |
 | 누가 결정하는지, 어떤 권한이 필요한지 알고 싶다 | [org/roles-and-authority.md](org/roles-and-authority.md) |
 | 백엔드 작업을 처음 한다 | [products/backend.md](products/backend.md) |
+| 웹사이트, 관리자 페이지, 인프라, 디자인 시스템 작업을 처음 한다 | [products/website.md](products/website.md), [products/admin.md](products/admin.md), [products/infra.md](products/infra.md), [products/design-system.md](products/design-system.md) |
+| API 응답 형식, 인증, 배포 순서를 확인한다 | [contracts/api.md](contracts/api.md), [contracts/auth.md](contracts/auth.md), [contracts/release-order.md](contracts/release-order.md) |
+| 장애가 났다 | [process/incident.md](process/incident.md) |
+| 권한을 요청하거나 회수한다 | [org/access.md](org/access.md) |
+| 팀에 합류하거나 기수를 인수인계한다 | [org/onboarding.md](org/onboarding.md), [org/handover.md](org/handover.md) |
 | 문서, 이슈, PR 본문을 쓴다 | [conventions/doc-writing.md](conventions/doc-writing.md) |
 | 규칙이 왜 이렇게 됐는지 궁금하다 | [decisions/](decisions/) |
 | 규칙을 바꾸고 싶다 | 아래 "문서를 고치는 방법" |
@@ -55,11 +60,11 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 
 | Product | 저장소 | 설명 | Product 문서 |
 |---|---|---|---|
-| 웹사이트 | frontend | 공개 홈페이지 | 작성 예정 |
-| 관리자 페이지 | frontend_admin | 운영진용 관리자 콘솔 | 작성 예정 |
+| 웹사이트 | frontend | 공개 홈페이지 | [products/website.md](products/website.md) |
+| 관리자 페이지 | frontend_admin | 운영진용 관리자 콘솔 | [products/admin.md](products/admin.md) |
 | 백엔드 서버 | backend | 사용자·관리자 API 서버 | [products/backend.md](products/backend.md) |
-| 인프라 | product-infra | AWS 인프라와 Terraform | 작성 예정 |
-| 디자인 시스템 | design-system | 공통 디자인 토큰과 컴포넌트 | 작성 예정 |
+| 인프라 | product-infra | AWS 인프라와 Terraform | [products/infra.md](products/infra.md) |
+| 디자인 시스템 | design-system | 공통 디자인 토큰과 컴포넌트 | [products/design-system.md](products/design-system.md) |
 
 ## 폴더 구성
 
@@ -69,6 +74,7 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 | [process/](process/) | 일하는 절차: 개발 주기, 릴리스와 hotfix |
 | [org/](org/) | 역할, 결정 권한, 접근 권한 규칙 |
 | [products/](products/) | Product별 작업 시작 안내 |
+| [contracts/](contracts/) | Product 사이의 약속: API 형식, 인증, 배포 순서, 디자인 시스템 버전 |
 | [decisions/](decisions/) | 규칙을 정하거나 바꾼 결정과 그 이유 |
 
 ## 여기에 없는 것
@@ -99,6 +105,7 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 
 1. 작업 브랜치를 만들어 문서를 고칩니다. 이 저장소는 문서 저장소라 `dev` 없이 `main`만 씁니다.
 2. `main` 대상으로 PR을 올리고, 1명 이상의 승인을 받아 머지합니다. `main`에 직접 push하지 않습니다.
+   - 이 저장소를 관리하는 PM은 승인 없이 PR을 머지할 수 있습니다. 이 저장소에만 두는 예외이고, `main` 직접 push는 PM도 할 수 없습니다.
 3. 규칙 자체를 바꾸는 경우에는 [decisions/_template.md](decisions/_template.md)로 결정 기록을 함께 추가합니다.
 4. 고친 문서 맨 위의 "최종 검토일"을 갱신합니다.
 
