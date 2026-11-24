@@ -1,11 +1,38 @@
 > 담당 역할: Product Engineer | PM
-> 최종 검토일: 2026-11-24
+> 최종 검토일: 2026-11-25
 > 적용 범위: design-system 저장소
 > 상태: 초안
 
 # 디자인 시스템
 
 저장소 README와 CONTRIBUTING에 있는 내용은 복사하지 않고 경로로 가리킴. 아래 사실은 2026-11-24 기준 저장소의 `README.md`, `CONTRIBUTING.md`, `package.json`에서 확인함
+
+## 메타
+
+| 항목 | 내용 |
+|---|---|
+| 담당 역할 | Product Engineer(영역 고정 없음), PM(우선순위·승인) |
+| 상태 | 개발 중. `v0.1.1` 릴리스 완료(2026-11-24 기준), 컴포넌트 구현 진행 중 |
+| 저장소 | https://github.com/BOAZ-website/design-system |
+| 사용자 | 웹사이트와 관리자 페이지를 개발하는 Product Engineer |
+| 의존하는 Product | 없음 |
+| 제공하는 API·산출물 | CSS 변수(`--boaz-*`), Tailwind v4 테마, 토큰 참조 객체와 타입, React 컴포넌트, 컴포넌트·패턴 명세 |
+| 사용하는 API·산출물 | 없음(Style Dictionary로 빌드) |
+| 관련 계약 문서 | `contracts/design-system-versioning.md` |
+
+## Product 소개
+
+디자인 시스템은 웹사이트와 관리자 페이지가 같은 색, 글꼴, 간격, 컴포넌트를 쓰도록 기준을 한곳에서 관리하는 Product. 두 앱은 git 태그로 설치해 사용함
+
+| 영역 | 내용 |
+|---|---|
+| 토큰 | 색, 타이포그래피, radius, spacing. 원본은 DTCG 형식 JSON |
+| 명세 | 컴포넌트와 패턴(feedback, form, accessibility, voice & tone) 명세 |
+| 구현 | 명세를 구현한 React 컴포넌트. Storybook으로 미리보기 |
+
+- 이 저장소는 기준을 만들고, 두 앱 코드는 각 앱 저장소에서 고침(저장소 `AGENTS.md`)
+- `home/`은 웹사이트용, 관리자 페이지용 `admin/`은 2026-11-24 기준 내용이 없음
+- 토큰 이름 삭제·변경은 두 앱을 깨뜨리는 호환되지 않는 변경이라 버전 규칙이 중요(`contracts/design-system-versioning.md`)
 
 ## 역할과 범위
 
@@ -16,7 +43,7 @@
 | 사용처 | 웹사이트(`products/website.md`), 관리자 페이지(`products/admin.md`) |
 | 스택 | 토큰은 DTCG 형식 JSON을 Style Dictionary로 빌드. 컴포넌트는 React 19, TypeScript, Vite. 미리보기는 Storybook, 테스트는 Vitest |
 | 산출물 | CSS 변수(`--boaz-*`), Tailwind v4 테마, 토큰 참조 객체와 타입, 컴포넌트 JS와 CSS |
-| 현황 | `v0.1.1` 릴리스 완료(파운데이션 토큰). 컴포넌트 구현 진행 중이며 컴포넌트가 처음 들어가는 버전은 `v0.2.0` |
+| 현황 | 2026-11-24 기준 `v0.1.1` 릴리스 완료(파운데이션 토큰). 컴포넌트 구현 진행 중이며 컴포넌트가 처음 들어가는 버전은 `v0.2.0` |
 
 | 자료 | 위치 |
 |---|---|
@@ -83,12 +110,12 @@
 | 커밋 | `type: 내용 (#이슈번호)`. 훅이 강제. type 7종 | type 4종 부족 |
 | PR 제목 | `[Type] 내용`. 티켓이 있으면 티켓 키를 앞에 둠. `[Hotfix]`는 PR 제목과 `hotfix/*` 브랜치에만 사용 | 제목 검사에 `[Release]` 없음 |
 | 보호 | `dev`·`main` 직접 push를 서버가 막지 않고 규약으로만 금지. 승인과 CI 통과 없이도 머지 가능한 상태 | 통일 기준 적용 시 룰셋 필요 |
-| 역할 이름 | 저장소 문서는 디자인 시스템 리드, 구현 담당, 명세 담당, 리뷰어로 구분 | 다음 기수 체계(PM, Product Engineer)에 맞춰 저장소 문서 수정 필요 |
+| 역할 이름 | 저장소 문서는 디자인 시스템 리드, 구현 담당, 명세 담당, 리뷰어로 구분 | 27&28기 체계(PM, Product Engineer)에 맞춰 저장소 문서 수정 필요 |
 
 ## 미결
 
 | 질문 | 결정 필요 주체 | 필요 시점 |
 |---|---|---|
 | `admin/` 폴더 작성 시점과 관리자 페이지 반영 범위 | PM | 관리자 페이지 디자인 시스템 적용 착수 전 |
-| 저장소 문서의 역할 이름을 새 체계로 바꾸는 시점 | PM | 다음 기수 시작 전 |
+| 저장소 문서의 역할 이름을 새 체계로 바꾸는 시점 | PM | 27&28기 시작 전 |
 | `dev`·`main` 보호 규칙 적용 | PM | `conventions/git.md` 적용 일정의 단계 3 |

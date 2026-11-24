@@ -1,11 +1,39 @@
 > 담당 역할: Product Engineer | PM
-> 최종 검토일: 2026-11-24
+> 최종 검토일: 2026-11-25
 > 적용 범위: product-infra 저장소
 > 상태: 초안
 
 # 인프라
 
 저장소 README에 있는 내용(설치·명령, 폴더 구조)은 복사하지 않고 경로로 가리킴. 자원 ID·계정 ID·호스트명·명령 상세는 비공개 운영 문서 참조
+
+## 메타
+
+| 항목 | 내용 |
+|---|---|
+| 담당 역할 | Product Engineer(영역 고정 없음, Terraform apply 권한 보유자), PM(다운타임·시즌 일정 승인) |
+| 상태 | 개발 중. 기존 AWS 자원을 Terraform으로 가져오는(import) 작업 진행 중 [확인 필요: 2026-11-25 기준 진행 단계] |
+| 저장소 | https://github.com/BOAZ-website/product-infra |
+| 사용자 | Product Engineer, PM |
+| 의존하는 Product | 다른 Product에 의존하지 않음. 반대로 백엔드 서버, 웹사이트, 관리자 페이지가 이 인프라 위에서 동작함 |
+| 제공하는 API·산출물 | Terraform 코드(네트워크, 서버, 데이터베이스, 스토리지, CDN, 배포, 권한, 파라미터 모듈), 시즌 전환 런북 |
+| 사용하는 API·산출물 | AWS, GitHub Actions(읽기 전용 plan), 백엔드 저장소의 시즌 전환 스크립트(이전 전까지) |
+| 관련 계약 문서 | 해당 없음. 릴리스·시즌 충돌은 `process/release.md` |
+
+## Product 소개
+
+인프라는 BOAZ 홈페이지가 도는 AWS 환경(서버, 데이터베이스, 정적 호스팅, CDN, 배포 파이프라인)을 콘솔·스크립트 대신 Terraform 코드로 관리하려는 Product. 애플리케이션 저장소와 분리되어 인프라만 담당함
+
+| 대상 | 구성 |
+|---|---|
+| 웹사이트·관리자 페이지 | 정적 호스팅 + CDN |
+| 백엔드 서버 | 서버(EC2) + CodeDeploy 배포, systemd 서비스로 실행 |
+| 평시 | 서버 1대 + 데이터베이스 |
+| 모집 시즌 | 로드밸런서 + 서버 2대 + 데이터베이스 Multi-AZ. API 앞단 CDN의 요청 대상도 바뀜 |
+
+- 시즌 전환은 `season_capacity`, `api_origin` 두 Terraform 변수로 관리하는 방향. 2026-11-25 기준 전환은 backend 저장소의 `infra/scripts/season-up.sh`, `season-down.sh`가 수행함
+- 데이터베이스, 스토리지, CDN은 삭제·교체 시 데이터 손실 위험이 있어 보호 대상(아래 "보호 리소스 규칙")
+- 모집 시즌 시작과 종료가 가장 중요한 운영 시기. 2026-12 시즌 시작, 2027-01 종료(season-down)
 
 ## 목적과 범위
 
@@ -15,7 +43,7 @@
 | 저장소 | product-infra |
 | 범위 In | 네트워크, 서버, 데이터베이스, 정적 호스팅, CDN, 배포, 권한 설정, 시즌 전환 |
 | 범위 Out | 애플리케이션 코드(backend, frontend, frontend_admin) |
-| 현황 | 기존 자원을 Terraform으로 가져오는(import) 작업 진행 중 [확인 필요: 2026-11-24 기준 진행 단계] |
+| 현황 | 기존 자원을 Terraform으로 가져오는(import) 작업 진행 중 [확인 필요: 2026-11-25 기준 진행 단계] |
 
 | 자료 | 위치 |
 |---|---|
@@ -35,8 +63,8 @@
 | 웹사이트·관리자 페이지 | 정적 호스팅 + CDN |
 | API 앞단 | CDN. 평시와 시즌에 요청 대상이 다름 |
 
-- 시즌 전환은 Terraform 변수 2개로 관리 방향. 현재는 backend 저장소의 `infra/scripts/season-up.sh`, `season-down.sh`로 수행
-- 현행 구성과 이전 계획: `docs/overview/`
+- 시즌 전환은 Terraform 변수 2개로 관리 방향. 2026-11-25 기준 backend 저장소의 `infra/scripts/season-up.sh`, `season-down.sh`로 수행
+- 기존 구성과 이전 계획: `docs/overview/`
 
 ## 변경 절차
 
@@ -112,6 +140,6 @@
 
 | 질문 | 결정 필요 주체 | 필요 시점 |
 |---|---|---|
-| 현재 import 진행 단계 | Product Engineer(조사) | 문서 검토 시 |
+| import 진행 단계(2026-11-25 기준) | Product Engineer(조사) | 문서 검토 시 |
 | 시즌 전환 실행 담당 역할 | PM | 2027-01 season-down 전 |
 | 비공개 기록 보관 위치 | PM | 인프라 문서 확정 전 |

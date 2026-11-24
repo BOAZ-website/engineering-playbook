@@ -1,11 +1,43 @@
 > 담당 역할: Product Engineer | PM
-> 최종 검토일: 2026-11-24
+> 최종 검토일: 2026-11-25
 > 적용 범위: frontend 저장소(공개 홈페이지)
 > 상태: 초안
 
 # 웹사이트
 
 저장소 README에 있는 내용(설치·실행 명령, 폴더 구조)은 복사하지 않고 경로로 가리킴
+
+## 메타
+
+| 항목 | 내용 |
+|---|---|
+| 담당 역할 | Product Engineer(영역 고정 없음), PM(우선순위·승인) |
+| 상태 | 운영 중(2026-11-25 기준) |
+| 저장소 | https://github.com/BOAZ-website/frontend |
+| 사용자 | 지원자, 예비 지원자, 활동 중인 BOAZ 회원, 외부 방문자 |
+| 의존하는 Product | 백엔드 서버(데이터·로그인), 인프라(정적 호스팅·CDN), 디자인 시스템 |
+| 제공하는 API·산출물 | 공개 홈페이지(정적 번들) |
+| 사용하는 API·산출물 | 백엔드 `/api/v1/...` 공개 API, OpenAPI 스펙(타입 생성), 디자인 시스템 토큰·컴포넌트 |
+| 관련 계약 문서 | `contracts/api.md`, `contracts/auth.md`, `contracts/release-order.md`, `contracts/design-system-versioning.md` |
+
+## Product 소개
+
+웹사이트는 BOAZ를 소개하고 신입 기수 모집 지원을 받는 공개 홈페이지. 방문자는 로그인 없이 소개·커리큘럼·FAQ를 보고, 지원은 소셜 로그인 후 진행함
+
+| 화면(`src/pages`) | 내용 |
+|---|---|
+| `home-page` | 메인 |
+| `recruiting-page`, `apply-page` | 모집 안내, 지원서 작성 |
+| `curriculum-page` | 커리큘럼 |
+| `archive-page` | 아카이브(프로젝트·블로그·활동) |
+| `faq-page` | FAQ |
+| `privacy-page` | 개인정보 처리 |
+| `auth-callback-page` | 소셜 로그인 콜백 |
+
+- 모든 데이터는 백엔드 API에서 가져옴. 응답 타입은 백엔드 OpenAPI 스펙에서 생성(`src/shared/api/schema.d.ts`)
+- 지원서 임시 저장, 내 지원서 조회, 모집 알림 구독 호출이 `END_POINT`에 정의되어 있음(`src/shared/api/end-point.ts`)
+- 백엔드 DTO 변경이 곧바로 타입 오류로 드러나므로 변경 알림이 중요(`contracts/api.md`)
+- 모집 시즌에 접속이 몰림. 시즌 전환은 `products/infra.md`
 
 ## 한눈에 보기
 
@@ -70,7 +102,7 @@
 
 - 커밋 전 `git status`로 의도하지 않은 포맷 변경 포함 여부 확인
 - `--no-verify` 사용 금지
-- 이슈 번호 `(#이슈번호)`는 현재 훅이 강제하지 않음. 통일 기준과의 차이는 `conventions/git.md`의 저장소별 현황 참조
+- 이슈 번호 `(#이슈번호)`는 2026-11-25 기준 훅이 강제하지 않음. 통일 기준과의 차이는 `conventions/git.md`의 저장소별 현황 참조
 
 ## PR 전 점검
 
@@ -112,4 +144,4 @@
 | 질문 | 결정 필요 주체 | 필요 시점 |
 |---|---|---|
 | 배포 후 점검 항목과 되돌리는 절차 | Product Engineer(조사), PM(확정) | 2026-12 시즌 시작 전 |
-| 레이어 의존 방향의 자동 검사 여부 | Product Engineer | 다음 기수 온보딩 전 |
+| 레이어 의존 방향의 자동 검사 여부 | Product Engineer | 27&28기 온보딩 전 |
