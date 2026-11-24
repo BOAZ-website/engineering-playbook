@@ -1,0 +1,34 @@
+name: Title Guard
+
+# PR 제목이 [Type] 내용 형식인지 검사한다(conventions/git.md).
+# pull_request_target을 쓰지만 PR 코드를 checkout하거나 실행하지 않는다.
+
+on:
+  pull_request_target:
+    types: [opened, reopened, edited, synchronize]
+    branches: [main]
+
+jobs:
+  check-title:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check PR title format
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        with:
+          script: |
+            const title = context.payload.pull_request.title.trim();
+            const pattern = /^\[(feat|fix|docs|style|refactor|test|chore|ci|build|perf|revert|hotfix|release)\]\s+\S.*/i;
+
+            if (pattern.test(title)) {
+              core.info(`제목 형식 통과: ${title}`);
+              return;
+            }
+
+            core.setFailed(
+              `PR 제목이 "[Type] 내용" 형식이 아닙니다: "${title}". ` +
+              '허용 Type: Feat, Fix, Docs, Style, Refactor, Test, Chore, Ci, Build, Perf, Revert, Hotfix, Release. ' +
+              '제목을 고치면 검사가 다시 실행됩니다. 규칙: conventions/git.md'
+            );
