@@ -1,11 +1,39 @@
 > 담당 역할: Product Engineer | PM
-> 최종 검토일: 2026-11-24
+> 최종 검토일: 2026-11-25
 > 적용 범위: backend 저장소
 > 상태: 초안
 
 # 백엔드 서버
 
 저장소 README에 있는 내용은 복사하지 않고 경로로 가리킴
+
+## 메타
+
+| 항목 | 내용 |
+|---|---|
+| 담당 역할 | Product Engineer(영역 고정 없음), PM(우선순위·승인) |
+| 상태 | 운영 중(2026-11-25 기준) |
+| 저장소 | https://github.com/BOAZ-website/backend |
+| 사용자 | 웹사이트(공개 API 호출), 관리자 페이지(관리자 API 호출 예정), 운영진(Swagger UI) |
+| 의존하는 Product | 인프라(서버·DB·배포 구성) |
+| 제공하는 API·산출물 | REST API(`/api/v1/...`, 관리자용은 `/api/v1/admin/...`), OpenAPI 스펙 |
+| 사용하는 API·산출물 | MySQL, S3, Google·Kakao·Naver 소셜 로그인 |
+| 관련 계약 문서 | `contracts/api.md`, `contracts/auth.md`, `contracts/release-order.md` |
+
+## Product 소개
+
+백엔드 서버는 사용자 API와 관리자 API를 한 애플리케이션으로 제공하는 Spring Boot 서버. 웹사이트가 보여 주는 모집·후기·커리큘럼·아카이브·FAQ 데이터와 로그인, 지원서 접수를 처리함
+
+| 도메인 폴더 | 내용 |
+|---|---|
+| `recruitment` | 모집 정보, 지원서, 지원자 평가(관리자용 `ApplicantEvaluationAdminController` 포함) |
+| `auth`, `user`, `admin` | 소셜 로그인과 토큰 재발급, 사용자 정보, 관리자 로그인과 관리자 계정 |
+| `review`, `curriculum`, `archive`, `faq` | 후기, 커리큘럼, 아카이브(프로젝트·블로그·활동·terms), FAQ. 공개용과 관리자용 컨트롤러가 나뉨 |
+
+- 웹사이트는 `/api/v1/recruitment`, `/api/v1/reviews`, `/api/v1/curriculums`, `/api/v1/archiving` 등을 호출함(`frontend/src/shared/api/end-point.ts`)
+- 관리자 API는 `SUPER`, `TEAM` 역할로 보호됨. 관리자 페이지는 2026-10-31 기준 백엔드에 연결되지 않음
+- 응답은 `ApiResponse<T>`, JSON 필드는 snake_case. DTO가 바뀌면 웹사이트 타입 재생성이 필요(`contracts/api.md`)
+- 모집 시즌에는 로드밸런서 + 서버 2대 + 데이터베이스 Multi-AZ 구성으로 전환됨(`products/infra.md`)
 
 | 자료 | 위치 |
 |---|---|
@@ -114,5 +142,5 @@
 | 질문 | 결정 필요 주체 | 필요 시점 |
 |---|---|---|
 | 운영 장애 대응 절차 문서화 | PM | 인프라 Product 문서 작성 시 |
-| 로컬 환경 값 전달 방식 | PM | 다음 기수 온보딩 전 |
+| 로컬 환경 값 전달 방식 | PM | 27&28기 온보딩 전 |
 | backend README의 커밋 type 안내를 통일 기준 11종으로 갱신 | Product Engineer | 저장소별 전환 시 |

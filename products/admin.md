@@ -1,5 +1,5 @@
 > 담당 역할: Product Engineer | PM
-> 최종 검토일: 2026-11-24
+> 최종 검토일: 2026-11-25
 > 적용 범위: frontend_admin 저장소(관리자 페이지)
 > 상태: 초안
 
@@ -7,15 +7,43 @@
 
 저장소 문서에 있는 내용은 복사하지 않고 경로로 가리킴
 
-## 현재 상태
+## 메타
+
+| 항목 | 내용 |
+|---|---|
+| 담당 역할 | Product Engineer(영역 고정 없음), PM(우선순위·승인) |
+| 상태 | 백엔드 미연동 UI 프로토타입(2026-10-31 기준, 저장소 `CLAUDE.md`) |
+| 저장소 | https://github.com/BOAZ-website/frontend_admin |
+| 사용자 | 운영진(`SUPER`, `TEAM`), 출결 입력 담당(`HOST`), 콘텐츠 관리 담당(`CONTENT_ADMIN`) |
+| 의존하는 Product | 백엔드 서버(연동 시), 인프라(정적 호스팅·CDN), 디자인 시스템(적용 예정) |
+| 제공하는 API·산출물 | 관리자 콘솔(정적 번들) |
+| 사용하는 API·산출물 | 연동 전에는 브라우저 안 임시 API·임시 DB. 연동 후 백엔드 `/api/v1/admin/...` |
+| 관련 계약 문서 | `contracts/api.md`, `contracts/auth.md`, `contracts/design-system-versioning.md` |
+
+## Product 소개
+
+관리자 페이지는 운영진이 모집, 출결, 회원, 시스템 설정을 한 곳에서 관리하기 위한 콘솔. 2026-10-31 기준 백엔드와 연결되지 않았고, 화면이 임시 API로 동작함
+
+| 화면 묶음(`src/pages`) | 내용 |
+|---|---|
+| `attendance-*`(`input`, `scores`, `rules`, `hosts`, `events`, `internal-category`) | 출결 입력, 점수 집계, 점수 규칙, HOST 계정, 행사 출결, BASE·ADV·스터디 출결 |
+| `recruiting-manage`, `recruiting-evaluation` | 모집 관리, 지원자 평가 |
+| `member-management` | 회원 관리 |
+| `system-accounts`, `system-audit`, `system-semesters` | 계정, 감사 로그, 학기 관리 |
+
+- 역할별로 사이드바 메뉴 범위가 달라짐. `HOST`, `CONTENT_ADMIN`은 백엔드에 아직 없음
+- 임시 API 경로는 백엔드와 같은 `/api/v1/...` 형식이라 연동 시 호출 경로를 유지할 수 있음
+- 백엔드에는 관리자용 모집·지원자 평가·후기·커리큘럼·FAQ·아카이브 컨트롤러가 이미 있음(`backend` 저장소 `domain/*`). 화면과의 대응은 [확인 필요: 연동 대상 범위]
+- 모집 시즌에는 모집 관리와 지원자 평가 화면의 사용이 많아짐 [확인 필요: 시즌 중 운영 방식]
+
+## 상태 요약
 
 | 항목 | 내용 |
 |---|---|
 | 목적 | 운영진용 관리자 콘솔 |
 | 저장소 | frontend_admin |
 | 스택 | React 19, Vite, Tailwind v4, npm |
-| 현황 | 백엔드 미연동 UI 프로토타입(2026-10-31 기준, 저장소 `CLAUDE.md`) |
-| 기준일 확인 | [확인 필요: 2026-11-24 기준 연동 여부] |
+| 기준일 확인 | [확인 필요: 2026-11-25 기준 연동 여부] |
 
 | 자료 | 위치 |
 |---|---|
@@ -34,7 +62,7 @@
 | 2 | `npm ci`, `npm run dev` 실행 | 개발 서버 기동 |
 | 3 | 환경 변수 없이 실행 | 서버 주소 키(`VITE_API_BASE_URL`)가 없으면 임시 API가 응답 |
 
-- 현재 빌드에는 환경 변수가 필요 없음
+- 2026-10-31 기준 빌드에는 환경 변수가 필요 없음
 - PR 검사에 배포 자격 증명을 추가하지 않음
 
 ## 구조 요약
@@ -60,7 +88,7 @@
 
 ## 임시 API와 백엔드 연동 시 바꿀 지점
 
-| 항목 | 현재 | 연동 시 |
+| 항목 | 2026-10-31 기준 | 연동 시 |
 |---|---|---|
 | 호출 경로 | 화면 → `src/entities/*/api/*Api.ts` → `src/shared/api/client.ts` | 같은 경로 유지 |
 | 응답 주체 | `src/shared/api/mock/`가 브라우저 안 임시 DB(SQLite, sql.js)로 응답 | 서버 주소 키 설정 시 실제 서버로 요청 |
@@ -118,7 +146,7 @@
 
 - `conventions/git.md`의 저장소별 현황 표 참조
 - 저장소 문서 간 불일치: README는 기본 브랜치를 `dev`로, CONTRIBUTING은 `main`으로 기술
-- 기본 브랜치 현황은 `conventions/git.md` 기준(2026-11-24 조회, `dev`). 저장소 문서 정정은 별도 작업
+- 기본 브랜치는 `conventions/git.md` 기준(2026-11-24 조회, `dev`). 저장소 문서 정정은 별도 작업
 
 ## 미결
 

@@ -1,5 +1,5 @@
 > 담당 역할: PM
-> 최종 검토일: 2026-11-24
+> 최종 검토일: 2026-11-25
 > 적용 범위: backend, frontend, frontend_admin, product-infra, design-system
 > 상태: 초안
 
@@ -46,7 +46,7 @@
 - 다른 저장소 적용은 2026-12 리크루팅 시즌 이후
 
 - `main` 진입 경로 제한(2026-11-24 PM 확정): `main`에 들어가는 변경은 `dev` → `main` 릴리스 PR과 `hotfix/*` → `main` PR뿐임. 그 밖의 브랜치에서 올리는 PR과 직접 push는 차단함. `release/*` 브랜치는 쓰지 않음. hotfix 머지 뒤에는 같은 브랜치로 `dev` 대상 PR을 올려 역머지함. PR 제목에는 `[Hotfix]`, `[Release]`를 추가로 허용하고 커밋 type에는 넣지 않음
-- 머지 방식은 merge commit(5개 저장소의 현재 방식)
+- 머지 방식은 merge commit(2026-11-24 기준 5개 저장소의 방식)
 
 ## 근거
 
