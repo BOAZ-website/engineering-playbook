@@ -43,7 +43,7 @@
 | 목적 | 운영진용 관리자 콘솔 |
 | 저장소 | frontend_admin |
 | 스택 | React 19, Vite, Tailwind v4, npm |
-| 기준일 확인 | [확인 필요: 2026-11-25 기준 연동 여부] |
+| 기준일 확인 | 2026-11-25 기준 백엔드 미연동. `src/shared/api/client.ts`가 환경 변수 `VITE_API_BASE_URL`이 있으면 해당 서버로 요청하고, 비어 있으면 브라우저 안의 임시 API(`src/shared/api/mock`)가 응답함. `.env.example`에서 이 값은 비어 있음 |
 
 | 자료 | 위치 |
 |---|---|

@@ -1,5 +1,5 @@
 > 담당 역할: PM | Product Engineer
-> 최종 검토일: 2026-11-24
+> 최종 검토일: 2026-11-25
 > 적용 범위: backend, frontend, frontend_admin
 > 상태: 초안
 
@@ -28,7 +28,7 @@
 - 백엔드 타입 이름은 `ApiResponse<T>`
 - 오류는 `CustomException(ErrorCode)`를 던지면 전역 예외 처리기가 같은 형식으로 변환
 - 프론트엔드 호출 헬퍼가 `data`를 꺼내므로 호출부는 `data` 안쪽 타입만 다룸
-- `errorCode`의 실제 JSON 필드명 표기: [확인 필요: snake_case 적용 여부]
+- `errorCode`의 실제 JSON 필드명 표기: 2026-11-25 기준 backend `application-local/dev/prod.yml`에 Jackson `property-naming-strategy: SNAKE_CASE` 설정됨. 따라서 `error_code`로 직렬화됨
 
 ## 코드 위치
 
