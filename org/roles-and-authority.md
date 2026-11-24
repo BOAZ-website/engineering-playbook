@@ -14,8 +14,34 @@
 | PM | 1명 | 서비스운영팀 팀장. 기술 결정까지 맡는 Technical Product Manager |
 | Product Engineer | 3명 | 담당 영역을 고정하지 않고 5개 Product 전체를 다루는 엔지니어 |
 
+- PM은 서비스운영팀장이 맡음. 서비스운영팀장은 이전 기수에서 올라온 사람
 - 인원은 다음 기수부터의 체계 기준
 - 역할명과 사람의 연결은 팀 Notion에서 관리. 이 저장소에 적지 않음
+
+## 기수별 GitHub 팀
+
+기수는 약 6개월마다 바뀜. 매 기수마다 GitHub 조직(BOAZ-website)에 아래 두 팀을 새로 만듦
+
+| 팀 | 구성 | 이름 규칙 |
+|---|---|---|
+| 기수 팀 | 그 기수 PM과 Product Engineer 전원 | `n`th-engineer. 번호는 PM 팀과 같음 |
+| PM 팀 | 그 기수 PM | `process/release.md`의 "기수별 승인 팀" 참조 |
+
+| 항목 | 규칙 |
+|---|---|
+| 생성 담당 | GitHub 조직 소유자 |
+| 생성 시점 | 기수 시작 전 |
+| 이전 기수 팀 정리 | `org/handover.md`의 "GitHub 팀 교체" |
+
+| 기수 | 기수 팀 | PM 팀 |
+|---|---|---|
+| 26&27기 | 기존 파트별 팀(`2nd-backend`, `2nd-frontend`, `2nd-design`, `2nd-infra`) | `2nd-PMO` |
+| 27&28기 | `3rd-engineer` | `3rd-PM` |
+| 28&29기 | `4th-engineer` | `4th-PM` |
+| 이후 | `5th-engineer`, `6th-engineer`, … 기수마다 번호 1씩 증가 | `5th-PM`, `6th-PM`, … |
+
+- 26&27기까지는 파트별 팀(기수 번호-파트 형식)을 씀. 27&28기부터 파트 구분이 없어지므로(Product Engineer) 기수 팀 하나로 합침
+- engineering-playbook 관리 주체는 기수마다 그 기수 PM 팀으로 넘어감. 절차: `org/handover.md`
 
 ## 결정 권한 (초안)
 
