@@ -45,7 +45,7 @@
 | 1 | `dev`에 릴리스할 변경이 모였는지 확인 | PM |
 | 2 | `package.json`의 `version`을 올리는 PR을 `dev`에 머지 | Product Engineer |
 | 3 | `dev` → `main` 릴리스 PR 생성 | Product Engineer |
-| 4 | 리뷰어 승인과 검사 통과 후 merge commit으로 머지 | 리뷰어 |
+| 4 | 리뷰어 승인과 검사 통과 후 merge commit으로 머지 | Product Engineer(PR 작성자) |
 | 5 | 릴리스 태그 생성 | PM(디자인 시스템 저장소 문서에는 디자인 시스템 리드로 적혀 있음) |
 
 - 순서 2와 3은 `v0.1.1` 릴리스의 선례(버전 지정 PR, 릴리스 PR)를 따름
