@@ -1,0 +1,52 @@
+name: Auto Labeler
+
+# 이슈와 PR의 제목 앞머리([Type])를 보고 라벨을 붙인다.
+# pull_request_target을 쓰지만 PR 코드를 checkout하거나 실행하지 않는다.
+
+on:
+  issues:
+    types: [opened, edited]
+  pull_request_target:
+    types: [opened, reopened, edited]
+    branches: [main]
+
+jobs:
+  labeler:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Auto Labeling based on title
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const payload = context.payload;
+            const target = payload.pull_request ?? payload.issue;
+            const title = target.title.trim();
+
+            // 제목 형식: [Type] 내용 (conventions/git.md)
+            const labelPatterns = {
+              '✏️ DOCS': /^\[docs\]/i,
+              '⭐️ FEAT': /^\[feat\]/i,
+              '🐛 FIX': /^\[(fix|hotfix)\]/i,
+              '🧹 CHORE': /^\[(chore|ci|build)\]/i,
+              '🛠️ REFACTOR': /^\[(refactor|style)\]/i,
+              '🚀 RELEASE': /^\[release\]/i,
+            };
+
+            const labels = Object.entries(labelPatterns)
+              .filter(([, pattern]) => pattern.test(title))
+              .map(([label]) => label);
+
+            if (labels.length === 0) return;
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: target.number,
+              labels,
+            });
