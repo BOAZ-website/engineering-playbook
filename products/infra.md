@@ -1,7 +1,7 @@
 > 담당 역할: Product Engineer | PM
 > 최종 검토일: 2026-11-25
 > 적용 범위: product-infra 저장소
-> 상태: 초안
+> 상태: 확정
 
 # 인프라
 
