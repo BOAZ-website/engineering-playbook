@@ -1,5 +1,5 @@
 > 담당 역할: PM | Product Engineer
-> 최종 검토일: 2026-11-25
+> 최종 검토일: 2026-11-26
 > 적용 범위: backend, frontend, frontend_admin
 > 상태: 확정
 
@@ -56,7 +56,9 @@
 | 3 | 백엔드 `dev` 머지 | 리뷰어 승인 후 PR 작성자 |
 | 4 | frontend에서 `pnpm generate:types` 실행 | Product Engineer |
 | 5 | 타입 오류 수정 후 프론트엔드 PR 생성 | Product Engineer |
+| 6 | backend-docs 명세서 갱신. `확정`된 API의 요청·응답·에러가 바뀌었으면 협의 상태를 `협의 중`으로 되돌림(예외는 `products/backend.md`) | 백엔드 PR 작성자(같은 주 안에) |
 
+- 구현이 끝난 API의 현재 계약은 Swagger(OpenAPI 스펙)가 기준. 설계 근거와 프론트엔드 합의 기록은 backend-docs 명세서에 있음(`products/backend.md`)
 - 생성에는 OpenAPI 스펙 접근 인증 값(`SWAGGER_BASIC_AUTH`)이 필요. 값은 개별 보관하고 저장소에 적지 않음
 - 알림 자동화: 도입하지 않음. PR 작성자가 PR 본문에 "프론트엔드 타입 재생성 필요"를 적고 직접 알림. 놓치는 일이 반복되면 CI의 OpenAPI 차이 검출 도입을 검토
 - 호환되지 않는 변경은 `contracts/release-order.md`의 3단계 절차 적용

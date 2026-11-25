@@ -1,5 +1,5 @@
 > 담당 역할: Product Engineer | PM
-> 최종 검토일: 2026-11-25
+> 최종 검토일: 2026-11-26
 > 적용 범위: backend 저장소
 > 상태: 확정
 
@@ -40,7 +40,7 @@
 | 기술 스택, 실행 방법, 환경 변수 표, 패키지 구조, 배포 구성 | backend 저장소 `README.md` |
 | DB 마이그레이션 규칙, 배포 순서, 실패 복구 | backend 저장소 `src/main/resources/db/README.md` |
 | 작업 규칙 | backend 저장소 `AGENTS.md` |
-| 기능·API 명세, 테스트 명세 | 비공개 저장소 backend-docs 참조 |
+| 기능·API 명세, 테스트 명세, ERD | 비공개 저장소 backend-docs. 작업 규칙은 아래 "비공개 저장소 참조(backend-docs)" 절 |
 | 인프라 구성 | `product-infra` 저장소, 저장소 README의 아키텍처 절 |
 
 ## 처음 하는 작업 순서
@@ -78,7 +78,7 @@
 
 | 순서 | 항목 | 완료 조건 |
 |---|---|---|
-| 1 | 요구사항과 API 목록 확인 | backend-docs 명세 또는 Ticket 확인 |
+| 1 | 요구사항과 API 목록 확인 | backend-docs에 기능 명세서가 있고 협의 상태가 `확정`. 없으면 명세서부터 작성 |
 | 2 | `domain/<이름>/{controller,service,repository,entity,dto/{request,response}}` 생성 | 패키지 존재 |
 | 3 | 공개용과 관리자용 컨트롤러 분리 | 관리자용은 `/api/v1/admin/...` 경로 |
 | 4 | 응답은 `ApiResponse<T>`로 감쌈 | 성공·실패 형식 일치 |
@@ -86,8 +86,9 @@
 | 6 | 인증이 필요한 경로를 `SecurityConfig`에 추가 | 미등록 경로는 모두 허용 상태이므로 누락 시 무인증 노출 |
 | 7 | Swagger 어노테이션 | 모든 컨트롤러에 `@Tag`(관리자용은 `[Admin]` 접두사), 인증 필요 시 `@SecurityRequirement(name = "bearerAuth")` |
 | 8 | 엔티티 변경 시 마이그레이션 파일 추가 | `./gradlew test` 통과 |
-| 9 | 테스트 4계층 작성 | 계층별 테스트 파일 존재 |
+| 9 | 테스트 4계층 작성 | 계층별 테스트 파일 존재. `@DisplayName`에 기능 ID·TC ID 표기 |
 | 10 | PR 템플릿 확인 항목 체크 | 마이그레이션 항목 포함 |
+| 11 | 구현 PR 머지 후 backend-docs 명세서·ERD 갱신 | 같은 주 안에 backend-docs 반영 PR 생성 |
 
 - 이름 규칙: DTO는 `XXXRequest`, `XXXResponse`. 서비스 메서드는 동사 + 명사. enum 상수는 대문자 스네이크
 - 의존 방향: Controller → Service → Repository → Entity. 하위 계층이 상위 계층을 참조하지 않음
@@ -129,13 +130,25 @@
 - 복구 절차 전문: backend 저장소 `db/README.md`의 "마이그레이션이 실패했을 때"
 - 장애 시 복구 담당 지정: 장애 대응 절차 문서(`process/incident.md`)는 미작성. 작성 전까지 PM이 지정
 
-## 비공개 저장소 참조
+## 비공개 저장소 참조(backend-docs)
 
-| 내용 | 위치 |
+backend-docs는 기능 명세서(API 스펙 포함), 테스트 명세서, ERD를 두는 비공개 저장소. 조직 멤버만 볼 수 있고 접근 권한은 PM에게 요청
+
+| 자료 | 위치(backend-docs) |
 |---|---|
-| 기능 명세, API 명세 | backend-docs(비공개) |
-| 테스트 명세 | backend-docs(비공개) |
-| 접근 권한 | PM에게 요청 |
+| 명세서 작성·합의 절차, 협의 상태(`agreement`) 값 | `README.md`의 "운영 흐름", "프론트엔드와 API 합의" |
+| 작성 규칙, PR 올리기 전 확인 목록 | `AGENTS.md` |
+| 기능 ID, 테스트 명세서 ID, TC ID 규칙 | `conventions/ids.md` |
+
+backend 작업자가 지켜야 할 규칙
+
+- 새 기능은 backend-docs 명세서의 협의 상태가 `확정`된 뒤 구현함
+- 명세서와 ERD의 기준은 backend 저장소 `dev` 브랜치의 코드. Notion 문서와 다르면 코드를 따름
+- 구현이 끝난 API의 현재 계약은 Swagger가 기준. 명세서는 설계 근거와 프론트엔드 합의 기록
+- 엔티티·API·에러 코드·권한을 바꾸는 backend PR이 `dev`에 머지되면, 그 PR 작성자가 같은 주 안에 backend-docs 반영 PR을 올림
+- `확정`된 API의 요청·응답·에러가 바뀌면 협의 상태를 `협의 중`으로 되돌리고 프론트엔드에 알림. 미리 합의한 변경의 예외는 backend-docs `README.md` 참조
+- 테스트 `@DisplayName`에 기능 ID와 TC ID(`TC-001` 형식)를 붙임. 규칙은 backend-docs `conventions/ids.md`
+- backend-docs는 배포하는 코드가 없어 `dev` 없이 `main`만 씀. 자동 생성 파일(`specs/INDEX.md`, `specs/index.csv`, `erd/schema.dbml`)은 직접 고치지 않음
 
 ## 미결
 
