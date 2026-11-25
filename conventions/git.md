@@ -1,5 +1,5 @@
 > 담당 역할: PM | Product Engineer
-> 최종 검토일: 2026-11-25
+> 최종 검토일: 2026-11-26
 > 적용 범위: backend, frontend, frontend_admin, product-infra, design-system
 > 상태: 확정
 
@@ -35,6 +35,7 @@
   - 릴리스: `dev` → `main` PR
   - hotfix: `hotfix/*` → `main` PR
 - 그 밖의 브랜치(`feat/*`, `fix/*` 등)에서 `main`으로 PR을 올리지 않음. 운영에 바로 반영해야 하는 변경은 반드시 `main`에서 `hotfix/*` 브랜치를 만들어 올림
+- 예외: 배포하는 코드가 없는 문서 저장소(engineering-playbook, backend-docs)는 `dev` 없이 `main`만 쓰고 모든 PR을 `main` 대상으로 올림. 위 두 경로 규칙은 적용하지 않음
 - `main` 직접 push 금지. 관리자도 예외 없음
 - `release/*` 브랜치는 쓰지 않음(현황: 3개 저장소의 main 대상 PR 검사가 `release/*`를 허용하고 있음. 통일할 때 제거)
 - 강제 방법: 저장소별 룰셋으로 `main` 직접 push를 막고, main 대상 PR 검사를 필수 검사로 지정해 `dev`와 `hotfix/*`가 아닌 PR을 차단함. 현황은 경고 댓글만 남기며 frontend, frontend_admin에는 검사가 없음. 적용은 아래 적용 일정의 단계 2~4
@@ -125,6 +126,7 @@
 - 3개 저장소의 검사 파일은 같은 내용을 복사한 것임. 통일할 때 조직 `.github` 저장소의 재사용 워크플로 하나로 바꿈
 - 릴리스 PR 제목 현황: frontend는 `dev → main` 또는 기능 PR과 같은 제목, design-system은 `[Chore] v0.1.1 릴리스`
 
+- 비공개 문서 저장소 backend-docs: `main`만 씀(위 브랜치 흐름의 예외). 커밋 훅·PR 제목 형식은 backend와 같고 type 7종이라 통일 기준보다 4종 부족
 - backend 훅은 merge 커밋과 자동 생성 revert 커밋을 통과시킴
 - 훅은 로컬 설정(`git config core.hooksPath .githooks`)을 해야 동작
 - 이 표는 통일 기준을 각 저장소에 적용하기 전 상태를 기록한 것. 아래 "적용 일정"에 따라 차이를 줄여 감
