@@ -177,7 +177,7 @@
 | 배포 시간 | RDS 유지보수 시간과 자동 백업 시간을 피함. 시간대는 backend `db/README.md` 참조 |
 | 실패 시 | 배포가 직전 버전으로 자동 복귀. 다음 배포 전에 실패 기록 복구 필요. 절차는 backend `db/README.md` 참조 |
 
-- 인프라 동결 기간(2027-01)에는 스키마 적용 주를 product-infra 담당에게 미리 공유
+- 인프라 동결 기간(모집 시즌 전환 전후)에는 스키마 적용 주를 product-infra 담당에게 미리 공유
 - 프로필별 Flyway 동작과 첫 prod 배포 설정은 backend `db/README.md`가 기준
 
 왜 이렇게 하는지
