@@ -5,7 +5,7 @@
 
 # 역할과 결정 권한
 
-근거: `decisions/0002-team-structure.md`. 시즌 역할은 `decisions/0003-recruiting-season-roles-and-checklist.md`(제안)
+근거: `decisions/0002-team-structure.md`. 시즌 역할은 `decisions/0003-recruiting-season-roles-and-checklist.md`
 
 ## 역할 정의
 
@@ -58,7 +58,7 @@ PM의 판단 기준: `org/pm-guide.md`
 
 ## 시즌 역할
 
-모집 시즌에만 두는 역할. 상태는 제안이며 `decisions/0003-recruiting-season-roles-and-checklist.md`가 채택되면 확정함
+모집 시즌에만 두는 역할. `decisions/0003-recruiting-season-roles-and-checklist.md`(2026-11-27 채택)
 
 | 역할 | 정의 | 지정 |
 |---|---|---|

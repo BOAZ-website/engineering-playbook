@@ -1,7 +1,7 @@
 > 담당 역할: PM | Product Engineer
 > 최종 검토일: 2026-11-27
 > 적용 범위: 5개 Product 전체(모집 시즌에 영향받는 backend, frontend, frontend_admin, product-infra 중심)
-> 상태: 초안
+> 상태: 확정
 
 # 모집 시즌 체크리스트
 
