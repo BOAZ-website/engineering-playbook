@@ -12,7 +12,7 @@
 | 대상 | 이 문서가 다루는 것 | 규칙 본문이 있는 곳 |
 |---|---|---|
 | 동결과 배포 금지 | 금지 구간을 정했는지, 막는 방법이 동작하는지 확인 | `process/release.md`(연간 운영 일정, 모집 시즌 전환과 겹칠 때). 이 문서는 규칙을 다시 쓰지 않고 가리키기만 함 |
-| 장애와 마감 연장 | 장애 대응 1쪽과 호출 연습 확인 | `process/incident.md`(마감 연장은 대표진 결정) |
+| 장애와 마감 연장 | 장애 대응 준비(원복 기준, 공지 채널, 마감 연장 기준)와 팀원 전원 경보 수신 확인 | `process/incident.md`(마감 연장은 대표진 결정) |
 | 인프라 절차 | 인프라 항목의 통과 기준과 증빙 | product-infra 시즌 런북(`docs/guides/season-runbook.md`). 명령, 자원 이름, ID는 거기와 비공개 기록에만 둠 |
 | 인프라 증빙 | 시즌 준비 상태 기록 | product-infra 시즌 기록(`docs/records/`). 예: `docs/records/2026-12-season-readiness.md` |
 | 시즌 진행 | 단계 게이트와 항목 상태 | 시즌마다 만드는 engineering-playbook 이슈(시즌 이슈) |
