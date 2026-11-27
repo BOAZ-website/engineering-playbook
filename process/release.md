@@ -1,5 +1,5 @@
 > 담당 역할: PM | Product Engineer
-> 최종 검토일: 2026-11-25
+> 최종 검토일: 2026-11-27
 > 적용 범위: backend, frontend, frontend_admin, product-infra
 > 상태: 확정
 
@@ -218,6 +218,7 @@ BOAZ 전체 일정 중 서비스 운영에 영향을 주는 시기. 상반기 �
 | 4월 셋째~넷째 주(10월) | 중간고사 휴식 | 큰 작업을 피함 |
 
 - 밀 수 없는 날짜: 서류 모집 시작, 면접, OT, 세션 시작. 이 날짜에 걸린 작업은 범위를 줄여서라도 날짜를 지킴
+- 모집 시즌 준비 점검: `process/recruiting-season.md`(서류 모집 시작 30일 전부터 시즌 이슈로 진행)
 - 해커톤은 연 1회 원칙이나 기수마다 열리지 않을 수 있음
 
 ## 모집 시즌 전환과 겹칠 때
@@ -232,6 +233,7 @@ BOAZ 전체 일정 중 서비스 운영에 영향을 주는 시기. 상반기 �
 - 시즌 전환 현황: 단일 EC2 구성과 ALB + EC2 2대 + RDS Multi-AZ 구성 사이의 전환. backend 저장소의 `infra/scripts/season-up.sh`, `season-down.sh`로 수행 중
 - product-infra가 이 전환을 Terraform 변수로 이전 중. 이전 완료 후 절차를 이 문서에 갱신
 - 시즌 전환은 PR 없는 실행 작업. 끝낸 당일 이슈 TO-DO 체크와 결과 댓글 필요(`process/dev-cycle.md`)
+- 동결 규칙은 이 절이 기준. 금지 구간을 정했는지와 막는 방법이 동작하는지의 확인 항목은 `process/recruiting-season.md`(REL-01, REL-02)
 
 왜 이렇게 하는지
 

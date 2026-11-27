@@ -18,6 +18,7 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 - 서비스운영팀에 새로 합류한 PM과 Product Engineer
 - 다른 Product의 작업을 처음 맡는 팀원
 - BOAZ 저장소에 기여하려는 사람
+- 모집 시즌의 공고·문항·평가·통지 확인에 참여하는 운영진([process/recruiting-season.md](process/recruiting-season.md))
 
 ## 어떻게 쓰나요
 
@@ -36,6 +37,7 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 | 웹사이트, 관리자 페이지, 인프라, 디자인 시스템 작업을 처음 한다 | [products/website.md](products/website.md), [products/admin.md](products/admin.md), [products/infra.md](products/infra.md), [products/design-system.md](products/design-system.md) |
 | API 응답 형식, 인증, 배포 순서를 확인한다 | [contracts/api.md](contracts/api.md), [contracts/auth.md](contracts/auth.md), [contracts/release-order.md](contracts/release-order.md) |
 | 장애가 났다 | [process/incident.md](process/incident.md) |
+| 모집 시즌을 준비한다 | [process/recruiting-season.md](process/recruiting-season.md) |
 | 권한을 요청하거나 회수한다 | [org/access.md](org/access.md) |
 | 팀에 합류하거나 기수를 인수인계한다 | [org/onboarding.md](org/onboarding.md), [org/handover.md](org/handover.md) |
 | 문서, 이슈, PR 본문을 쓴다 | [conventions/doc-writing.md](conventions/doc-writing.md) |
@@ -75,7 +77,7 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 | 폴더 | 담는 것 |
 |---|---|
 | [conventions/](conventions/) | 모든 저장소에 공통인 규칙: git, 코드 리뷰, 문서 작성 |
-| [process/](process/) | 일하는 절차: 개발 주기, 릴리스와 hotfix |
+| [process/](process/) | 일하는 절차: 개발 주기, 릴리스와 hotfix, 장애 대응, 모집 시즌 체크리스트 |
 | [org/](org/) | 역할, 결정 권한, 접근 권한 규칙 |
 | [products/](products/) | Product별 작업 시작 안내 |
 | [contracts/](contracts/) | Product 사이의 약속: API 형식, 인증, 배포 순서, 디자인 시스템 버전 |
@@ -118,4 +120,4 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 
 ## 문서 상태
 
-2026-11-25 기준으로 관리자 페이지 문서를 뺀 모든 문서가 확정 상태입니다. 확정 문서는 27&28기부터 팀이 지켜야 하는 규칙입니다. 관리자 페이지 문서는 백엔드 연동이 시작되면 확정합니다. 각 문서 맨 위에 담당 역할, 최종 검토일, 적용 범위, 상태가 적혀 있습니다. 통일 기준을 각 저장소에 실제로 적용하는 일정은 [conventions/git.md](conventions/git.md)의 "적용 일정"에 있습니다.
+2026-11-25 기준으로 관리자 페이지 문서를 뺀 모든 문서가 확정 상태입니다. 확정 문서는 27&28기부터 팀이 지켜야 하는 규칙입니다. 관리자 페이지 문서는 백엔드 연동이 시작되면 확정합니다. 2026-11-27에 추가한 [process/recruiting-season.md](process/recruiting-season.md)와 [decisions/0003](decisions/0003-recruiting-season-roles-and-checklist.md)은 초안·제안 상태입니다. 각 문서 맨 위에 담당 역할, 최종 검토일, 적용 범위, 상태가 적혀 있습니다. 통일 기준을 각 저장소에 실제로 적용하는 일정은 [conventions/git.md](conventions/git.md)의 "적용 일정"에 있습니다.

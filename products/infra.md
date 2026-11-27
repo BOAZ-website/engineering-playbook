@@ -1,5 +1,5 @@
 > 담당 역할: Product Engineer | PM
-> 최종 검토일: 2026-11-25
+> 최종 검토일: 2026-11-27
 > 적용 범위: product-infra 저장소
 > 상태: 확정
 
@@ -94,6 +94,7 @@
 | 승인 수준 | PM이 일정과 다운타임 승인 |
 | 릴리스와의 관계 | 전환 작업이 릴리스보다 우선. 상세는 `process/release.md` |
 | 기록 | 전환 당일 이슈에 결과 댓글 |
+| 시즌 준비 점검 | 인프라 항목(INF, TF)의 통과 기준과 단계는 `process/recruiting-season.md`. 증빙은 저장소 `docs/records/`의 시즌 준비 기록 |
 
 - 전환 중 장애: `process/incident.md`
 - 절차 상세: 저장소 `docs/guides/season-runbook.md`
@@ -133,6 +134,7 @@
 |---|---|
 | 장애 대응 | `process/incident.md` |
 | 릴리스·시즌 충돌 | `process/release.md` |
+| 모집 시즌 체크리스트 | `process/recruiting-season.md` |
 | 접근 권한 | `org/access.md` |
 | 인수인계 | `org/handover.md` |
 

@@ -1,11 +1,11 @@
 > 담당 역할: PM
-> 최종 검토일: 2026-11-25
+> 최종 검토일: 2026-11-27
 > 적용 범위: 5개 Product 전체
 > 상태: 확정
 
 # 역할과 결정 권한
 
-근거: `decisions/0002-team-structure.md`
+근거: `decisions/0002-team-structure.md`. 시즌 역할은 `decisions/0003-recruiting-season-roles-and-checklist.md`(제안)
 
 ## 역할 정의
 
@@ -55,6 +55,20 @@ PM의 판단 기준: `org/pm-guide.md`
 - 26&27기까지는 파트별 팀(기수 번호-파트 형식)을 씀. 27&28기부터 파트 구분이 없어지므로(Product Engineer) 기수 팀 하나로 합침
 - PM 팀은 운영 배포 승인자와 이 저장소의 PM 예외에 쓰이므로 기수 팀과 따로 만듦(`process/release.md`, `org/handover.md`)
 - engineering-playbook 관리 주체는 기수마다 그 기수 PM 팀으로 넘어감. 절차: `org/handover.md`
+
+## 시즌 역할
+
+모집 시즌에만 두는 역할. 상태는 제안이며 `decisions/0003-recruiting-season-roles-and-checklist.md`가 채택되면 확정함
+
+| 역할 | 정의 | 지정 |
+|---|---|---|
+| 시즌 판단자 | 시즌 단계 게이트의 통과·보류·중단, 배포 금지 해제, 원복, 예외 승인을 결정. 마감 연장은 대표진이 결정하고 시즌 판단자는 요청과 수행 확인을 맡음 | PM이 맡음. 시즌 이슈에 한 명으로 명시하고 대리인 1명을 정함 |
+| 당직 | 접수·평가·발표 기간에 날짜별로 감시하고 연락을 받음 | Product Engineer가 순번을 정해 시즌 이슈에 기록. 인원이 부족하면 PM이 겸임하고 기록 |
+| 개인정보 담당 | 동의 기록 확인, 보유·파기 계획 수립, 파기 실행 확인 | Product Engineer 1명을 시즌마다 지정 |
+
+- 시즌 역할은 결정 권한 표를 바꾸지 않음. 일정·우선순위의 최종 결정은 PM
+- 시즌 단계와 항목: `process/recruiting-season.md`
+- 사람과 역할의 연결은 팀 Notion에서 관리. 이 저장소에 적지 않음
 
 ## 결정 권한
 
