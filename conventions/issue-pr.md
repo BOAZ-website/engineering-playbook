@@ -1,5 +1,5 @@
 > 담당 역할: PM | Product Engineer
-> 최종 검토일: 2026-11-28
+> 최종 검토일: 2026-11-29
 > 적용 범위: BOAZ-website 조직의 모든 저장소
 > 상태: 확정
 
@@ -18,7 +18,7 @@
 | 영역 | Type 뒤에 영역 표기를 허용. 예: `[Feat] [서류 평가] 내용` |
 | 예 | `[Feat] 로그인 API 구현` |
 | 본문 | 저장소 PR 템플릿의 섹션 이름과 순서 유지("템플릿") |
-| 검사 | 재사용 워크플로 repo-rule-keeper의 검사 항목. 필수 검사는 `repo-rule-keeper`("PR 검사 `repo-rule-keeper`") |
+| 검사 | 재사용 워크플로 repo-rule-keeper의 검사 항목. 필수 검사는 커밋 상태 `repo-rule-keeper`(대상이 기본 브랜치가 아니면 `repo-rule-keeper (<대상>)`, "PR 검사 `repo-rule-keeper`") |
 
 - 이유: 제목 형식을 맞춰 두면 어느 저장소에서든 목록만 보고 변경 종류를 알 수 있고, 라벨·Type 자동 지정이 제목의 `[Type]`에 의존함
 - 이전 type을 9종으로 정리함: `ci`·`build`는 Chore, `perf`는 Refactor, `revert`는 Chore로 씀. `hotfix`는 커밋 type이 아니라 PR 제목에만 씀
@@ -29,10 +29,11 @@
 - PR 하나 = 이슈 하나. 항상 PR 본문(템플릿의 이슈 줄)에 `Closes #번호`를 1개만 씀
 - `Closes #번호`를 쓰면 PR 화면 Development에 이슈가 자동으로 연결되고, 머지하면 이슈가 자동으로 닫힘. 손으로 연결하지 않음
 - 작업이 PR 여러 개로 나뉘면 이슈를 하위 이슈(Sub-issue)로 미리 나누고 PR마다 하위 이슈 하나를 `Closes`로 닫음. 상위 이슈는 PR에 연결하지 않음. 하위 이슈가 모두 닫히고 상위 이슈 체크리스트(머지 뒤 확인 포함)가 끝나면 닫음(`tools/new-issue.sh -p 상위번호`, "체크리스트 완료와 머지·종료")
-- `Refs #번호`는 쓰지 않음. Development에 연결되지 않아 PR과 이슈의 관계를 보드에서 찾을 수 없음. 예외: 릴리스(`dev` → `main`)와 hotfix PR은 이슈를 연결하지 않음
-- 키워드는 `Closes`, `Fixes`, `Resolves`(대소문자 무관, 콜론 허용). 다른 저장소 이슈는 `Closes BOAZ-website/frontend#209`
+- 저장소를 넘는 작업은 저장소마다 이슈를 만들고, 상위 이슈로 묶음. 상위 이슈는 다른 저장소여도 됨(`tools/new-issue.sh -p 저장소#번호`)
+- `Refs #번호`는 쓰지 않음. Development에 연결되지 않아 PR과 이슈의 관계를 보드에서 찾을 수 없음. 예외: 릴리스(`dev` → `main`)와 hotfix PR은 `Closes`를 0~1개 허용함(보통 연결하지 않음)
+- 키워드는 `Closes`, `Fixes`, `Resolves`(대소문자 무관, 콜론 허용). `Closes`는 같은 저장소 이슈만 씀. 다른 저장소 이슈(`Closes BOAZ-website/frontend#209` 꼴)는 이슈 댓글·편집 때 PR 재검사가 되지 않아 검사가 실패 처리함
 - 키워드는 PR 본문이나 커밋 메시지에서만 동작함(PR 댓글은 동작하지 않음). PR을 올린 뒤 본문을 고쳐도 연결됨
-- 키워드는 PR 대상이 저장소 기본 브랜치일 때만 동작함. 기능 PR은 기본 브랜치로 보냄. hotfix·릴리스 PR(`main` 대상)은 연결하지 않아도 됨. 기본 브랜치 목록은 `conventions/repos.md`
+- 키워드는 PR 대상이 저장소 기본 브랜치일 때만 동작함. 기능 PR은 기본 브랜치로 보냄. hotfix·릴리스 PR(`main` 대상)은 `Closes`를 0~1개 허용하며 보통 연결하지 않음. 기본 브랜치 목록은 `conventions/repos.md`
 
 ## 분류 방식
 
@@ -87,7 +88,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 - 여러 프로젝트에 걸치는 이슈는 주된 목적의 프로젝트 하나를 고름
 - backend의 `/api/v1/admin/**` API라도 관리자 콘솔 프로젝트(2026-08 시작) 이전에 홈페이지 콘텐츠·모집 운영용으로 만든 것(FAQ·커리큘럼·후기 CRUD, Admin 계정, 감사 로그, 합격자 승격 등)은 홈페이지 운영 & 유지보수. 관리자 페이지 개발은 관리자 콘솔용 기능(출결, 시스템 계정, 권한 개편, 서류 평가 앱 등)만
 - 작업 유형·우선순위 기준은 이 문서 "분류 기준"(우선순위는 Notion 티켓과 같음, `org/pm-guide.md` "4. 티켓 우선순위")
-- PR의 작업 종류 라벨은 제목의 `[Type]`을 보고 자동으로 붙임. 이슈는 만들 때 붙임(`tools/new-issue.sh`가 제목에서 자동 지정)
+- PR의 작업 종류 라벨은 제목의 `[Type]`을 보고 자동으로 붙임. 이슈는 만들 때 붙임(`tools/new-issue.sh`가 제목 접두어에서 지정)
 
 ## 이슈
 
@@ -97,12 +98,12 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | 작업 종류 라벨, Type | 반드시 지정. 제목 `[Type]`에 맞춤("라벨", "분류 방식") |
 | Priority, Project | 반드시 지정. Priority는 조직 이슈 필드, Project는 보드 필드("분류 방식") |
 | 보드 편입 | 반드시 조직 Project "BOAZ-website project"에 넣음. 권한이 없으면 PM에게 알림 |
-| 만드는 방법 | AI·명령줄로 만들 때는 [`tools/new-issue.sh`](../tools/new-issue.sh)를 씀. 6개 값(Assignee, 라벨, Type, Priority, 보드 편입, Project)을 한 번에 지정하고, 하나라도 빠지면 이슈를 만들지 않음 |
+| 만드는 방법 | AI·명령줄로 만들 때는 [`tools/new-issue.sh`](../tools/new-issue.sh)를 씀. 6개 값(Assignee, 라벨, Type, Priority, 보드 편입, Project)을 한 번에 지정하고, 하나라도 빠지면 이슈를 만들지 않음. 라벨과 Type은 제목 접두어로 정해지므로 `-T`는 생략할 수 있고, 주면 접두어와 맞아야 함 |
 | 본문 | 이슈 폼 `task.yml`("템플릿") 사용. 체크리스트(`- [ ]`)로 머지 전에 확인할 수 있는 완료 조건만 적음(머지 뒤 확인은 상위 이슈) |
 
 - 이유: 담당자가 없는 이슈는 진행하는 사람 없이 남고, 유형·우선순위·프로젝트가 없으면 보드에서 급한 일을 고를 수 없음. Project 밖의 이슈는 우선순위 목록에서 보이지 않음
-- GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 생성 뒤 repo-rule-keeper가 검사함. 원본은 playbook의 재사용 워크플로 2개(PR용 `.github/workflows/repo-rule-keeper.yml`, 이슈·댓글용 `.github/workflows/repo-rule-keeper-issue.yml`)이고, 화면 표시 이름은 호출 파일 둘 다 "🛡️ repo-rule-keeper"임. 저장소는 호출 파일 견본 [`tools/callers/repo-rule-keeper.yml`](../tools/callers/repo-rule-keeper.yml)(PR용)과 [`tools/callers/repo-rule-keeper-issue.yml`](../tools/callers/repo-rule-keeper-issue.yml)(이슈용)을 `.github/workflows/`에 같은 이름으로 복사해 두며 `@v2` 태그로 고정함. 호출 파일은 이 2개이고 playbook은 로컬 호출 파일 `.github/workflows/repo-rule-keeper-run.yml`(PR용), `.github/workflows/repo-rule-keeper-issue-run.yml`(이슈용)을 씀. 원본을 고치면 `v2` 태그를 옮겨 모든 저장소에 반영함
-- 동작: 이슈를 만들거나 고치거나 라벨·담당자를 바꿀 때마다 "이슈 자동 정리" 잡이 담당자를 작성자로, 작업 종류 라벨을 제목에서 채우고 Type 지정도 시도함(생성 직후에는 2분까지 기다림). 이어서 "이슈 필수 값 알림" 잡이 비어 있는 값(라벨·Type 실패, Priority)을 마커가 붙은 댓글 1개로 갱신해 알림하고, 모두 채워지면 그 댓글을 "해결됨"으로 바꾸고 접음
+- GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 생성 뒤 repo-rule-keeper가 검사함. 원본은 playbook의 재사용 워크플로 2개(PR용 `.github/workflows/repo-rule-keeper.yml`, 이슈·댓글용 `.github/workflows/repo-rule-keeper-issue.yml`)이고, 화면 표시 이름은 호출 파일 둘 다 "🛡️ repo-rule-keeper"임("PR 검사 `repo-rule-keeper`"). 저장소는 호출 파일 견본 [`tools/callers/repo-rule-keeper.yml`](../tools/callers/repo-rule-keeper.yml)(PR용)과 [`tools/callers/repo-rule-keeper-issue.yml`](../tools/callers/repo-rule-keeper-issue.yml)(이슈용)을 `.github/workflows/`에 같은 이름으로 복사해 두며 `@v2` 태그로 고정함. 호출 파일은 이 2개이고 playbook은 로컬 호출 파일 `.github/workflows/repo-rule-keeper-run.yml`(PR용), `.github/workflows/repo-rule-keeper-issue-run.yml`(이슈용)을 씀. 원본을 고치면 `v2` 태그를 옮겨 모든 저장소에 반영함. 태그 이동은 PM이 하고, 이동 전후 커밋을 `decisions/0006-repo-rule-keeper-v2-and-repo-standards.md`의 표에 남김
+- 동작: 이슈를 만들거나 고치거나 라벨·담당자를 바꿀 때마다 "이슈 자동 정리" 잡이 담당자가 비었으면 작성자로 채움. 이벤트마다 제목에 맞게 작업 종류 라벨을 교정함(9종 밖 라벨은 그대로 둠). Type이 기대값과 다르면 변경을 시도하고, 실패하면 "Type 불일치(기대 X, 현재 Y)"로 알림. 생성 직후 2분 대기는 이슈를 처음 열 때(opened)만 함. 이어서 "이슈 필수 값 알림" 잡이 비어 있는 값(라벨·Type 실패, Priority)을 마커가 붙은 댓글 1개로 갱신해 알림하고, 모두 채워지면 그 댓글을 "해결됨"으로 바꾸고 접음
 - Priority 조회에 실패하면 누락으로 보고 "이슈 필수 값 알림" 잡을 실패시킴(조용히 통과하지 않음). 보드 편입·Project는 저장소 권한으로 확인할 수 없어 PM 스프린트 점검에서 확인함
 - 이슈를 대신 만들어 준 경우(예: 회의 결정을 PM이 이슈로 옮김)에도 만든 사람을 먼저 지정하고, 작업자가 정해지면 작업자를 추가함
 - 장애 대응 예외: 운영 장애로 바로 고쳐야 하면 이슈 없이 hotfix PR을 먼저 올리고 머지할 수 있음. 복구 뒤 24시간 안에 이슈(`[Hotfix]`, Type Bug, Priority Urgent, Project SRE & 장애 대응 또는 해당 제품)를 만들어 PR 링크를 적고 닫음. 장애 절차는 `process/incident.md`
@@ -113,9 +114,11 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 |---|---|
 | 담당자(Assignee) | 반드시 지정. PR 작성자(작업한 사람) |
 | 리뷰어(Reviewer) | 반드시 지정. 작성자가 아닌 사람 1명 이상(PM 또는 해당 Product의 다른 팀원). 리뷰어가 없는 PR은 리뷰를 시작하지 않음 |
-| 이슈 연결 | PR 하나 = 이슈 하나, 본문에 `Closes #번호` 1개로 Development에 연결. 여러 PR로 나뉘는 작업은 하위 이슈로 나눔. 예외: 릴리스(`dev` → `main`)와 hotfix PR은 연결하지 않음("PR 제목과 이슈 연결") |
+| 이슈 연결 | PR 하나 = 이슈 하나, 본문에 `Closes #번호` 1개로 Development에 연결. 여러 PR로 나뉘는 작업은 하위 이슈로 나눔. 예외: 릴리스(`dev` → `main`)와 hotfix PR은 `Closes` 0~1개 허용, 보통 연결하지 않음. `Closes`는 같은 저장소 이슈만("PR 제목과 이슈 연결") |
 | 작업 종류 라벨 | 제목의 `[Type]`에 맞는 라벨 1개. 자동으로 붙고, 제목을 고치면 라벨도 바뀜 |
 | 본문 | PR 템플릿 사용. "🔍 확인" 공통 항목과 "🧩 저장소별 확인" 항목을 체크하거나 항목마다 `사유:` 댓글을 남김 |
+
+- Fix PR(`[Fix]`, `[Hotfix]`)에는 재현 테스트나 확인 절차를 PR 본문에 적음. 같은 오류가 다시 나지 않는다는 근거를 리뷰어가 볼 수 있게 하기 위함
 
 ## 체크리스트 완료와 머지·종료
 
@@ -133,9 +136,10 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 
 ### PR 검사 `repo-rule-keeper`
 
-- 원본은 playbook의 재사용 워크플로 `.github/workflows/repo-rule-keeper.yml`(PR용, "🛡️ repo-rule-keeper")과 `.github/workflows/repo-rule-keeper-issue.yml`(이슈·댓글용, 같은 이름). 저장소는 [`tools/callers/repo-rule-keeper.yml`](../tools/callers/repo-rule-keeper.yml), [`tools/callers/repo-rule-keeper-issue.yml`](../tools/callers/repo-rule-keeper-issue.yml)을 `.github/workflows/`에 같은 이름으로 복사해 `@v2`로 고정함. 결과는 커밋 상태 `repo-rule-keeper`로 기록됨
+- 원본은 playbook의 재사용 워크플로 `.github/workflows/repo-rule-keeper.yml`(PR용)과 `.github/workflows/repo-rule-keeper-issue.yml`(이슈·댓글용). 화면 이름은 호출 파일의 이름과 원본 잡 이름이 합쳐진 "호출 파일 화면 이름 🛡️ repo-rule-keeper"로 보임. 저장소는 [`tools/callers/repo-rule-keeper.yml`](../tools/callers/repo-rule-keeper.yml), [`tools/callers/repo-rule-keeper-issue.yml`](../tools/callers/repo-rule-keeper-issue.yml)을 `.github/workflows/`에 같은 이름으로 복사해 `@v2`로 고정함
+- 결과는 커밋 상태로 기록됨. 이름은 PR 대상이 저장소 기본 브랜치이면 `repo-rule-keeper`, 아니면 `repo-rule-keeper (<대상>)`. 예: `dev`가 기본 브랜치인 저장소에서 `main` 대상 릴리스·hotfix PR은 `repo-rule-keeper (main)`. 같은 커밋으로 `main`·`dev` PR을 함께 열어도 결과가 서로 덮어쓰이지 않게 하기 위함
 - 이 워크플로가 제목 검사(title-guard), 자동 라벨(auto-label), 작성자 자동 지정(auto-assign), 대상 브랜치 경고(pr-base-guard)를 모두 맡으므로 저장소에 이 기능의 별도 워크플로를 두지 않음
-- 검사를 잡별로 나눠 PR 검사 목록에서 어느 규칙을 어겼는지 잡 이름으로 바로 보임. PR 검사 목록에는 아래 잡 7줄과 커밋 상태 `repo-rule-keeper` 1줄이 보임
+- 검사를 잡별로 나눠 PR 검사 목록에서 어느 규칙을 어겼는지 잡 이름으로 바로 보임. PR 검사 목록에는 아래 잡 7줄과 커밋 상태 1줄(`repo-rule-keeper` 또는 `repo-rule-keeper (<대상>)`)이 보임
 - 실행 시점: PR을 만들거나 고칠 때, 리뷰가 달릴 때. 이슈나 PR에 댓글이 달리거나 연결된 이슈를 고칠 때는 이슈용 호출 파일이 연결된 열린 PR을 찾아 PR 검사를 다시 실행함("PR 재검사" 잡)
 
 | 잡 화면 이름 | 하는 일 | 자동 수정·검사 |
@@ -143,15 +147,15 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | PR 정리 | PR을 한 번 조회해 다음 잡에 넘김. 커밋 상태를 `pending`("검사 중")으로 기록 | 자동 수정: 제목 `[Type]`에 맞는 작업 종류 라벨 1개만 남기고 나머지 작업 종류 라벨은 뗌, Assignee가 비면 PR 작성자를 지정 |
 | 제목 | `[Type] 내용`이고 Type이 9종 중 하나("제목") | 검사 |
 | 대상 브랜치 | 기본 브랜치가 아닌 곳을 향한 PR은 `dev`(릴리스)나 `hotfix/*` 브랜치에서 올 때만 허용("브랜치 흐름", [git.md](git.md)) | 검사 |
-| 이슈 연결 | `Closes` 이슈 정확히 1개. 릴리스(`[Release]`, `[Hotfix]`)와 기본 브랜치가 아닌 곳을 향한 PR은 0~1개 허용 | 검사 |
+| 이슈 연결 | `Closes` 이슈 정확히 1개. 릴리스·hotfix와 기본 브랜치가 아닌 곳을 향한 PR은 0~1개 허용. `Closes`는 같은 저장소 이슈만(다른 저장소 이슈는 실패) | 검사 |
 | 담당자·리뷰어 | Assignee가 있음. Reviewer가 지정됐거나(요청·취소 기록의 최종 상태 기준, 팀 포함) 작성자가 아닌 사람의 리뷰가 있음 | 검사 |
-| 체크리스트 사유 | PR 본문의 미체크 항목과, `Closes` 이슈가 1개이면 그 이슈 본문의 미체크 항목마다 사유가 있음. 사유는 PR 댓글이나 이슈 댓글(사람이 쓴 것만 인정)의 `사유: <항목 문구 앞부분> / <이유>` 줄로 남김. 항목 문구의 앞 30자가 사유 줄에 들어 있으면 처리된 것으로 봄 | 검사 |
+| 체크리스트 사유 | PR 본문의 미체크 항목과, `Closes` 이슈가 1개이면 그 이슈 본문의 미체크 항목마다 사유가 있음. 사유는 `사유: <항목 문구 앞부분> / <이유>` 줄로 남기고 사람이 쓴 댓글만 인정함. PR 항목은 PR 댓글의 사유만, 연결 이슈 항목은 PR 댓글과 이슈 댓글의 사유를 인정함. 항목 문구의 앞 30자가 사유 줄에 들어 있으면 처리된 것으로 봄 | 검사 |
 | 최종 판정 | 앞의 검사 잡 결과를 모아 커밋 상태 `repo-rule-keeper`를 `success`("모든 규칙 충족") 또는 `failure`(위반 문구 140자)로 기록 | 이 잡은 규칙 위반으로 실패하지 않고 상태만 `failure`로 둠 |
 
 - 검사 잡(제목, 대상 브랜치, 이슈 연결, 담당자·리뷰어, 체크리스트 사유)은 규칙을 어기면 그 잡이 실패로 표시되고 잡 요약에 상세가 남음
-- 필수 검사는 커밋 상태 `repo-rule-keeper`. 댓글로 사유를 단 뒤에는 PR 재검사가 상태를 갱신하지만, "체크리스트 사유" 잡 표시는 다음 PR 이벤트까지 예전 결과로 남을 수 있음. 머지 기준은 잡 표시가 아니라 상태임
+- 필수 검사는 커밋 상태 `repo-rule-keeper`(대상이 기본 브랜치가 아니면 `repo-rule-keeper (<대상>)`). 댓글로 사유를 단 뒤에는 PR 재검사가 상태를 갱신하지만, "체크리스트 사유" 잡 표시는 다음 PR 이벤트까지 예전 결과로 남을 수 있음. 머지 기준은 잡 표시가 아니라 상태임
 - PR 본문·댓글·리뷰·이슈 본문이 바뀔 때마다 다시 검사함
-- 공개 저장소는 룰셋의 필수 검사로 `repo-rule-keeper`를 지정해 머지를 막음. backend-docs(비공개)는 무료 플랜이라 룰셋을 강제할 수 없어 표시만 함(리뷰어가 상태를 확인하고 머지)
+- 공개 저장소는 룰셋의 필수 검사로 지정해 머지를 막음. 기본 브랜치 룰셋은 `repo-rule-keeper`, `dev`가 기본인 저장소의 `main` 룰셋은 `repo-rule-keeper (main)`("룰셋 표준" 절, [repos.md](repos.md)). backend-docs(비공개)는 무료 플랜이라 룰셋을 강제할 수 없어 표시만 함(리뷰어가 상태를 확인하고 머지)
 - backend-docs(비공개)는 Actions 사용 분이 듦(무료 월 2000분). PR 이벤트 1번에 잡 7개, 댓글 재검사 1번에 "연결 PR 찾기" 1개와 대상 PR마다 7개. 부족하면 그 저장소 호출 파일 두 개의 이벤트 종류를 함께 줄임(PR 이벤트만 줄여서는 댓글 재검사 비용이 줄지 않음)
 - 최종 판정은 상태를 쓰기 전에 PR을 다시 조회해, 검사 중에 제목·본문·커밋이 바뀌었으면 기록하지 않음(오래된 결과가 최신 결과를 덮지 않게 함). 바뀐 이벤트의 새 실행이 기록함
 - PR 정리 잡이 실패하면 최종 판정이 상태를 failure("PR 정리 잡 실패")로 기록해 pending이 남지 않게 함. 실패한 실행을 다시 돌리면 됨
@@ -211,8 +215,8 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | `[Release]` | `🚀 RELEASE` | `Task` | `dev` → `main` 릴리스 PR(이슈 없음) | - |
 | `[Chore]` | `🧹 CHORE` | `Task` | 빌드·CI·의존성·설정·저장소 관리 | 의존성 버전 올리기, 워크플로 추가는 Chore. 배포 파이프라인 변경의 Project 값은 "분류 방식"의 판정 순서를 따름 |
 
-- 제목 접두어 하나로 라벨과 Type이 함께 정해짐(`tools/new-issue.sh`, repo-rule-keeper가 같은 대응을 씀)
-- repo-rule-keeper의 이슈 규칙은 라벨은 자동으로 붙이지만 Type은 저장소 토큰 권한이 없어 지정에 실패하고 누락 댓글로 알림(2026-11-28 시험, playbook #47, 기존 기록 유지)
+- 제목 접두어 하나로 라벨과 Type의 기대값이 정해짐. `tools/new-issue.sh`는 접두어로 Type을 정하고(`-T`는 생략 가능, 주면 접두어와 맞아야 함), repo-rule-keeper도 같은 대응을 씀
+- repo-rule-keeper의 이슈 규칙은 라벨을 자동으로 붙이고 Type 변경을 시도함. 저장소 토큰 권한이 없어 Type 변경에 실패하면 "Type 불일치(기대 X, 현재 Y)"로 누락 댓글에 알림(2026-11-28 시험, playbook #47에서 지정 실패 확인, 기존 기록 유지)
 - 두 성격이 섞이면 주된 변경 하나를 고르고, 크면 하위 이슈로 나눔
 
 ### Priority

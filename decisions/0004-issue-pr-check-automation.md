@@ -1,5 +1,5 @@
 > 담당 역할: PM | Product Engineer
-> 최종 검토일: 2026-11-28
+> 최종 검토일: 2026-11-29
 > 적용 범위: BOAZ-website 조직의 모든 저장소
 > 상태: 확정
 
@@ -62,3 +62,5 @@
 | 없음 | | |
 
 갱신(2026-11-28): issue-check·pr-check와 저장소별 auto-label·auto-assign·pr-base-guard·title-guard를 재사용 워크플로 `repo-rule-keeper.yml`("🛡️ repo-rule-keeper") 하나로 합침. 이유: 모든 저장소 공통 규칙이라 한 파일·한 이름으로 관리
+
+갱신(2026-11-29): 원본을 PR용·이슈용 2개로 나누고 잡을 규칙별로 분리해 `v2` 태그로 호출함(decisions 0006)

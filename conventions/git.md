@@ -1,5 +1,5 @@
 > 담당 역할: PM | Product Engineer
-> 최종 검토일: 2026-11-28
+> 최종 검토일: 2026-11-29
 > 적용 범위: BOAZ-website 조직의 모든 저장소
 > 상태: 확정
 
@@ -38,11 +38,12 @@
   - 릴리스: `dev` → `main` PR
   - hotfix: `hotfix/*` → `main` PR
 - 그 밖의 브랜치(`feat/*`, `fix/*` 등)에서 `main`으로 PR을 올리지 않음. 운영에 바로 반영해야 하는 변경은 반드시 `main`에서 `hotfix/*` 브랜치를 만들어 올림
-- 예외: 배포하는 코드가 없는 문서 저장소(engineering-playbook, backend-docs)는 `dev` 없이 `main`만 쓰고 모든 PR을 `main` 대상으로 올림. 위 두 경로 규칙은 적용하지 않음
+- 예외: `main`만 쓰는 저장소(engineering-playbook, backend-docs, frontend_recruiting_admin)는 `dev` 없이 모든 PR을 `main` 대상으로 올림. 위 두 경로 규칙은 적용하지 않음
+- 저장소별 브랜치 모델(기본 브랜치, `dev` 유무)의 원천은 `conventions/repos.md` 하나임. 이 문서와 다르면 repos.md를 따름
 - `main` 직접 push 금지. 관리자도 예외 없음
 - `release/*` 브랜치는 쓰지 않음
 - 대상 브랜치 규칙은 repo-rule-keeper가 검사함([issue-pr.md](issue-pr.md) "PR 검사")
-- 강제 방법: 저장소별 룰셋으로 `main` 직접 push를 막고, 필수 검사 `repo-rule-keeper`로 머지를 차단함(`conventions/issue-pr.md` "PR 검사"). 저장소별 적용 현황과 일정은 `conventions/repos.md`
+- 강제 방법: 저장소별 룰셋으로 `main` 직접 push를 막고, 필수 검사로 머지를 차단함. 커밋 상태 이름은 PR 대상이 기본 브랜치이면 `repo-rule-keeper`, 아니면 `repo-rule-keeper (<대상>)`이며, `dev`가 기본인 저장소의 `main` 룰셋은 `repo-rule-keeper (main)`을 필수로 지정함(`conventions/issue-pr.md` "PR 검사", `conventions/repos.md` "룰셋 표준"). 저장소별 적용 현황과 일정은 `conventions/repos.md`
 - hotfix 역머지 방법: 같은 `hotfix/*` 브랜치로 `dev` 대상 PR을 하나 더 올림(backend 선례: `main` 대상 PR과 `dev` 대상 PR을 한 쌍으로 올림)
 - 다른 작업 브랜치 위에 작업 브랜치를 만들지 않음
 - PR 1건에는 이슈 1건의 변경만 포함(연결 방법은 `conventions/issue-pr.md` "PR 제목과 이슈 연결")

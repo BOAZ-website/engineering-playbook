@@ -1,6 +1,6 @@
 # engineering-playbook
 
-> 2026-11-28 개편(최종 검토일 2026-11-28), 2026-11-24 기준 1.0 Ver.  
+> 2026-11-28 개편(최종 검토일 2026-11-29), 2026-11-24 기준 1.0 Ver.  
 > author: @daehyun-bigbread
 
 BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. 브랜치를 어떻게 만들고, PR을 어떻게 올리고, 누가 무엇을 결정하고, 운영에 어떻게 배포하는지를 한곳에서 찾을 수 있습니다.
@@ -10,7 +10,7 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 서비스운영팀은 약 6개월마다 기수가 바뀝니다. 그때마다 규칙이 사람을 따라 사라지거나 저장소마다 달라졌습니다. 이 저장소는 그 문제를 막으려고 만들었습니다.
 
 - 새로 합류한 팀원이 이 저장소만 읽고 첫 작업을 시작할 수 있게 합니다.
-- 팀원 누구나 5개 Product 어디서든 같은 규칙으로 작업할 수 있게 합니다.
+- 팀원 누구나 모든 저장소 어디서든 같은 규칙으로 작업할 수 있게 합니다.
 - 규칙이 왜 그렇게 정해졌는지를 결정 기록으로 남겨, 이후 기수의 팀원이 이유를 알고 고칠 수 있게 합니다.
 
 ## 누가 읽나요
@@ -30,6 +30,7 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 | 저장소 공통 규칙: PR·이슈 제목 `[Type]`, 라벨, 이슈 필수 6값, `Closes`, 템플릿, 검사, 분류 기준 | [conventions/issue-pr.md](conventions/issue-pr.md) |
 | 저장소 공통 규칙: 승인·머지 조건, 리뷰 응답 | [conventions/code-review.md](conventions/code-review.md) |
 | 저장소 공통 규칙: 문서·이슈·PR 본문 작성 | [conventions/doc-writing.md](conventions/doc-writing.md) |
+| 저장소 공통 규칙: AI 도구 사용 | [conventions/ai-usage.md](conventions/ai-usage.md) |
 | 저장소마다 다른 값: 기본 브랜치, 커밋 형식, 검사 적용 현황, 새 저장소 추가 | [conventions/repos.md](conventions/repos.md) |
 | 팀에 처음 합류했다 | 아래 "처음 읽는 순서" |
 | 티켓을 만들고 진행 상태를 남긴다 | [process/dev-cycle.md](process/dev-cycle.md) |
@@ -67,21 +68,37 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 
 ## 팀과 Product
 
-팀은 PM 1명과 Product Engineer 3명으로 구성합니다(27&28기부터 적용, 26&27기 서비스운영팀은 이전 체계로 운영했습니다). Product Engineer는 담당 영역을 고정하지 않고 아래 5개 Product를 모두 다룹니다.
+### 팀 구성
 
-| Product | 저장소 | 설명 | Product 문서 |
-|---|---|---|---|
-| 웹사이트 | [frontend](https://github.com/BOAZ-website/frontend) | 공개 홈페이지 | [products/website.md](products/website.md) |
-| 관리자 페이지 | [frontend_admin](https://github.com/BOAZ-website/frontend_admin) | 운영진용 관리자 콘솔 | [products/admin.md](products/admin.md) |
-| 백엔드 서버 | [backend](https://github.com/BOAZ-website/backend) | 사용자·관리자 API 서버 | [products/backend.md](products/backend.md) |
-| 인프라 | [product-infra](https://github.com/BOAZ-website/product-infra) | AWS 인프라와 Terraform | [products/infra.md](products/infra.md) |
-| 디자인 시스템 | [design-system](https://github.com/BOAZ-website/design-system) | 공통 디자인 토큰과 컴포넌트 | [products/design-system.md](products/design-system.md) |
+- 서비스운영팀은 서비스운영팀장(PM) 1명과 엔지니어 3명, 총 4명임. 팀장도 Product Engineer로 개발과 리뷰에 참여함(27&28기부터 적용, 26&27기 서비스운영팀은 이전 체계로 운영함)
+- Product Engineer는 담당 영역을 고정하지 않고 아래 저장소를 모두 다룸
+- 저장소마다 관리 주체가 있으며 기수가 바뀌면 새 기수의 담당자로 넘어감. 절차는 [org/handover.md](org/handover.md), 역할과 권한은 [org/roles-and-authority.md](org/roles-and-authority.md)에 있음
+  - engineering-playbook: PM이 관리함. 관리 주체는 기수마다 새 PM 팀으로 교체함
+  - backend-docs: Backend 담당이 관리함(backend 작업을 맡은 Product Engineer)
+
+### 저장소 목록
+
+BOAZ-website 조직의 저장소 8개 전부임. 앞의 5개는 Product, 나머지 3개는 Product를 돕는 저장소임. 기본 브랜치가 `main`인 저장소는 `dev`가 없음.
+
+| 저장소 | 역할 | 공개 여부 | 기본 브랜치 | 관리 | 상세 문서 |
+|---|---|---|---|---|---|
+| [backend](https://github.com/BOAZ-website/backend) | 사용자·관리자 API 서버(Product: 백엔드 서버) | 공개 | `dev` | Product Engineer | [products/backend.md](products/backend.md) |
+| [frontend](https://github.com/BOAZ-website/frontend) | 공개 홈페이지(Product: 웹사이트) | 공개 | `dev` | Product Engineer | [products/website.md](products/website.md) |
+| [frontend_admin](https://github.com/BOAZ-website/frontend_admin) | 운영진용 관리자 콘솔(Product: 관리자 페이지) | 공개 | `dev` | Product Engineer | [products/admin.md](products/admin.md) |
+| [product-infra](https://github.com/BOAZ-website/product-infra) | AWS 인프라와 Terraform(Product: 인프라) | 공개 | `dev` | Product Engineer | [products/infra.md](products/infra.md) |
+| [design-system](https://github.com/BOAZ-website/design-system) | 공통 디자인 토큰과 컴포넌트(Product: 디자인 시스템) | 공개 | `dev` | Product Engineer | [products/design-system.md](products/design-system.md) |
+| [frontend_recruiting_admin](https://github.com/BOAZ-website/frontend_recruiting_admin) | 28기 서류 평가 앱. 관리자 콘솔과 분리함 | 공개 | `main` | Product Engineer | [conventions/repos.md](conventions/repos.md) 행 |
+| [backend-docs](https://github.com/BOAZ-website/backend-docs) | 백엔드 기능 명세서, ERD, API 명세 저장소. backend 코드를 바꾸면 명세를 함께 동기화함(backend의 Docs Sync Reminder가 알림). 담당 Product는 backend(관리자·홈페이지 API) | 비공개 | `main` | Backend 담당 | [products/backend.md](products/backend.md) "비공개 저장소 참조", [conventions/repos.md](conventions/repos.md) 행 |
+| [engineering-playbook](https://github.com/BOAZ-website/engineering-playbook) | 모든 저장소의 공통 개발 규칙 원천: 브랜치·이슈·PR·리뷰·릴리스·장애 절차, 템플릿, repo-rule-keeper 재사용 워크플로, `tools/new-issue.sh`. 이 저장소 자체임 | 공개 | `main` | PM | 이 문서, [conventions/repos.md](conventions/repos.md) 행 |
+
+- 저장소별 커밋 형식, 검사 적용 현황, AI 지침 파일은 [conventions/repos.md](conventions/repos.md)에 있음
+- backend-docs는 비공개라 조직 멤버만 볼 수 있으며 접근 권한은 PM에게 요청함([org/access.md](org/access.md))
 
 ## 폴더 구성
 
 | 폴더 | 담는 것 |
 |---|---|
-| [conventions/](conventions/) | 모든 저장소가 따르는 단일 규칙 원천: git, 이슈·PR, 코드 리뷰, 문서 작성, 저장소별 차이 |
+| [conventions/](conventions/) | 모든 저장소가 따르는 단일 규칙 원천: git, 이슈·PR, 코드 리뷰, 문서 작성, AI 도구 사용, 저장소별 차이 |
 | [process/](process/) | 일하는 절차: 개발 주기, 릴리스와 hotfix, 장애 대응, 모집 시즌 체크리스트 |
 | [org/](org/) | 역할, 결정 권한, 접근 권한 규칙 |
 | [products/](products/) | Product별 작업 시작 안내 |

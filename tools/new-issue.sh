@@ -7,7 +7,7 @@
 #   tools/new-issue.sh -R backend -t "[Feat] 출결 조회 API" -T Feature -P High \
 #     -j "관리자 페이지 개발" -b body.md [-a 로그인]
 #   -R 저장소 이름(BOAZ-website 조직 안)   -t 제목([Type] 내용)
-#   -T Feature|Bug|Task                    -P Urgent|High|Medium|Low(Notion 긴급·높음·중간·낮음)
+#   -T (생략 가능) 제목 접두어로 정함. 주면 접두어와 맞아야 함                    -P Urgent|High|Medium|Low(Notion 긴급·높음·중간·낮음)
 #   -j 보드 Project 값                      -b 본문 파일(이슈 템플릿 형식)
 #   -a 담당자(기본: 실행한 사람)
 #   -r 이슈 번호: 이전 실행이 이슈 생성 뒤 실패했을 때 새로 만들지 않고 그 이슈에 남은 값만 채움(재개)
@@ -31,10 +31,9 @@ while getopts "R:t:T:P:j:b:a:p:r:" o; do
 done
 
 die() { echo "중단: $*" >&2; exit 1; }
-for v in REPO TITLE TYPE PRIORITY PROJECT; do [ -n "${!v}" ] || die "$v 값이 없음"; done
+for v in REPO TITLE PRIORITY PROJECT; do [ -n "${!v}" ] || die "$v 값이 없음"; done
 if [ -z "$RESUME" ]; then [ -n "$BODY" ] || die "BODY 값이 없음"; [ -f "$BODY" ] || die "본문 파일 없음: $BODY"; fi
 
-case $TYPE in Feature|Bug|Task) ;; *) die "Type은 Feature, Bug, Task 중 하나" ;; esac
 
 # 제목 접두어 → 작업 종류 라벨(conventions/issue-pr.md "라벨")
 prefix=$(printf '%s' "$TITLE" | sed -nE 's/^\[([A-Za-z]+)\].*/\1/p' | tr '[:upper:]' '[:lower:]')
@@ -44,6 +43,10 @@ case $prefix in
   release) LABEL='🚀 RELEASE' ;; chore) LABEL='🧹 CHORE' ;;
   *) die "제목은 [Feat]·[Fix]·[Hotfix]·[Docs]·[Refactor]·[Style]·[Test]·[Release]·[Chore] 중 하나로 시작" ;;
 esac
+# Type은 제목 접두어로 정함(conventions/issue-pr.md "분류 기준"). -T를 주면 접두어와 맞는지만 확인함
+case $prefix in feat) WANT=Feature ;; fix|hotfix) WANT=Bug ;; *) WANT=Task ;; esac
+[ -z "$TYPE" ] && TYPE=$WANT
+[ "$TYPE" = "$WANT" ] || die "Type이 제목 접두어와 다름: [$prefix]는 $WANT(입력 $TYPE)"
 
 # 보드·필드 ID를 이름으로 찾음. 값이 틀리면 생성 전에 멈춤
 meta=$(gh api graphql -f query='query($o:String!,$n:Int!){organization(login:$o){

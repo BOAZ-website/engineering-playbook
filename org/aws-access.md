@@ -1,5 +1,5 @@
 > 담당 역할: PM(승인), Product Engineer(AWS 관리자 권한 보유자가 수행)
-> 최종 검토일: 2026-11-28
+> 최종 검토일: 2026-11-29
 > 적용 범위: 인프라 Product(AWS 계정)
 > 상태: 확정
 
@@ -136,7 +136,7 @@ AWS 관리자 권한 보유자가 수행함
 ## 변경 이력 기록
 
 - CloudTrail이 없어 콘솔 변경 이력이 남지 않음. IAM 변경은 당일 product-infra `decisions.md` 또는 해당 이슈에 기록함
-- 운영 IAM 변경이 배포 금지 기간(`process/release.md` "배포 금지")에 걸리면 PM 승인을 받음
+- 운영 IAM 변경이 배포 금지 기간(`process/release.md` "모집 시즌 전환과 겹칠 때"의 "배포 금지 기간")에 걸리면 PM 승인을 받음
 
 ## 관련 문서
 
