@@ -75,6 +75,41 @@
 - 이유: 체크리스트는 완료 조건이므로, 체크하지 않은 채 머지·종료하면 무엇이 빠졌는지 나중에 알 수 없음
 - 후속으로 미루는 항목은 후속 이슈 번호를 사유 댓글에 적음
 
+## 프로젝트 값과 저장소 추가
+
+### 새 Project 값 추가
+
+- 기준: "분류 방식"의 판정 표 1~6에 맞는 행이 있으면 기존 값을 씀. 새 값은 아래 셋을 모두 만족할 때만 만듦
+  - 기존 정의로 판정할 수 없음
+  - 이슈가 5개 이상 생길 예정
+  - 기수 묶음이 아님(기수 묶음은 상위 이슈나 Notion Epic으로 만듦)
+- 순서
+  1. 제안 이슈(Type `Task`, Project 값 Product Management)에 값의 정의 한 줄과 판정 표에 넣을 행을 적음
+  2. PM이 승인함
+  3. 이 문서의 판정 표와 정의를 고치는 PR을 머지함
+  4. Notion 두 DB(Engineering Ticket, 디자인 & FE Ticket)와 GitHub 조직 Project에 같은 이름으로 옵션을 추가함. GitHub 옵션은 웹 화면에서만 추가함(API로 옵션 목록을 바꾸면 기존 값이 모두 지워짐)
+  5. 기존 티켓을 판정 표로 다시 분류함
+- 종료: 정의에 끝 조건을 적음. 끝나면 값을 보관하고 다른 값과 합치지 않음(Terraform Migration 선례). 이후 작업을 넘길 값을 판정 표에 적음
+
+### 새 저장소 추가
+
+- [ ] 기존 이슈를 조직 Project에 넣고 Project 값을 지정함. 자동 추가 규칙은 무료 플랜이라 1개뿐이므로 PM이 일괄로 넣음
+- [ ] 공통 이슈·PR 템플릿과 작업 종류 라벨을 backend와 같게 복사함
+- [ ] 커밋 훅과 PR 제목 검사를 설정함
+- [ ] AWS 배포가 필요하면 배포 롤 신뢰 조건을 `org/aws-access.md` 절차대로 설정함([org/aws-access.md](../org/aws-access.md))
+- [ ] 워크스페이스 루트 `CLAUDE.md`의 저장소 표에 추가함
+
+### 필수 값과 누락 점검
+
+- 이슈 필수 값(Project, Priority, Assignee, Type)은 위 "이슈" 절 규칙을 따름
+- Notion 티켓 필수 값: Project, 우선순위, GitHub Issue 링크
+- 누락 점검: 스프린트 시작 때 PM이 확인함
+  - GitHub Project에서 Project나 Priority가 빈 항목
+  - 저장소별 `is:issue is:open no:project` 검색(저장소별 자동 편입 여부는 아래 "미결" 표)
+  - Notion 두 DB에서 Project가 비었거나 GitHub 링크가 없는 티켓
+- 빈 값 필터는 저장 뷰로 만들어 둠
+- 이유: Project 값이 비면 프로젝트 필터 화면에서 빠져 누락을 알아채기 어려움
+
 ## 라벨
 
 | 작업 종류 라벨 | PR 제목 | 색 |
