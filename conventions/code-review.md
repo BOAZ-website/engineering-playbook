@@ -13,7 +13,7 @@
 | 머지 조건 | 승인 1건 이상, 필수 검사 통과(`repo-rule-keeper`와 저장소 CI), 대화 모두 해결 |
 | 릴리스 PR 승인 수 | 일반 PR과 같이 1명(`dev` → `main` 릴리스, hotfix 포함) |
 | 승인 전 머지 | 금지 |
-| 작성자 단독 머지 | 금지. 작성자는 자신의 PR을 승인하지 않음 |
+| 작성자 단독 머지 | 금지. 작성자는 자신의 PR을 승인하지 않음. 예외: PO 팀의 룰셋 우회(사유 댓글과 사후 리뷰, `conventions/repos.md` "룰셋 표준") |
 | 새 커밋 | 승인 후 새 커밋이 올라오면 기존 승인 무효화 |
 | PR 없이 병합 | 금지. 문서만 바뀌어도 PR 사용 |
 | 머지 방식 | 모든 저장소 merge commit만 허용, squash·rebase는 저장소 설정에서 끔(PM 결정 2026-11-29, `decisions/0006-repo-rule-keeper-v2-and-repo-standards.md`). 승인과 필수 검사 통과를 확인한 뒤 머지 |
