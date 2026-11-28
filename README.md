@@ -42,6 +42,7 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 | AWS 계정을 발급하거나 회수한다 | [org/aws-access.md](org/aws-access.md) |
 | 팀에 합류하거나 기수를 인수인계한다 | [org/onboarding.md](org/onboarding.md), [org/handover.md](org/handover.md) |
 | 문서, 이슈, PR 본문을 쓴다 | [conventions/doc-writing.md](conventions/doc-writing.md) |
+| 이슈·PR을 만들고 머지·종료한다(담당자, 유형, 우선순위, 체크리스트) | [conventions/issue-pr.md](conventions/issue-pr.md) |
 | 규칙이 왜 이렇게 됐는지 궁금하다 | [decisions/](decisions/) |
 | 규칙을 바꾸고 싶다 | 아래 "문서를 고치는 방법" |
 
