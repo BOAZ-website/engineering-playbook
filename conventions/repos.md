@@ -11,7 +11,7 @@
 
 ## 저장소 현황
 
-2026-11-28 조회. 목표 상태(모든 저장소에 BOAZ Rules 적용, 공개 저장소 룰셋에 PR 승인 1과 필수 검사 `pr-rules`)와 다른 부분은 "차이"로 표시
+2026-11-28 조회. 목표 상태(모든 저장소에 repo-rule-keeper 적용, 공개 저장소 룰셋에 PR 승인 1과 필수 검사 `pr-rules`)와 다른 부분은 "차이"로 표시
 
 ### 브랜치·커밋·PR 확인
 
@@ -28,7 +28,7 @@
 
 ### 템플릿·검사·룰셋·AI 지침 파일
 
-| 저장소 | 절차 전용 이슈 템플릿 | BOAZ Rules 적용 | 룰셋 | AI 지침 파일 |
+| 저장소 | 절차 전용 이슈 템플릿 | repo-rule-keeper 적용 | 룰셋 | AI 지침 파일 |
 |---|---|---|---|---|
 | backend | 없음(`feature_request.md`는 `task.yml`로 대체 예정) | 미적용(PR #260 열림) | 없음 | `AGENTS.md`(`CLAUDE.md`는 `@AGENTS.md`) |
 | frontend | 없음 | 미적용(PR #211) | `dev` 룰셋 비활성 | `AGENTS.md` |
@@ -48,16 +48,16 @@
 
 | 저장소 | 차이 |
 |---|---|
-| backend | 차이: BOAZ Rules 미적용, 룰셋 없음. 흡수 대상 워크플로 남음: `auto-assign`, `pr-base-guard`, `title-guard` |
-| frontend | 차이: BOAZ Rules 미적용, `dev` 룰셋 비활성, PR 템플릿 없음, 커밋에 이슈 번호가 선택. 흡수 대상 워크플로 남음: `auto-assign`, `auto-label` |
-| frontend_admin | 차이: BOAZ Rules 미적용, 룰셋 없음 |
-| frontend_recruiting_admin | 차이: BOAZ Rules 미적용, 룰셋 없음, 템플릿 없음, 커밋 규약 없음, 이슈·PR 템플릿 도입 필요 |
-| product-infra | 차이: BOAZ Rules 미적용, 룰셋 없음. 흡수 대상 워크플로 남음: `auto-label`, `pr-base-guard`, `title-guard` |
-| backend-docs | 차이: BOAZ Rules 미적용. 룰셋은 비공개 플랜 한계로 강제 불가(표시만). 흡수 대상 워크플로 남음: `auto-assign`, `title-guard` |
+| backend | 차이: repo-rule-keeper 미적용, 룰셋 없음. 흡수 대상 워크플로 남음: `auto-assign`, `pr-base-guard`, `title-guard` |
+| frontend | 차이: repo-rule-keeper 미적용, `dev` 룰셋 비활성, PR 템플릿 없음, 커밋에 이슈 번호가 선택. 흡수 대상 워크플로 남음: `auto-assign`, `auto-label` |
+| frontend_admin | 차이: repo-rule-keeper 미적용, 룰셋 없음 |
+| frontend_recruiting_admin | 차이: repo-rule-keeper 미적용, 룰셋 없음, 템플릿 없음, 커밋 규약 없음, 이슈·PR 템플릿 도입 필요 |
+| product-infra | 차이: repo-rule-keeper 미적용, 룰셋 없음. 흡수 대상 워크플로 남음: `auto-label`, `pr-base-guard`, `title-guard` |
+| backend-docs | 차이: repo-rule-keeper 미적용. 룰셋은 비공개 플랜 한계로 강제 불가(표시만). 흡수 대상 워크플로 남음: `auto-assign`, `title-guard` |
 | engineering-playbook | 차이: 룰셋 일시 비활성(작업 뒤 복구). 룰셋 필수 검사가 아직 `check-title`이라 `title-guard.yml`이 남음(필수 검사를 `pr-rules`로 바꾼 뒤 삭제) |
-| design-system | 차이: BOAZ Rules 미적용, `dev`·`main` 룰셋 없음(`v*` 태그만 보호). 흡수 대상 워크플로 남음: `auto-assign`, `auto-label`, `pr-base-guard`, `title-guard` |
+| design-system | 차이: repo-rule-keeper 미적용, `dev`·`main` 룰셋 없음(`v*` 태그만 보호). 흡수 대상 워크플로 남음: `auto-assign`, `auto-label`, `pr-base-guard`, `title-guard` |
 
-- 제목 검사, 자동 라벨, 작성자 자동 지정, 대상 브랜치 경고는 모두 BOAZ Rules에 들어 있으므로 BOAZ Rules 적용이 끝나면 저장소별 `title-guard.yml`, `auto-label.yml`, `auto-assign.yml`, `pr-base-guard.yml`은 삭제함. 빌드·테스트·배포 워크플로(ci, cd, deploy 등)는 저장소 고유라 유지함
+- 제목 검사, 자동 라벨, 작성자 자동 지정, 대상 브랜치 경고는 모두 repo-rule-keeper에 들어 있으므로 repo-rule-keeper 적용이 끝나면 저장소별 `title-guard.yml`, `auto-label.yml`, `auto-assign.yml`, `pr-base-guard.yml`은 삭제함. 빌드·테스트·배포 워크플로(ci, cd, deploy 등)는 저장소 고유라 유지함
 - 저장소 PR이 머지되면 이 표를 같은 PR에서 고치고 "최종 검토일"을 갱신함
 
 ## 적용 일정
@@ -75,7 +75,7 @@
 ## 새 저장소 추가
 
 - [ ] 기존 이슈를 조직 Project에 넣고 Project 값을 지정함. 자동 추가 규칙은 무료 플랜이라 1개뿐이므로 PM이 일괄로 넣음
-- [ ] `tools/callers/`의 호출 파일 1개(`boaz-rules.yml`)를 `.github/workflows/boaz-rules.yml`로 복사함(`@v1` 고정). 제목 검사·자동 라벨·Assignee 자동 지정·대상 브랜치 경고는 BOAZ Rules에 들어 있으므로 저장소별 파일(`title-guard.yml`, `auto-label.yml`, `auto-assign.yml`, `pr-base-guard.yml`)을 따로 두지 않음
+- [ ] `tools/callers/`의 호출 파일 1개(`boaz-rules.yml`)를 `.github/workflows/boaz-rules.yml`로 복사함(`@v1` 고정). 제목 검사·자동 라벨·Assignee 자동 지정·대상 브랜치 경고는 repo-rule-keeper에 들어 있으므로 저장소별 파일(`title-guard.yml`, `auto-label.yml`, `auto-assign.yml`, `pr-base-guard.yml`)을 따로 두지 않음
 - [ ] `tools/templates/`의 이슈 폼(`task.yml`, `config.yml`)과 PR 템플릿을 `.github/`에 복사하고 PR 템플릿의 저장소별 확인 칸을 채움
 - [ ] 작업 종류 라벨 9종을 backend와 같게 만듦(`conventions/issue-pr.md` "라벨")
 - [ ] 공개 저장소면 룰셋(기본 브랜치, `dev`가 기본 브랜치이면 `main`도 포함)에 PR 승인 1과 필수 검사 `pr-rules`를 지정함

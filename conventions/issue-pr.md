@@ -18,7 +18,7 @@
 | 영역 | Type 뒤에 영역 표기를 허용. 예: `[Feat] [서류 평가] 내용` |
 | 예 | `[Feat] 로그인 API 구현` |
 | 본문 | 저장소 PR 템플릿의 섹션 이름과 순서 유지("템플릿") |
-| 검사 | 재사용 워크플로 BOAZ Rules("PR 규칙" 잡)의 검사 항목. 필수 검사는 `pr-rules`("PR 검사 `pr-rules`") |
+| 검사 | 재사용 워크플로 repo-rule-keeper("PR 규칙" 잡)의 검사 항목. 필수 검사는 `pr-rules`("PR 검사 `pr-rules`") |
 
 - 이유: 제목 형식을 맞춰 두면 어느 저장소에서든 목록만 보고 변경 종류를 알 수 있고, 라벨·Type 자동 지정이 제목의 `[Type]`에 의존함
 - 이전 type을 9종으로 정리함: `ci`·`build`는 Chore, `perf`는 Refactor, `revert`는 Chore로 씀. `hotfix`는 커밋 type이 아니라 PR 제목에만 씀
@@ -101,7 +101,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | 본문 | 일반 업무 이슈 템플릿 사용. 체크리스트(`- [ ]`)로 완료 조건을 적음 |
 
 - 이유: 담당자가 없는 이슈는 진행하는 사람 없이 남고, 유형·우선순위·프로젝트가 없으면 보드에서 급한 일을 고를 수 없음. Project 밖의 이슈는 우선순위 목록에서 보이지 않음
-- GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 생성 뒤 BOAZ Rules("이슈 규칙" 잡)가 검사함. 원본은 playbook의 재사용 워크플로 `.github/workflows/boaz-rules.yml`(화면 표시 이름 "🛡️ BOAZ Rules")이고, 저장소는 호출 파일 견본 [`tools/callers/boaz-rules.yml`](../tools/callers/boaz-rules.yml)을 `.github/workflows/boaz-rules.yml`로 복사해 두며 `@v1` 태그로 고정함. 호출 파일은 이것 1개뿐이고 이슈·PR 검사가 모두 이 파일로 동작함. playbook은 로컬 호출 파일 `.github/workflows/boaz-rules-run.yml`을 씀. 원본을 고치면 `v1` 태그를 옮겨 모든 저장소에 반영함
+- GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 생성 뒤 repo-rule-keeper("이슈 규칙" 잡)가 검사함. 원본은 playbook의 재사용 워크플로 `.github/workflows/boaz-rules.yml`(화면 표시 이름 "🛡️ repo-rule-keeper")이고, 저장소는 호출 파일 견본 [`tools/callers/boaz-rules.yml`](../tools/callers/boaz-rules.yml)을 `.github/workflows/boaz-rules.yml`로 복사해 두며 `@v1` 태그로 고정함. 호출 파일은 이것 1개뿐이고 이슈·PR 검사가 모두 이 파일로 동작함. playbook은 로컬 호출 파일 `.github/workflows/boaz-rules-run.yml`을 씀. 원본을 고치면 `v1` 태그를 옮겨 모든 저장소에 반영함
 - 동작: 담당자는 작성자로, 작업 종류 라벨은 제목에서 자동으로 채우고 Type 지정도 시도함(실패하면 누락으로 알림). 이슈를 만들거나 고치거나 라벨·담당자를 바꿀 때마다 다시 검사하고(생성 직후에는 2분까지 기다림), 비어 있는 값은 마커가 붙은 댓글 1개를 갱신해 알림. 모두 채워지면 그 댓글을 "해결됨"으로 바꾸고 접음
 - Priority 조회에 실패하면 누락으로 보고 job을 실패시킴(조용히 통과하지 않음). 보드 편입·Project는 저장소 권한으로 확인할 수 없어 PM 스프린트 점검에서 확인함
 - 이슈를 대신 만들어 준 경우(예: 회의 결정을 PM이 이슈로 옮김)에도 만든 사람을 먼저 지정하고, 작업자가 정해지면 작업자를 추가함
@@ -133,7 +133,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 
 ### PR 검사 `pr-rules`
 
-- 원본은 playbook의 재사용 워크플로 `.github/workflows/boaz-rules.yml`("🛡️ BOAZ Rules")의 "PR 규칙" 잡. 저장소는 [`tools/callers/boaz-rules.yml`](../tools/callers/boaz-rules.yml)을 `.github/workflows/boaz-rules.yml`로 복사해 `@v1`로 고정함. 결과는 커밋 상태 `pr-rules`로 기록됨
+- 원본은 playbook의 재사용 워크플로 `.github/workflows/boaz-rules.yml`("🛡️ repo-rule-keeper")의 "PR 규칙" 잡. 저장소는 [`tools/callers/boaz-rules.yml`](../tools/callers/boaz-rules.yml)을 `.github/workflows/boaz-rules.yml`로 복사해 `@v1`로 고정함. 결과는 커밋 상태 `pr-rules`로 기록됨
 - 같은 잡이 제목 검사(title-guard), 자동 라벨(auto-label), 작성자 자동 지정(auto-assign), 대상 브랜치 경고(pr-base-guard)를 모두 맡으므로 저장소에 이 기능의 별도 워크플로를 두지 않음
 - 실행 시점: PR을 만들거나 고칠 때, 리뷰·댓글이 달릴 때, 연결된 이슈를 고칠 때
 - 검사 항목 7가지
@@ -181,7 +181,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
   - Notion 두 DB: 개발 티켓 중 GitHub 링크가 없는 것, 개발이 아닌 티켓 중 Project가 빈 것
   - 반대 방향: 이번 스프린트에 열린 GitHub 이슈 중 Notion 티켓에 링크되지 않은 것(이슈만 만들고 티켓을 빠뜨린 경우)
   - 대조: 이번 스프린트 Notion Ticket의 Project·우선순위와 연결 이슈의 GitHub 값을 대조하고, 다르면 원천 쪽 값으로 고침(개발 작업은 GitHub, 그 밖은 Notion)
-  - BOAZ Rules의 누락 알림 댓글이 달린 이슈
+  - repo-rule-keeper의 누락 알림 댓글이 달린 이슈
 - 빈 값 필터는 저장 뷰로 만들어 둠
 - 이유: Project 값이 비면 프로젝트 필터 화면에서 빠져 누락을 알아채기 어려움
 
@@ -201,8 +201,8 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | `[Release]` | `🚀 RELEASE` | `Task` | `dev` → `main` 릴리스 PR(이슈 없음) | - |
 | `[Chore]` | `🧹 CHORE` | `Task` | 빌드·CI·의존성·설정·저장소 관리 | 의존성 버전 올리기, 워크플로 추가는 Chore. 배포 파이프라인 변경의 Project 값은 "분류 방식"의 판정 순서를 따름 |
 
-- 제목 접두어 하나로 라벨과 Type이 함께 정해짐(`tools/new-issue.sh`, BOAZ Rules가 같은 대응을 씀)
-- BOAZ Rules의 이슈 규칙은 라벨은 자동으로 붙이지만 Type은 저장소 토큰 권한이 없어 지정에 실패하고 누락 댓글로 알림(2026-11-28 시험, playbook #47, 기존 기록 유지)
+- 제목 접두어 하나로 라벨과 Type이 함께 정해짐(`tools/new-issue.sh`, repo-rule-keeper가 같은 대응을 씀)
+- repo-rule-keeper의 이슈 규칙은 라벨은 자동으로 붙이지만 Type은 저장소 토큰 권한이 없어 지정에 실패하고 누락 댓글로 알림(2026-11-28 시험, playbook #47, 기존 기록 유지)
 - 두 성격이 섞이면 주된 변경 하나를 고르고, 크면 하위 이슈로 나눔
 
 ### Priority
@@ -246,7 +246,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | `🧹 CHORE` | `[Chore]` 빌드·설정 등 부수 작업 | `#BFD4F2` |
 
 - 이름·색·설명은 모든 저장소에서 같게 둠(backend 기준)
-- BOAZ Rules의 제목 검사와 자동 라벨은 이 표를 대응표로 씀. 제목 검사가 허용하는 접두어는 모두 이 표에 있어야 함
+- repo-rule-keeper의 제목 검사와 자동 라벨은 이 표를 대응표로 씀. 제목 검사가 허용하는 접두어는 모두 이 표에 있어야 함
 - 기능 라벨(예: backend의 `auth`, `recruitment`, `monitoring`)은 저장소가 쓰고 싶을 때만 만들고 붙임. 조직 공통 규칙이 아니며, 프로젝트 구분에 쓰지 않음(프로젝트는 Project 필드)
 - 사람 이름 라벨은 쓰지 않음(담당자는 Assignee)
 

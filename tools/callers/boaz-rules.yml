@@ -1,5 +1,5 @@
 # 규칙 검사 호출 파일 견본(.github/workflows/boaz-rules.yml로 복사). 원본 변경은 v1 태그 이동으로 반영됨
-name: "🐻 repo-rule-keeper-Choonsik"
+name: "🛡️ repo-rule-keeper"
 on:
   issues: { types: [opened, edited, labeled, unlabeled, assigned, unassigned] }
   pull_request: { types: [opened, edited, synchronize, reopened, ready_for_review, review_requested, review_request_removed, assigned, unassigned, labeled, unlabeled] }

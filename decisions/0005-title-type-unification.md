@@ -58,4 +58,4 @@
 |---|---|---|
 | 없음 | | |
 
-갱신(2026-11-28): issue-check·pr-check와 저장소별 auto-label·auto-assign·pr-base-guard·title-guard를 재사용 워크플로 `boaz-rules.yml`("🛡️ BOAZ Rules") 하나로 합침. 이유: 모든 저장소 공통 규칙이라 한 파일·한 이름으로 관리
+갱신(2026-11-28): issue-check·pr-check와 저장소별 auto-label·auto-assign·pr-base-guard·title-guard를 재사용 워크플로 `boaz-rules.yml`("🛡️ repo-rule-keeper") 하나로 합침. 이유: 모든 저장소 공통 규칙이라 한 파일·한 이름으로 관리
