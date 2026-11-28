@@ -54,6 +54,7 @@
 | 중간 | 다음 스프린트 |
 | 낮음 | 여유가 있을 때 |
 
+- 기준 상세와 GitHub 값 대응은 `conventions/issue-pr.md` "분류 기준"
 - 2절 우선순위와 같은 기준. 심각도 높음 장애는 모집·운영이 계속되더라도 긴급
 - 개발 작업의 Project·우선순위는 GitHub 보드에서 봄(Notion 개발 티켓에는 링크만 적음. `conventions/issue-pr.md` "분류 방식")
 
