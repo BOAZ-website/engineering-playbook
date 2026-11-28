@@ -1,5 +1,5 @@
 > 담당 역할: Product Engineer | PM
-> 최종 검토일: 2026-11-26
+> 최종 검토일: 2026-11-28
 > 적용 범위: backend 저장소
 > 상태: 확정
 
@@ -155,4 +155,4 @@ backend 작업자가 지켜야 할 규칙
 | 질문 | 결정 필요 주체 | 필요 시점 |
 |---|---|---|
 | 운영 장애 대응 절차 문서화 | PM | 인프라 Product 문서 작성 시 |
-| backend README의 커밋 type 안내를 통일 기준 11종으로 갱신 | Product Engineer | 저장소별 전환 시 |
+| backend README의 협업 안내를 `conventions/repos.md` 견본으로 갱신 | Product Engineer | 저장소별 전환 시 |

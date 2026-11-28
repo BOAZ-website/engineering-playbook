@@ -1,6 +1,6 @@
 # engineering-playbook
 
-> 2026-11-24 기준 1.0 Ver.  
+> 2026-11-28 개편(최종 검토일 2026-11-28), 2026-11-24 기준 1.0 Ver.  
 > author: @daehyun-bigbread
 
 BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. 브랜치를 어떻게 만들고, PR을 어떻게 올리고, 누가 무엇을 결정하고, 운영에 어떻게 배포하는지를 한곳에서 찾을 수 있습니다.
@@ -26,10 +26,13 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 
 | 이런 상황이라면 | 이 문서를 봅니다 |
 |---|---|
+| 저장소 공통 규칙: 브랜치, dev→main 흐름, 커밋 원칙 | [conventions/git.md](conventions/git.md) |
+| 저장소 공통 규칙: PR·이슈 제목 `[Type]`, 라벨, 이슈 필수 6값, `Closes`, 템플릿, 검사, 분류 기준 | [conventions/issue-pr.md](conventions/issue-pr.md) |
+| 저장소 공통 규칙: 승인·머지 조건, 리뷰 응답 | [conventions/code-review.md](conventions/code-review.md) |
+| 저장소 공통 규칙: 문서·이슈·PR 본문 작성 | [conventions/doc-writing.md](conventions/doc-writing.md) |
+| 저장소마다 다른 값: 기본 브랜치, 커밋 형식, 검사 적용 현황, 새 저장소 추가 | [conventions/repos.md](conventions/repos.md) |
 | 팀에 처음 합류했다 | 아래 "처음 읽는 순서" |
-| 브랜치를 만들거나 커밋·PR을 올린다 | [conventions/git.md](conventions/git.md) |
-| PR을 리뷰하거나 리뷰를 받는다 | [conventions/code-review.md](conventions/code-review.md) |
-| 티켓과 이슈를 만들고 진행 상태를 남긴다 | [process/dev-cycle.md](process/dev-cycle.md) |
+| 티켓을 만들고 진행 상태를 남긴다 | [process/dev-cycle.md](process/dev-cycle.md) |
 | 운영에 배포하거나 급한 수정(hotfix)을 한다 | [process/release.md](process/release.md) |
 | 누가 결정하는지, 어떤 권한이 필요한지 알고 싶다 | [org/roles-and-authority.md](org/roles-and-authority.md) |
 | PM으로서 우선순위·결정·보고를 판단한다 | [org/pm-guide.md](org/pm-guide.md) |
@@ -41,26 +44,26 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 | 권한을 요청한다(저장소, 조직, 시크릿 등) | [org/access.md](org/access.md) |
 | AWS 계정을 발급하거나 회수한다 | [org/aws-access.md](org/aws-access.md) |
 | 팀에 합류하거나 기수를 인수인계한다 | [org/onboarding.md](org/onboarding.md), [org/handover.md](org/handover.md) |
-| 문서, 이슈, PR 본문을 쓴다 | [conventions/doc-writing.md](conventions/doc-writing.md) |
-| 이슈·PR을 만들고 머지·종료한다(담당자, 유형, 우선순위, 체크리스트) | [conventions/issue-pr.md](conventions/issue-pr.md) |
 | 규칙이 왜 이렇게 됐는지 궁금하다 | [decisions/](decisions/) |
 | 규칙을 바꾸고 싶다 | 아래 "문서를 고치는 방법" |
 
 ### 처음 읽는 순서
 
-첫날에는 아래 네 개를 읽습니다.
+첫날에는 아래 다섯 개를 읽습니다.
 
 1. 이 문서
 2. [conventions/doc-writing.md](conventions/doc-writing.md): 공개 저장소에 적으면 안 되는 것
-3. [conventions/git.md](conventions/git.md): 브랜치, 커밋, PR 제목 형식
-4. [org/roles-and-authority.md](org/roles-and-authority.md): 역할과 결정 권한
+3. [conventions/git.md](conventions/git.md): 브랜치, dev→main 흐름, 커밋 원칙
+4. [conventions/issue-pr.md](conventions/issue-pr.md): PR·이슈 제목, 라벨, 이슈 필수 값, `Closes`
+5. [org/roles-and-authority.md](org/roles-and-authority.md): 역할과 결정 권한
 
 첫 주에는 아래를 읽고, 이슈 하나에 연결된 PR 하나를 머지하는 것을 목표로 합니다.
 
-5. [conventions/code-review.md](conventions/code-review.md)
-6. [process/dev-cycle.md](process/dev-cycle.md)
-7. [process/release.md](process/release.md)
-8. 맡은 작업의 Product 문서([products/](products/))
+6. [conventions/code-review.md](conventions/code-review.md)
+7. [conventions/repos.md](conventions/repos.md): 맡은 저장소의 차이
+8. [process/dev-cycle.md](process/dev-cycle.md)
+9. [process/release.md](process/release.md)
+10. 맡은 작업의 Product 문서([products/](products/))
 
 ## 팀과 Product
 
@@ -78,7 +81,7 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 
 | 폴더 | 담는 것 |
 |---|---|
-| [conventions/](conventions/) | 모든 저장소에 공통인 규칙: git, 코드 리뷰, 문서 작성 |
+| [conventions/](conventions/) | 모든 저장소가 따르는 단일 규칙 원천: git, 이슈·PR, 코드 리뷰, 문서 작성, 저장소별 차이 |
 | [process/](process/) | 일하는 절차: 개발 주기, 릴리스와 hotfix, 장애 대응, 모집 시즌 체크리스트 |
 | [org/](org/) | 역할, 결정 권한, 접근 권한 규칙 |
 | [products/](products/) | Product별 작업 시작 안내 |
@@ -122,4 +125,4 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 
 ## 문서 상태
 
-2026-11-25 기준으로 관리자 페이지 문서를 뺀 모든 문서가 확정 상태입니다. 확정 문서는 27&28기부터 팀이 지켜야 하는 규칙입니다. 관리자 페이지 문서는 백엔드 연동이 시작되면 확정합니다. 2026-11-27에 추가한 [process/recruiting-season.md](process/recruiting-season.md)와 [decisions/0003](decisions/0003-recruiting-season-roles-and-checklist.md)은 같은 날 채택되어 확정 상태입니다. 체크리스트의 `(초기 기준)` 수치는 매 시즌 회고에서 실측값으로 고칩니다. 2026-11-28에 추가한 [org/aws-access.md](org/aws-access.md)도 확정 상태입니다. 각 문서 맨 위에 담당 역할, 최종 검토일, 적용 범위, 상태가 적혀 있습니다. 통일 기준을 각 저장소에 실제로 적용하는 일정은 [conventions/git.md](conventions/git.md)의 "적용 일정"에 있습니다.
+2026-11-25 기준으로 관리자 페이지 문서를 뺀 모든 문서가 확정 상태입니다. 확정 문서는 27&28기부터 팀이 지켜야 하는 규칙입니다. 관리자 페이지 문서는 백엔드 연동이 시작되면 확정합니다. 2026-11-27에 추가한 [process/recruiting-season.md](process/recruiting-season.md)와 [decisions/0003](decisions/0003-recruiting-season-roles-and-checklist.md)은 같은 날 채택되어 확정 상태입니다. 체크리스트의 `(초기 기준)` 수치는 매 시즌 회고에서 실측값으로 고칩니다. 2026-11-28에 추가한 [org/aws-access.md](org/aws-access.md)도 확정 상태입니다. 각 문서 맨 위에 담당 역할, 최종 검토일, 적용 범위, 상태가 적혀 있습니다. 통일 기준을 각 저장소에 실제로 적용하는 현황과 일정은 [conventions/repos.md](conventions/repos.md)에 있습니다.

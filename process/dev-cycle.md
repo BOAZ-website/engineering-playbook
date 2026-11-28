@@ -31,7 +31,7 @@
 
 - Ticket에는 Epic과 스프린트를 반드시 연결. 미연결 Ticket은 Notion에서 추적 불가
 - 개발 Ticket은 GitHub 이슈를 만들고 Ticket에 이슈 번호 기재
-- 브랜치·커밋·PR에 이슈 번호 포함(`conventions/git.md`)
+- 브랜치·커밋·PR에 이슈 번호 포함(`conventions/git.md`, `conventions/issue-pr.md`)
 - 기획·디자인 Ticket은 GitHub 이슈를 만들지 않음. README 등 저장소 문서 작업은 이슈 생성
 - 완료 시 Ticket에 이슈·PR 번호 기재. 디자인 Ticket은 Figma 파일 이름을 기재(공개 문서에는 링크를 적지 않으며 Ticket에만 첨부)
 - Ticket 내용 작성 시점: 개발은 PR 머지 후, 기획·디자인은 작업 완료 시 Ticket에 수행 내용과 결과를 적음
@@ -70,9 +70,9 @@
 
 생성부터 종료까지 흐름(개발 작업)
 
-1. GitHub 이슈를 먼저 만듦. Assignee(본인), 작업 종류 라벨, Type, Priority, 보드 편입, Project 6개를 모두 지정함. AI·명령줄은 `tools/new-issue.sh`를 씀
+1. GitHub 이슈를 먼저 만듦. 필수 6값, `tools/new-issue.sh`, 원천은 `conventions/issue-pr.md` "이슈"와 "분류 방식"([링크](../conventions/issue-pr.md))
 2. Notion Ticket을 만들고 Epic, Sprint, 이슈 링크를 적음. Project·우선순위는 이슈가 원천이므로 다시 적지 않음. 하위 이슈로 나뉜 작업은 상위 이슈 링크를 적음
-3. PR을 올림. Assignee는 PR 작성자, Reviewer는 작성자가 아닌 사람 1명 이상을 반드시 지정함. 본문 개요에 이슈 번호를 연결 키워드로 적어 Development에 이슈가 연결되게 함. PR 하나 = 이슈 하나이고 항상 `Closes #번호`를 씀. 작업이 PR 여러 개로 나뉘면 이슈를 하위 이슈로 나누고 PR마다 하위 이슈 하나를 닫음([규칙](../conventions/git.md)). PR 링크를 Notion Ticket에 적음
+3. PR을 올림. Assignee·Reviewer 지정, `Closes` 1개, 하위 이슈 분할은 `conventions/issue-pr.md` "PR"과 "PR 제목과 이슈 연결"을 따름. PR 링크를 Notion Ticket에 적음
 4. 머지·종료 때 PR 작성자가 Notion Ticket 상태를 완료로 바꿈. 연결 이슈가 실제로 닫히고 남은 하위 이슈가 없는지 확인한 뒤 함. 여러 저장소 PR로 끝나는 Ticket은 모든 이슈가 닫힌 뒤 완료
 
 개발이 아닌 작업(기획, 디자인, 콘텐츠, 운영진 업무)은 Notion Ticket만 만듦
@@ -93,43 +93,20 @@ Ticket 생성 체크리스트
 
 ## 우선순위
 
-우선순위는 긴급·높음·중간·낮음 4단계(`conventions/issue-pr.md` "분류 기준"). 아래 표는 높음과 중간 사이를 판단할 때 쓰는 보조 표
-
-| 우선순위 | 중요성 | 시급성 | 처리 |
-|---|---|---|---|
-| 높음(High) | 높음 | 높음 | 이번 스프린트 안에 끝냄. 지연 시 프로젝트 전반 영향 |
-| 중간(Medium) | 높음 | 낮음·중간 | 다음 스프린트 계획 때 배정 |
-| 중간(Medium) | 낮음·중간 | 높음 | 빠른 해결 필요. 일정 영향 방지 |
-| 낮음(Low) | 낮음 | 낮음 | 여유가 있을 때 처리 |
-
-- 긴급(Urgent)은 이 표로 정하지 않음. 장애·모집 차단일 때만 씀
-- 방법: 작업마다 중요성과 시급성을 보고 표에서 같은 조합의 우선순위를 찾음. 둘 다 높으면 높음, 둘 다 낮으면 낮음, 그 밖의 조합(하나만 높음, 둘 다 중간 등)은 중간. 작업 우선순위의 최종 결정은 PM(`org/roles-and-authority.md`)
+우선순위 기준과 판단 보조 표는 `conventions/issue-pr.md` "분류 기준"의 Priority에 있음([링크](../conventions/issue-pr.md)). 최종 결정은 PM(`org/roles-and-authority.md`)
 
 ## 이슈 TO-DO 관리
 
+체크 시점, 하지 않기로 한 항목의 사유 댓글, 머지·종료 조건, 자동 검사는 `conventions/issue-pr.md` "체크리스트 완료와 머지·종료"와 "PR 검사 `pr-rules`"를 따름([링크](../conventions/issue-pr.md))
+
+dev-cycle에서 추가로 지키는 것
+
 | 시점 | 규칙 |
 |---|---|
-| PR 생성 | 그 PR로 끝난 TO-DO 항목을 연결된 GitHub 이슈에서 체크 |
-| PR 템플릿 | 확인 항목에 "이슈 TO-DO를 갱신했음" 포함. 공통 템플릿은 조직 `.github` 저장소에 둘 예정 |
-| 리뷰 | 리뷰어가 이슈의 체크 상태와 PR 내용의 일치 여부 확인 |
-| 이슈 종료 | 체크되지 않은 항목이 남아 있으면 이슈를 닫지 않음 |
-| 하지 않기로 한 항목 | 취소선을 긋고 이유를 한 줄 기재. 또는 새 이슈로 옮기고 그 번호 기재 |
 | PR 없는 작업 | 콘솔 변경, 운영 DB 반영, 시즌 전환 같은 실행 작업은 끝낸 당일 체크. 결과를 이슈 댓글로 기록 |
 
-작성 기준
-
-- TO-DO 1항목 = PR 1건으로 확인할 수 있는 크기
-- 확인이 불가능한 큰 항목은 쪼갬
-
-이유
-
-- 담당 영역을 고정하지 않는 체계에서는 누구든 작업을 이어받을 수 있어야 함
-- 이슈의 체크 상태가 진행 기록 역할
-
-자동 확인
-
-- 이슈 종료 시 미체크 항목이 있으면 경고 댓글을 남기는 검사
-- 2026-12 리크루팅 시즌 이후 `.github` 재사용 워크플로로 도입 검토
+- 작성 기준: TO-DO 1항목 = PR 1건으로 확인할 수 있는 크기. 확인이 불가능한 큰 항목은 쪼갬
+- 이유: 담당 영역을 고정하지 않는 체계에서는 누구든 작업을 이어받을 수 있어야 하고, 이슈의 체크 상태가 진행 기록 역할을 함
 
 ## 완료와 이월
 
@@ -176,7 +153,7 @@ Ticket 생성 체크리스트
 | 4 | 작업, 커밋(작은 단위) | Product Engineer |
 | 5 | PR 생성, TO-DO 체크 | Product Engineer |
 | 6 | 리뷰, 수정 | 리뷰어, Product Engineer |
-| 7 | 머지, 브랜치 삭제 | Product Engineer |
+| 7 | 머지, 브랜치 삭제(`conventions/git.md` "브랜치") | Product Engineer |
 | 8 | Ticket 갱신 | Product Engineer |
 
 ## 미결

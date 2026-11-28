@@ -1,0 +1,14 @@
+# 규칙 검사 호출 파일 견본(.github/workflows/boaz-rules.yml로 복사). 원본 변경은 v1 태그 이동으로 반영됨
+name: "🛡️ BOAZ Rules"
+on:
+  issues: { types: [opened, edited, labeled, unlabeled, assigned, unassigned] }
+  pull_request: { types: [opened, edited, synchronize, reopened, ready_for_review, review_requested, review_request_removed, assigned, unassigned, labeled, unlabeled] }
+  pull_request_review: { types: [submitted, dismissed] }
+  issue_comment: { types: [created, edited, deleted] }
+permissions: { contents: read, issues: write, pull-requests: write, statuses: write }
+concurrency:
+  group: "boaz-rules-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number }}"
+  cancel-in-progress: true
+jobs:
+  rules:
+    uses: BOAZ-website/engineering-playbook/.github/workflows/boaz-rules.yml@v1

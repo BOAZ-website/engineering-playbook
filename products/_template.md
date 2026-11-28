@@ -80,7 +80,7 @@ Product 문서 공통 목차. 복사해 `products/<이름>.md`로 사용. 저장
 
 ## 저장소별 규칙 현황
 
-- `conventions/git.md`의 저장소별 현황 표와 차이가 있으면 기재
+- `conventions/repos.md`의 저장소 현황 표와 차이가 있으면 기재
 
 ## 비공개 저장소 참조
 

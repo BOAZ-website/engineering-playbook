@@ -5,7 +5,34 @@
 
 # 이슈·PR 공통 규칙
 
-이슈와 PR을 만들고, 머지하고, 닫을 때 모든 저장소에 같이 적용하는 규칙. 제목·커밋·브랜치·이슈 연결 키워드는 `conventions/git.md`, 리뷰 승인 조건은 `conventions/code-review.md`
+이슈와 PR을 만들고, 머지하고, 닫을 때 모든 저장소에 같이 적용하는 규칙. 브랜치·커밋 원칙은 `conventions/git.md`, 머지·승인 조건은 `conventions/code-review.md`, 저장소마다 다른 값은 `conventions/repos.md`
+
+## 제목과 이슈 연결
+
+### 제목
+
+| 항목 | 규칙 |
+|---|---|
+| 형식 | 모든 저장소의 PR·이슈 제목은 `[Type] 내용` |
+| Type | 9종: `Feat`, `Fix`, `Hotfix`, `Docs`, `Refactor`, `Style`, `Test`, `Release`, `Chore`(작업 종류 라벨 9종과 같음, "라벨") |
+| 영역 | Type 뒤에 영역 표기를 허용. 예: `[Feat] [서류 평가] 내용` |
+| 예 | `[Feat] 로그인 API 구현` |
+| 본문 | 저장소 PR 템플릿의 섹션 이름과 순서 유지("템플릿") |
+| 검사 | 재사용 워크플로 BOAZ Rules("PR 규칙" 잡)의 검사 항목. 필수 검사는 `pr-rules`("PR 검사 `pr-rules`") |
+
+- 이유: 제목 형식을 맞춰 두면 어느 저장소에서든 목록만 보고 변경 종류를 알 수 있고, 라벨·Type 자동 지정이 제목의 `[Type]`에 의존함
+- 이전 type을 9종으로 정리함: `ci`·`build`는 Chore, `perf`는 Refactor, `revert`는 Chore로 씀. `hotfix`는 커밋 type이 아니라 PR 제목에만 씀
+- 커밋 메시지 형식은 저장소별로 유지함(`conventions/repos.md`, `decisions/0005-title-type-unification.md`)
+
+### PR 제목과 이슈 연결
+
+- PR 하나 = 이슈 하나. 항상 PR 본문(템플릿의 이슈 줄)에 `Closes #번호`를 1개만 씀
+- `Closes #번호`를 쓰면 PR 화면 Development에 이슈가 자동으로 연결되고, 머지하면 이슈가 자동으로 닫힘. 손으로 연결하지 않음
+- 작업이 PR 여러 개로 나뉘면 이슈를 하위 이슈(Sub-issue)로 미리 나누고 PR마다 하위 이슈 하나를 `Closes`로 닫음. 상위 이슈는 PR에 연결하지 않음. 하위 이슈가 모두 닫히고 상위 이슈 체크리스트(머지 뒤 확인 포함)가 끝나면 닫음(`tools/new-issue.sh -p 상위번호`, "체크리스트 완료와 머지·종료")
+- `Refs #번호`는 쓰지 않음. Development에 연결되지 않아 PR과 이슈의 관계를 보드에서 찾을 수 없음. 예외: 릴리스(`dev` → `main`)와 hotfix PR은 이슈를 연결하지 않음
+- 키워드는 `Closes`, `Fixes`, `Resolves`(대소문자 무관, 콜론 허용). 다른 저장소 이슈는 `Closes BOAZ-website/frontend#209`
+- 키워드는 PR 본문이나 커밋 메시지에서만 동작함(PR 댓글은 동작하지 않음). PR을 올린 뒤 본문을 고쳐도 연결됨
+- 키워드는 PR 대상이 저장소 기본 브랜치일 때만 동작함. 기능 PR은 기본 브랜치로 보냄. hotfix·릴리스 PR(`main` 대상)은 연결하지 않아도 됨. 기본 브랜치 목록은 `conventions/repos.md`
 
 ## 분류 방식
 
@@ -74,8 +101,8 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | 본문 | 일반 업무 이슈 템플릿 사용. 체크리스트(`- [ ]`)로 완료 조건을 적음 |
 
 - 이유: 담당자가 없는 이슈는 진행하는 사람 없이 남고, 유형·우선순위·프로젝트가 없으면 보드에서 급한 일을 고를 수 없음. Project 밖의 이슈는 우선순위 목록에서 보이지 않음
-- GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 생성 뒤 `issue-check`가 검사함. 원본은 playbook의 재사용 워크플로 `.github/workflows/issue-check.yml`이고, 저장소는 호출 파일 견본 [`tools/callers/issue-check.yml`](../tools/callers/issue-check.yml)을 `.github/workflows/`에 복사해 두며 `@v1` 태그로 고정함. 원본을 고치면 `v1` 태그를 옮겨 모든 저장소에 반영함
-- 동작: 담당자(작성자), 작업 종류 라벨, Type은 제목에서 자동으로 채움. 이슈를 만들거나 고치거나 라벨·담당자를 바꿀 때마다 다시 검사하고(생성 직후에는 2분까지 기다림), 비어 있는 값은 마커가 붙은 댓글 1개를 갱신해 알림. 모두 채워지면 그 댓글을 "해결됨"으로 바꾸고 접음
+- GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 생성 뒤 BOAZ Rules("이슈 규칙" 잡)가 검사함. 원본은 playbook의 재사용 워크플로 `.github/workflows/boaz-rules.yml`(화면 표시 이름 "🛡️ BOAZ Rules")이고, 저장소는 호출 파일 견본 [`tools/callers/boaz-rules.yml`](../tools/callers/boaz-rules.yml)을 `.github/workflows/boaz-rules.yml`로 복사해 두며 `@v1` 태그로 고정함. 호출 파일은 이것 1개뿐이고 이슈·PR 검사가 모두 이 파일로 동작함. playbook은 로컬 호출 파일 `.github/workflows/boaz-rules-run.yml`을 씀. 원본을 고치면 `v1` 태그를 옮겨 모든 저장소에 반영함
+- 동작: 담당자는 작성자로, 작업 종류 라벨은 제목에서 자동으로 채우고 Type 지정도 시도함(실패하면 누락으로 알림). 이슈를 만들거나 고치거나 라벨·담당자를 바꿀 때마다 다시 검사하고(생성 직후에는 2분까지 기다림), 비어 있는 값은 마커가 붙은 댓글 1개를 갱신해 알림. 모두 채워지면 그 댓글을 "해결됨"으로 바꾸고 접음
 - Priority 조회에 실패하면 누락으로 보고 job을 실패시킴(조용히 통과하지 않음). 보드 편입·Project는 저장소 권한으로 확인할 수 없어 PM 스프린트 점검에서 확인함
 - 이슈를 대신 만들어 준 경우(예: 회의 결정을 PM이 이슈로 옮김)에도 만든 사람을 먼저 지정하고, 작업자가 정해지면 작업자를 추가함
 - 장애 대응 예외: 운영 장애로 바로 고쳐야 하면 이슈 없이 hotfix PR을 먼저 올리고 머지할 수 있음. 복구 뒤 24시간 안에 이슈(`[Hotfix]`, Type Bug, Priority Urgent, Project SRE & 장애 대응 또는 해당 제품)를 만들어 PR 링크를 적고 닫음. 장애 절차는 `process/incident.md`
@@ -86,7 +113,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 |---|---|
 | 담당자(Assignee) | 반드시 지정. PR 작성자(작업한 사람) |
 | 리뷰어(Reviewer) | 반드시 지정. 작성자가 아닌 사람 1명 이상(PM 또는 해당 Product의 다른 팀원). 리뷰어가 없는 PR은 리뷰를 시작하지 않음 |
-| 이슈 연결 | PR 하나 = 이슈 하나, 본문에 `Closes #번호` 1개로 Development에 연결. 여러 PR로 나뉘는 작업은 하위 이슈로 나눔. 예외: 릴리스(`dev` → `main`)와 hotfix PR은 연결하지 않음(`conventions/git.md` "PR 제목") |
+| 이슈 연결 | PR 하나 = 이슈 하나, 본문에 `Closes #번호` 1개로 Development에 연결. 여러 PR로 나뉘는 작업은 하위 이슈로 나눔. 예외: 릴리스(`dev` → `main`)와 hotfix PR은 연결하지 않음("PR 제목과 이슈 연결") |
 | 작업 종류 라벨 | 제목의 `[Type]`에 맞는 라벨 1개. 자동으로 붙고, 제목을 고치면 라벨도 바뀜 |
 | 본문 | PR 템플릿 사용 |
 
@@ -106,12 +133,17 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 
 ### PR 검사 `pr-rules`
 
-- 원본은 playbook의 재사용 워크플로 `.github/workflows/pr-check.yml`. 저장소는 [`tools/callers/pr-check.yml`](../tools/callers/pr-check.yml)을 복사해 `@v1`로 고정함. 결과는 커밋 상태 `pr-rules`로 기록됨
-- 검사 항목 4가지
-  1. `Closes` 이슈 연결: 정확히 1개. 릴리스(`[Release]`, `[Hotfix]`)와 기본 브랜치가 아닌 곳을 향한 PR은 0~1개 허용
-  2. Reviewer: 지정됐거나 작성자가 아닌 사람의 리뷰가 있음
-  3. Assignee: 1명 이상
-  4. 사유 없는 미체크 항목이 없음: PR 본문의 미체크 항목과, `Closes` 이슈가 1개이면 그 이슈 본문의 미체크 항목. 사유는 PR 댓글이나 이슈 댓글(사람이 쓴 것만 인정)의 `사유: <항목 문구 앞부분> / <이유>` 줄로 남김. 항목 문구의 앞 30자가 사유 줄에 들어 있으면 처리된 것으로 봄
+- 원본은 playbook의 재사용 워크플로 `.github/workflows/boaz-rules.yml`("🛡️ BOAZ Rules")의 "PR 규칙" 잡. 저장소는 [`tools/callers/boaz-rules.yml`](../tools/callers/boaz-rules.yml)을 `.github/workflows/boaz-rules.yml`로 복사해 `@v1`로 고정함. 결과는 커밋 상태 `pr-rules`로 기록됨
+- 같은 잡이 제목 검사(title-guard), 자동 라벨(auto-label), 작성자 자동 지정(auto-assign), 대상 브랜치 경고(pr-base-guard)를 모두 맡으므로 저장소에 이 기능의 별도 워크플로를 두지 않음
+- 실행 시점: PR을 만들거나 고칠 때, 리뷰·댓글이 달릴 때, 연결된 이슈를 고칠 때
+- 검사 항목 7가지
+  1. 제목 형식: `[Type] 내용`이고 Type이 9종 중 하나("제목")
+  2. 라벨 자동: 제목의 `[Type]`에 맞는 작업 종류 라벨 1개만 남김(다른 작업 종류 라벨은 뗌)
+  3. Assignee 자동: 비어 있으면 PR 작성자를 지정함. 지정되지 않으면 실패
+  4. 대상 브랜치: 기본 브랜치가 아닌 곳을 향한 PR은 `dev`(릴리스)나 `hotfix/*` 브랜치에서 올 때만 허용함. 그 밖이면 실패로 표시함("브랜치 흐름", [git.md](git.md))
+  5. `Closes` 이슈 연결: 정확히 1개. 릴리스(`[Release]`, `[Hotfix]`)와 기본 브랜치가 아닌 곳을 향한 PR은 0~1개 허용
+  6. Reviewer: 지정됐거나 작성자가 아닌 사람(팀 포함)의 리뷰가 있음
+  7. 사유 없는 미체크 항목이 없음: PR 본문의 미체크 항목과, `Closes` 이슈가 1개이면 그 이슈 본문의 미체크 항목. 사유는 PR 댓글이나 이슈 댓글(사람이 쓴 것만 인정)의 `사유: <항목 문구 앞부분> / <이유>` 줄로 남김. 항목 문구의 앞 30자가 사유 줄에 들어 있으면 처리된 것으로 봄
 - 규칙을 어기면 상태만 `failure`가 되고, API 오류는 job 실패로 나타남. PR 본문·댓글·리뷰·이슈 본문이 바뀔 때마다 다시 검사함
 - 공개 저장소는 룰셋의 필수 검사로 `pr-rules`를 지정해 머지를 막음. backend-docs(비공개)는 무료 플랜이라 룰셋을 강제할 수 없어 표시만 함(리뷰어가 상태를 확인하고 머지)
 
@@ -137,16 +169,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 
 ### 새 저장소 추가
 
-- [ ] 기존 이슈를 조직 Project에 넣고 Project 값을 지정함. 자동 추가 규칙은 무료 플랜이라 1개뿐이므로 PM이 일괄로 넣음
-- [ ] `tools/callers/`의 호출 파일 2개(`issue-check.yml`, `pr-check.yml`)를 `.github/workflows/`에 복사함(`@v1` 고정)
-- [ ] `tools/templates/`의 이슈 폼(`task.yml`, `config.yml`)과 PR 템플릿을 `.github/`에 복사하고 PR 템플릿의 저장소별 확인 칸을 채움
-- [ ] 작업 종류 라벨을 backend와 같게 만듦
-- [ ] 공개 저장소면 룰셋(기본 브랜치, dev가 기본 브랜치이면 main도 포함)에 PR 승인 1과 필수 검사 `pr-rules`를 지정함
-- [ ] AI 지침 파일(`AGENTS.md` 또는 `CLAUDE.md`)에 이슈·PR 생성 규칙을 적음(`tools/new-issue.sh` 사용, Closes 1개, Reviewer·Assignee 지정)
-- [ ] 저장소 설정 "Automatically delete head branches"를 켬(머지한 브랜치 자동 삭제, `conventions/git.md` "브랜치")
-- [ ] 커밋 훅과 PR 제목 검사를 설정함
-- [ ] AWS 배포가 필요하면 배포 롤 신뢰 조건을 `org/aws-access.md` 절차대로 설정함([org/aws-access.md](../org/aws-access.md))
-- [ ] 워크스페이스 루트 `CLAUDE.md`의 저장소 표에 추가함
+체크리스트는 `conventions/repos.md` "새 저장소 추가"에 있음([repos.md](repos.md))
 
 ### 필수 값과 누락 점검
 
@@ -158,7 +181,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
   - Notion 두 DB: 개발 티켓 중 GitHub 링크가 없는 것, 개발이 아닌 티켓 중 Project가 빈 것
   - 반대 방향: 이번 스프린트에 열린 GitHub 이슈 중 Notion 티켓에 링크되지 않은 것(이슈만 만들고 티켓을 빠뜨린 경우)
   - 대조: 이번 스프린트 Notion Ticket의 Project·우선순위와 연결 이슈의 GitHub 값을 대조하고, 다르면 원천 쪽 값으로 고침(개발 작업은 GitHub, 그 밖은 Notion)
-  - `issue-check` 댓글이 달린 이슈
+  - BOAZ Rules의 누락 알림 댓글이 달린 이슈
 - 빈 값 필터는 저장 뷰로 만들어 둠
 - 이유: Project 값이 비면 프로젝트 필터 화면에서 빠져 누락을 알아채기 어려움
 
@@ -178,8 +201,8 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | `[Release]` | `🚀 RELEASE` | `Task` | `dev` → `main` 릴리스 PR(이슈 없음) | - |
 | `[Chore]` | `🧹 CHORE` | `Task` | 빌드·CI·의존성·설정·저장소 관리 | 의존성 버전 올리기, 워크플로 추가는 Chore. 배포 파이프라인 변경의 Project 값은 "분류 방식"의 판정 순서를 따름 |
 
-- 제목 접두어 하나로 라벨과 Type이 함께 정해짐(`tools/new-issue.sh`, 이슈 검사 워크플로가 같은 대응을 씀)
-- 이슈 검사 워크플로는 라벨은 자동으로 붙이지만 Type은 저장소 토큰 권한이 없어 자동으로 채우지 못하고 누락 댓글로 알림(2026-11-28 시험, playbook #47)
+- 제목 접두어 하나로 라벨과 Type이 함께 정해짐(`tools/new-issue.sh`, BOAZ Rules가 같은 대응을 씀)
+- BOAZ Rules의 이슈 규칙은 라벨은 자동으로 붙이지만 Type은 저장소 토큰 권한이 없어 지정에 실패하고 누락 댓글로 알림(2026-11-28 시험, playbook #47, 기존 기록 유지)
 - 두 성격이 섞이면 주된 변경 하나를 고르고, 크면 하위 이슈로 나눔
 
 ### Priority
@@ -193,7 +216,19 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | `Medium` | 중간 | 다음 스프린트 대상 | 다음 스프린트 계획 때 배정 | 운영에 영향 없는 버그, 개선 작업 |
 | `Low` | 낮음 | 여유가 있을 때 | 기한 없음 | 리팩터링, 문서 보완 |
 
-- 높음과 중간 사이에서 애매하면 중요성(목표·사용자 영향)과 시급성(기한)을 함께 봄. 둘 다 높으면 High, 하나만 높으면 Medium(`process/dev-cycle.md` "우선순위"는 이 판단을 돕는 보조 표)
+- 높음과 중간 사이에서 애매하면 중요성(목표·사용자 영향)과 시급성(기한)을 함께 봄. 둘 다 높으면 High, 하나만 높으면 Medium. 아래 보조 표로 판단함
+
+높음과 중간 사이를 판단할 때 쓰는 보조 표
+
+| 우선순위 | 중요성 | 시급성 | 처리 |
+|---|---|---|---|
+| 높음(High) | 높음 | 높음 | 이번 스프린트 안에 끝냄. 지연 시 프로젝트 전반 영향 |
+| 중간(Medium) | 높음 | 낮음·중간 | 다음 스프린트 계획 때 배정 |
+| 중간(Medium) | 낮음·중간 | 높음 | 빠른 해결 필요. 일정 영향 방지 |
+| 낮음(Low) | 낮음 | 낮음 | 여유가 있을 때 처리 |
+
+- 긴급(Urgent)은 이 표로 정하지 않음. 장애·모집 차단일 때만 씀
+- 방법: 작업마다 중요성과 시급성을 보고 표에서 같은 조합의 우선순위를 찾음. 둘 다 높으면 높음, 둘 다 낮으면 낮음, 그 밖의 조합(하나만 높음, 둘 다 중간 등)은 중간
 - 최종 결정은 PM. 스프린트 중 긴급 장애가 생기면 Urgent로 올리고 PM에게 바로 알림
 
 ## 라벨
@@ -211,7 +246,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | `🧹 CHORE` | `[Chore]` 빌드·설정 등 부수 작업 | `#BFD4F2` |
 
 - 이름·색·설명은 모든 저장소에서 같게 둠(backend 기준)
-- PR 제목 검사와 자동 라벨 워크플로는 이 표를 대응표로 씀. 제목 검사가 허용하는 접두어는 모두 이 표에 있어야 함
+- BOAZ Rules의 제목 검사와 자동 라벨은 이 표를 대응표로 씀. 제목 검사가 허용하는 접두어는 모두 이 표에 있어야 함
 - 기능 라벨(예: backend의 `auth`, `recruitment`, `monitoring`)은 저장소가 쓰고 싶을 때만 만들고 붙임. 조직 공통 규칙이 아니며, 프로젝트 구분에 쓰지 않음(프로젝트는 Project 필드)
 - 사람 이름 라벨은 쓰지 않음(담당자는 Assignee)
 

@@ -1,5 +1,5 @@
 > 담당 역할: Product Engineer | PM
-> 최종 검토일: 2026-11-25
+> 최종 검토일: 2026-11-28
 > 적용 범위: frontend_admin 저장소(관리자 페이지)
 > 상태: 초안 (백엔드 연동 범위·시즌 중 운영·타입 생성 방식은 연동 시작 후 확정)
 
@@ -144,9 +144,9 @@
 
 ## 저장소별 규칙 현황
 
-- `conventions/git.md`의 저장소별 현황 표 참조
+- `conventions/repos.md`의 저장소 현황 표 참조
 - 저장소 문서 간 불일치: README는 기본 브랜치를 `dev`로, CONTRIBUTING은 `main`으로 기술
-- 기본 브랜치는 `conventions/git.md` 기준(2026-11-24 조회, `dev`). 저장소 문서 정정은 별도 작업
+- 기본 브랜치는 `conventions/repos.md` 기준(2026-11-24 조회, `dev`). 저장소 문서 정정은 별도 작업
 
 ## 미결
 

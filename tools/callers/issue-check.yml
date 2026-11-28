@@ -1,9 +1,0 @@
-# 이슈 검사 호출 파일 견본(.github/workflows/issue-check.yml로 복사). 원본 변경은 @v1 태그 이동으로 반영됨
-name: Issue Check
-on:
-  issues: { types: [opened, edited, labeled, unlabeled, assigned, unassigned] }
-permissions: { issues: write }
-concurrency: { group: "issue-check-${{ github.event.issue.number }}", cancel-in-progress: true }
-jobs:
-  check:
-    uses: BOAZ-website/engineering-playbook/.github/workflows/issue-check.yml@v1

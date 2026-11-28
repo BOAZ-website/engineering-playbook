@@ -1,5 +1,5 @@
 > 담당 역할: PM
-> 최종 검토일: 2026-11-25
+> 최종 검토일: 2026-11-28
 > 적용 범위: backend, frontend, frontend_admin, product-infra, design-system
 > 상태: 확정
 
@@ -16,7 +16,7 @@
 ## 배경
 
 - 저장소마다 커밋·브랜치·PR 제목 규칙이 달라 5개 Product를 오가는 Product Engineer가 저장소마다 규칙을 따로 기억해야 함
-- 현황 상세는 `conventions/git.md`의 저장소별 현황 표
+- 현황 상세는 `conventions/repos.md`의 저장소 현황 표(2026-11-28 이전 현황은 git 이력 참조)
 - 규칙 안내 문서끼리도 어긋남(예: 브랜치 예시에 `#` 포함 여부, 허용 type 수)
 
 ## 선택지

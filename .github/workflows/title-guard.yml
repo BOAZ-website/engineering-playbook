@@ -1,6 +1,7 @@
 name: Title Guard
 
-# PR 제목이 [Type] 내용 형식인지 검사한다(conventions/git.md).
+# PR 제목이 [Type] 내용 형식(9종)인지 검사한다(conventions/issue-pr.md "분류 기준"). 같은 검사가 pr-check(pr-rules)에도 있음.
+# 룰셋 필수 검사를 check-title에서 pr-rules로 바꾼 뒤 이 파일을 삭제함.
 # pull_request_target을 쓰지만 PR 코드를 checkout하거나 실행하지 않는다.
 
 on:
@@ -20,7 +21,7 @@ jobs:
         with:
           script: |
             const title = context.payload.pull_request.title.trim();
-            const pattern = /^\[(feat|fix|docs|style|refactor|test|chore|ci|build|perf|revert|hotfix|release)\]\s+\S.*/i;
+            const pattern = /^\[(feat|fix|hotfix|docs|refactor|style|test|release|chore)\]\s+\S.*/i;
 
             if (pattern.test(title)) {
               core.info(`제목 형식 통과: ${title}`);
