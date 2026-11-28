@@ -72,8 +72,8 @@
 
 1. GitHub 이슈를 먼저 만듦. Assignee(본인), 작업 종류 라벨, Type, Priority, 보드 편입, Project 6개를 모두 지정함. AI·명령줄은 `tools/new-issue.sh`를 씀
 2. Notion Ticket을 만들고 이슈와 같은 Project·우선순위, Epic, Sprint, 이슈 링크를 적음
-3. PR을 올림. Assignee는 PR 작성자, Reviewer는 작성자가 아닌 사람 1명 이상을 반드시 지정함. 본문 개요에 이슈 번호를 연결 키워드로 적어 Development에 이슈가 연결되게 함. 이슈 전체를 처리하는 마지막 PR만 `Closes #번호`, 일부만 처리하는 PR은 `Refs #번호`([규칙](../conventions/git.md)). `Refs`는 Development에 연결되지 않고 이슈 타임라인에만 표시됨(Development에 연결된 이슈는 머지 때 닫히므로 부분 PR은 연결하지 않음). PR 링크를 Notion Ticket에 적음
-4. 머지·종료 때 PR 작성자가 Notion Ticket 상태를 완료로 바꿈. 연결 이슈가 실제로 닫히고 남은 하위 이슈가 없는지 확인한 뒤 함. 여러 저장소 PR로 끝나는 Ticket은 모든 이슈가 닫힌 뒤 완료
+3. PR을 올림. Assignee는 PR 작성자, Reviewer는 작성자가 아닌 사람 1명 이상을 반드시 지정함. 본문 개요에 이슈 번호를 연결 키워드로 적어 Development에 이슈가 연결되게 함. PR 하나 = 이슈 하나이고 항상 `Closes #번호`를 씀. 작업이 PR 여러 개로 나뉘면 이슈를 하위 이슈로 나누고 PR마다 하위 이슈 하나를 닫음([규칙](../conventions/git.md)). PR 링크를 Notion Ticket에 적음
+4. 머지·종료 때 PR 작성자가 Notion Ticket 상태를 완료로 바꿈. 연결 이슈가 실제로 닫히고 남은 하위 이슈가 없는지 확인한 뒤 함. Notion Ticket에는 상위 이슈 링크를 적음. 여러 저장소 PR로 끝나는 Ticket은 모든 이슈가 닫힌 뒤 완료
 
 개발이 아닌 작업(기획, 디자인, 콘텐츠, 운영진 업무)은 Notion Ticket만 만듦
 

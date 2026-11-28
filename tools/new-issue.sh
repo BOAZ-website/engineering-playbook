@@ -10,18 +10,19 @@
 #   -T Feature|Bug|Task                    -P Urgent|High|Medium|Low(Notion 긴급·높음·중간·낮음)
 #   -j 보드 Project 값                      -b 본문 파일(이슈 템플릿 형식)
 #   -a 담당자(기본: 실행한 사람)
+#   -p 상위 이슈(같은 저장소는 번호, 다른 저장소는 저장소#번호). 작업이 PR 여러 개로 나뉘면 하위 이슈로 만듦(PR 하나 = 이슈 하나)
 # 필요: gh(project 권한: gh auth refresh -s project), jq
 set -euo pipefail
 
 ORG=BOAZ-website
 BOARD_NUMBER=1
 ASSIGNEE=@me
-REPO= TITLE= TYPE= PRIORITY= PROJECT= BODY=
+REPO= TITLE= TYPE= PRIORITY= PROJECT= BODY= PARENT=
 
-while getopts "R:t:T:P:j:b:a:" o; do
+while getopts "R:t:T:P:j:b:a:p:" o; do
   case $o in
     R) REPO=$OPTARG ;; t) TITLE=$OPTARG ;; T) TYPE=$OPTARG ;; P) PRIORITY=$OPTARG ;;
-    j) PROJECT=$OPTARG ;; b) BODY=$OPTARG ;; a) ASSIGNEE=$OPTARG ;;
+    j) PROJECT=$OPTARG ;; b) BODY=$OPTARG ;; a) ASSIGNEE=$OPTARG ;; p) PARENT=$OPTARG ;;
     *) echo "알 수 없는 옵션" >&2; exit 2 ;;
   esac
 done
@@ -54,6 +55,13 @@ pri_field=$(jq -r '.data.organization.issueFields.nodes[]|select(.name=="Priorit
 pri_opt=$(jq -r --arg v "$PRIORITY" '.data.organization.issueFields.nodes[]|select(.name=="Priority").options[]|select(.name==$v).id' <<<"$meta")
 [ -n "$proj_opt" ] || die "Project 값이 보드에 없음: $PROJECT (옵션: $(jq -r '[.data.organization.projectV2.field.options[].name]|join(", ")' <<<"$meta"))"
 [ -n "$pri_opt" ] || die "Priority는 Urgent, High, Medium, Low 중 하나"
+parent_id=
+if [ -n "$PARENT" ]; then
+  p_repo=$REPO p_num=$PARENT
+  case $PARENT in *#*) p_repo=${PARENT%#*}; p_num=${PARENT#*#} ;; esac
+  parent_id=$(gh api "repos/$ORG/$p_repo/issues/$p_num" -q 'select(.pull_request==null)|.node_id // empty' 2>/dev/null) || parent_id=
+  [[ $parent_id == I_* ]] || die "상위 이슈 없음: $p_repo#$p_num"
+fi
 
 url=$(gh issue create -R "$ORG/$REPO" --title "$TITLE" --body-file "$BODY" \
   --assignee "$ASSIGNEE" --label "$LABEL" --type "$TYPE" --project "$board_title")
@@ -67,6 +75,10 @@ gh api graphql -f query='mutation($p:ID!,$i:ID!,$f:ID!,$o:String!){updateProject
   -f p="$board_id" -f i="$item_id" -f f="$proj_field" -f o="$proj_opt" >/dev/null || die "$url Project 지정 실패"
 gh api graphql -f query='mutation($i:ID!,$f:ID!,$o:ID!){setIssueFieldValue(input:{issueId:$i,issueFields:[{fieldId:$f,singleSelectOptionId:$o}]}){clientMutationId}}' \
   -f i="$issue_id" -f f="$pri_field" -f o="$pri_opt" >/dev/null || die "$url Priority 지정 실패"
+if [ -n "$parent_id" ]; then
+  gh api graphql -f query='mutation($p:ID!,$c:ID!){addSubIssue(input:{issueId:$p,subIssueId:$c}){clientMutationId}}' \
+    -f p="$parent_id" -f c="$issue_id" >/dev/null || die "$url 상위 이슈 $PARENT 연결 실패"
+fi
 
 echo "$url"
 echo "다음: Notion 티켓을 만들고 이 이슈 링크를 \"Github Issue\" 칸에 적음(Project·우선순위는 같은 값)"
