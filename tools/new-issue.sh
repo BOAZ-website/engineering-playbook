@@ -10,26 +10,29 @@
 #   -T Feature|Bug|Task                    -P Urgent|High|Medium|Low(Notion 긴급·높음·중간·낮음)
 #   -j 보드 Project 값                      -b 본문 파일(이슈 템플릿 형식)
 #   -a 담당자(기본: 실행한 사람)
+#   -r 이슈 번호: 이전 실행이 이슈 생성 뒤 실패했을 때 새로 만들지 않고 그 이슈에 남은 값만 채움(재개)
 #   -p 상위 이슈(같은 저장소는 번호, 다른 저장소는 저장소#번호). 작업이 PR 여러 개로 나뉘면 하위 이슈로 만듦(PR 하나 = 이슈 하나)
 # 필요: gh(project 권한: gh auth refresh -s project), jq
 set -euo pipefail
+command -v jq >/dev/null || { echo "중단: jq 필요" >&2; exit 1; }
+[[ $(gh issue create --help 2>&1) == *--type* ]] || { echo "중단: gh 2.80 이상 필요(issue create --type)" >&2; exit 1; }
 
 ORG=BOAZ-website
 BOARD_NUMBER=1
 ASSIGNEE=@me
-REPO= TITLE= TYPE= PRIORITY= PROJECT= BODY= PARENT=
+REPO= TITLE= TYPE= PRIORITY= PROJECT= BODY= PARENT= RESUME=
 
-while getopts "R:t:T:P:j:b:a:p:" o; do
+while getopts "R:t:T:P:j:b:a:p:r:" o; do
   case $o in
     R) REPO=$OPTARG ;; t) TITLE=$OPTARG ;; T) TYPE=$OPTARG ;; P) PRIORITY=$OPTARG ;;
-    j) PROJECT=$OPTARG ;; b) BODY=$OPTARG ;; a) ASSIGNEE=$OPTARG ;; p) PARENT=$OPTARG ;;
+    j) PROJECT=$OPTARG ;; b) BODY=$OPTARG ;; a) ASSIGNEE=$OPTARG ;; p) PARENT=$OPTARG ;; r) RESUME=$OPTARG ;;
     *) echo "알 수 없는 옵션" >&2; exit 2 ;;
   esac
 done
 
 die() { echo "중단: $*" >&2; exit 1; }
-for v in REPO TITLE TYPE PRIORITY PROJECT BODY; do [ -n "${!v}" ] || die "$v 값이 없음"; done
-[ -f "$BODY" ] || die "본문 파일 없음: $BODY"
+for v in REPO TITLE TYPE PRIORITY PROJECT; do [ -n "${!v}" ] || die "$v 값이 없음"; done
+if [ -z "$RESUME" ]; then [ -n "$BODY" ] || die "BODY 값이 없음"; [ -f "$BODY" ] || die "본문 파일 없음: $BODY"; fi
 
 case $TYPE in Feature|Bug|Task) ;; *) die "Type은 Feature, Bug, Task 중 하나" ;; esac
 
@@ -63,22 +66,37 @@ if [ -n "$PARENT" ]; then
   [[ $parent_id == I_* ]] || die "상위 이슈 없음: $p_repo#$p_num"
 fi
 
-url=$(gh issue create -R "$ORG/$REPO" --title "$TITLE" --body-file "$BODY" \
-  --assignee "$ASSIGNEE" --label "$LABEL" --type "$TYPE" --project "$board_title")
+if [ -n "$RESUME" ]; then
+  num=$RESUME; url="https://github.com/$ORG/$REPO/issues/$num"
+  gh issue edit "$num" -R "$ORG/$REPO" --add-assignee "$ASSIGNEE" --add-label "$LABEL" >/dev/null || die "$url 담당자·라벨 지정 실패"
+  type_id=$(gh api graphql -f query='query($o:String!){organization(login:$o){issueTypes(first:10){nodes{id name}}}}' -f o=$ORG \
+    -q ".data.organization.issueTypes.nodes[]|select(.name==\"$TYPE\").id")
+else
+  url=$(gh issue create -R "$ORG/$REPO" --title "$TITLE" --body-file "$BODY" \
+    --assignee "$ASSIGNEE" --label "$LABEL" --type "$TYPE" --project "$board_title")
+  num=${url##*/}
+  echo "생성: $url"
+fi
 
-# 생성 뒤 필드 지정. 실패하면 이슈 주소와 함께 알림(이슈는 남으므로 손으로 채움)
-num=${url##*/}
-issue_id=$(gh api "repos/$ORG/$REPO/issues/$num" -q .node_id)
+# 생성 뒤 필드 지정. 실패하면 같은 명령에 -r 이슈번호를 붙여 다시 실행(새 이슈를 만들지 않고 남은 값만 채움)
+fail() { die "$url $1. 복구: 같은 명령에 -r $num 을 붙여 다시 실행"; }
+issue_id=$(gh api "repos/$ORG/$REPO/issues/$num" -q .node_id) || fail "이슈 조회 실패"
+if [ -n "${type_id:-}" ]; then
+  gh api graphql -f query='mutation($i:ID!,$t:ID!){updateIssue(input:{id:$i,issueTypeId:$t}){clientMutationId}}' -f i="$issue_id" -f t="$type_id" >/dev/null || fail "Type 지정 실패"
+fi
 item_id=$(gh api graphql -f query='mutation($p:ID!,$c:ID!){addProjectV2ItemById(input:{projectId:$p,contentId:$c}){item{id}}}' \
-  -f p="$board_id" -f c="$issue_id" -q .data.addProjectV2ItemById.item.id) || die "$url 보드 편입 실패"
+  -f p="$board_id" -f c="$issue_id" -q .data.addProjectV2ItemById.item.id) || fail "보드 편입 실패"
 gh api graphql -f query='mutation($p:ID!,$i:ID!,$f:ID!,$o:String!){updateProjectV2ItemFieldValue(input:{projectId:$p,itemId:$i,fieldId:$f,value:{singleSelectOptionId:$o}}){clientMutationId}}' \
-  -f p="$board_id" -f i="$item_id" -f f="$proj_field" -f o="$proj_opt" >/dev/null || die "$url Project 지정 실패"
+  -f p="$board_id" -f i="$item_id" -f f="$proj_field" -f o="$proj_opt" >/dev/null || fail "Project 지정 실패"
 gh api graphql -f query='mutation($i:ID!,$f:ID!,$o:ID!){setIssueFieldValue(input:{issueId:$i,issueFields:[{fieldId:$f,singleSelectOptionId:$o}]}){clientMutationId}}' \
-  -f i="$issue_id" -f f="$pri_field" -f o="$pri_opt" >/dev/null || die "$url Priority 지정 실패"
+  -f i="$issue_id" -f f="$pri_field" -f o="$pri_opt" >/dev/null || fail "Priority 지정 실패"
 if [ -n "$parent_id" ]; then
-  gh api graphql -f query='mutation($p:ID!,$c:ID!){addSubIssue(input:{issueId:$p,subIssueId:$c}){clientMutationId}}' \
-    -f p="$parent_id" -f c="$issue_id" >/dev/null || die "$url 상위 이슈 $PARENT 연결 실패"
+  linked=$(gh api graphql -f query='query($c:ID!){node(id:$c){... on Issue{parent{id}}}}' -f c="$issue_id" -q '.data.node.parent.id // empty')
+  if [ "$linked" != "$parent_id" ]; then
+    gh api graphql -f query='mutation($p:ID!,$c:ID!){addSubIssue(input:{issueId:$p,subIssueId:$c}){clientMutationId}}' \
+      -f p="$parent_id" -f c="$issue_id" >/dev/null || fail "상위 이슈 $PARENT 연결 실패"
+  fi
 fi
 
 echo "$url"
-echo "다음: Notion 티켓을 만들고 이 이슈 링크를 \"Github Issue\" 칸에 적음(Project·우선순위는 같은 값)"
+echo "다음: Notion 티켓을 만들고 Epic·Sprint와 이 이슈 링크를 적음(Project·우선순위는 이슈가 원천이라 다시 적지 않음)"

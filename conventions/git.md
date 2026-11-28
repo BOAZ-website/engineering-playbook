@@ -96,9 +96,9 @@
 - 이유: PR 제목과 본문의 형식을 맞춰 두면 어느 저장소에서든 PR 목록만 보고 변경 종류를 알 수 있음
 - 방법: PR 제목은 `[Feat] 로그인 API 구현`처럼 쓰고, 본문에 `Closes #번호`를 적음
 - `Closes #번호`를 쓰면 PR 화면 Development에 이슈가 자동으로 연결되고, 머지하면 이슈가 자동으로 닫힘. 손으로 연결하지 않음
-- 작업이 PR 여러 개로 나뉘면 이슈를 하위 이슈(Sub-issue)로 미리 나누고 PR마다 하위 이슈 하나를 `Closes`로 닫음. 상위 이슈는 PR에 연결하지 않고 하위 이슈가 모두 닫히면 닫음(`tools/new-issue.sh -p 상위번호`)
+- 작업이 PR 여러 개로 나뉘면 이슈를 하위 이슈(Sub-issue)로 미리 나누고 PR마다 하위 이슈 하나를 `Closes`로 닫음. 상위 이슈는 PR에 연결하지 않음. 하위 이슈가 모두 닫히고 상위 이슈 체크리스트(머지 뒤 확인 포함)가 끝나면 닫음(`tools/new-issue.sh -p 상위번호`, `conventions/issue-pr.md` "체크리스트 완료와 머지·종료")
 - `Refs #번호`는 쓰지 않음. Development에 연결되지 않아 PR과 이슈의 관계를 보드에서 찾을 수 없음. 예외: 릴리스(`dev` → `main`)와 hotfix PR은 이슈를 연결하지 않음
-- 키워드는 `Closes`, `Fixes`, `Resolves`(대소문자 무관, 콜론 허용). 다른 저장소 이슈는 `Closes BOAZ-website/frontend#209`. 이슈가 여러 개면 `Closes #10, closes #11`처럼 이슈마다 키워드를 반복함(`Closes #10, #11`은 #10만 연결)
+- 키워드는 `Closes`, `Fixes`, `Resolves`(대소문자 무관, 콜론 허용). 다른 저장소 이슈는 `Closes BOAZ-website/frontend#209`. PR 하나에 `Closes`는 1개만 씀
 - 키워드는 PR 본문이나 커밋 메시지에서만 동작함(PR 댓글은 동작하지 않음). PR을 올린 뒤 본문을 고쳐도 연결됨
 - 키워드는 PR 대상이 저장소 기본 브랜치일 때만 동작함. 기능 PR은 기본 브랜치로 보냄. hotfix·릴리스 PR(`main` 대상)은 연결하지 않아도 됨
 - 기본 브랜치(2026-11-28 조회): backend, frontend, frontend_admin, product-infra, design-system은 `dev`. engineering-playbook, backend-docs, frontend_recruiting_admin은 `main`(`dev` 없음)
