@@ -99,7 +99,7 @@ PM 결정(2026-11-29, `decisions/0006-repo-rule-keeper-v2-and-repo-standards.md`
 
 ### 보안 설정
 
-- 공개 저장소 전부 secret scanning과 push protection을 켬(2026-11-29 현황: product-infra, engineering-playbook, design-system만 켜짐)
+- 공개 저장소 전부 secret scanning과 push protection을 켬(2026-11-29 현황: 7개 공개 저장소 모두 켜짐)
 - Actions `GITHUB_TOKEN` 기본 권한은 읽기 전용으로 둠. 쓰기가 필요한 워크플로는 파일의 `permissions:`에 직접 적음(2026-11-29 현황: 7개 공개 저장소 모두 읽기 전용)
 - Dependabot 보안 알림(alerts)은 켜고, 자동 보안 업데이트 PR은 켜지 않음. 알림은 담당 Product Engineer가 확인하고 필요하면 `[Chore]` 이슈를 만듦(2026-11-29 현황: 7개 공개 저장소 모두 알림 켜짐, 자동 PR 꺼짐)
 - 시크릿은 코드, 문서, PR, 이슈, AI 도구에 넣지 않음(`conventions/doc-writing.md`, `conventions/ai-usage.md`)
