@@ -11,18 +11,20 @@
 
 | 무엇을 나누나 | 어디에 기록 | 값 | 필수 |
 |---|---|---|---|
-| 작업 유형 | 이슈 Type(조직 이슈 유형) | `Feature`(기능 추가), `Bug`(오류 수정), `Task`(문서·설정·운영 작업) | 이슈 필수 |
-| 프로젝트 | 조직 Project "BOAZ-website project"의 Project 필드 | 홈페이지 운영 & 유지보수, 관리자 페이지 개발, Product Management, 온보딩, Terraform Migration, SRE & 장애 대응, Design System 구축, 서비스운영팀 업무 | PM 지정(스프린트 시작) |
-| 우선순위 | 조직 이슈 필드 Priority(이슈 사이드바 "Fields") | `Urgent`·`High`·`Medium`·`Low`. Notion의 긴급·높음·중간·낮음과 차례로 대응 | PM 지정(스프린트 시작) |
-| 작업 종류 | 작업 종류 라벨 9종 | 아래 "라벨" | PR 필수(제목에서 자동) |
+| 작업 유형 | 이슈 Type(조직 이슈 유형) | `Feature`(기능 추가), `Bug`(오류 수정), `Task`(문서·설정·운영 작업) | 이슈 작성자 필수 |
+| 프로젝트 | 조직 Project "BOAZ-website project"의 Project 필드 | 홈페이지 운영 & 유지보수, 관리자 페이지 개발, Product Management, 온보딩, Terraform Migration, SRE & 장애 대응, Design System 구축, 서비스운영팀 업무 | 이슈 작성자 필수 |
+| 우선순위 | 조직 이슈 필드 Priority(이슈 사이드바 "Fields") | `Urgent`·`High`·`Medium`·`Low`. Notion의 긴급·높음·중간·낮음과 차례로 대응 | 이슈 작성자 필수 |
+| 작업 종류 | 작업 종류 라벨 9종 | 아래 "라벨" | 이슈 작성자 필수, PR은 제목에서 자동 |
 | 기능 영역 | 저장소 기능 라벨 | 저장소가 정함(예: backend의 `auth`, `recruitment`) | 선택 |
 
 - 이유: 한 프로젝트가 여러 저장소에 걸침(예: 관리자 페이지 개발 = frontend_admin, backend, backend-docs). 저장소별 라벨로는 저장소마다 같은 라벨을 맞춰야 하고 한 곳에서 빠뜨리면 필터에서 빠지므로, 프로젝트는 조직 Project 필드 한 곳에서 정의함
 - Project 필드 값은 Notion 티켓의 Project 속성과 같은 이름을 씀. 값을 추가·변경할 때 Notion과 함께 바꿈
 - 조직 이슈 필드 중 Start date, Target date, Effort와 보드의 Size·Estimate·Iteration 필드는 쓰지 않음. 관리할 값이 늘어나 누락만 생기므로 Priority 하나만 씀
-- 원천과 입력 책임: Project·우선순위의 원천은 Notion Ticket. GitHub의 Project(보드 필드)·Priority(조직 이슈 필드)는 PM이 스프린트 시작 때 Notion 값을 기준으로 지정함. 이슈 작성자는 Type과 Assignee만 필수로 입력하고, Project·Priority는 알면 넣되 필수 아님
-- 두 값이 다르면 Notion 값으로 GitHub을 고침
-- 이유: 매 기수 인원이 바뀌어 팀원에게 판정 표를 맡기기 어렵고, 계획(Epic·Sprint)은 Notion에서 운영함
+- 작업 순서와 원천
+  - 개발 작업(코드·설정 변경): GitHub 이슈를 먼저 만들고 Notion 티켓을 만듦. Project·우선순위의 원천은 GitHub 이슈. Notion 티켓에는 같은 값과 이슈 링크를 적음
+  - 개발이 아닌 작업(기획, 디자인, 콘텐츠, 운영진 업무): Notion 티켓만 만듦. 원천은 Notion
+  - 두 값이 다르면 원천 쪽 값으로 다른 쪽을 고침. 스프린트 시작 때 PM이 대조함
+- 이유: 개발 작업은 AI로 GitHub 이슈부터 만드는 경우가 많아, 이슈를 만들 때 값을 정하면 입력이 한 번으로 끝남. 계획(Epic·Sprint)은 Notion에서 운영함
 
 저장소 기본값(먼저 확인). 기본값이 있으면 그 값을 쓰고, 아래 판정 표 1~6은 기본값이 없는 저장소와 예외 판정에 씀
 
@@ -57,19 +59,21 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 - 여러 프로젝트에 걸치는 이슈는 주된 목적의 프로젝트 하나를 고름
 - backend의 `/api/v1/admin/**` API라도 관리자 콘솔 프로젝트(2026-08 시작) 이전에 홈페이지 콘텐츠·모집 운영용으로 만든 것(FAQ·커리큘럼·후기 CRUD, Admin 계정, 감사 로그, 합격자 승격 등)은 홈페이지 운영 & 유지보수. 관리자 페이지 개발은 관리자 콘솔용 기능(출결, 시스템 계정, 권한 개편, 서류 평가 앱 등)만
 - 우선순위 기준은 `org/pm-guide.md` "4. 티켓 우선순위"(Notion 티켓과 같음)
-- 이슈에는 작업 종류 라벨을 붙이지 않아도 됨(Type과 같은 정보). PR의 작업 종류 라벨은 제목의 `[Type]`을 보고 자동으로 붙임
+- PR의 작업 종류 라벨은 제목의 `[Type]`을 보고 자동으로 붙임. 이슈는 만들 때 붙임(`tools/new-issue.sh`가 제목에서 자동 지정)
 
 ## 이슈
 
 | 항목 | 규칙 |
 |---|---|
 | 담당자(Assignee) | 반드시 지정. 이슈를 만든 사람. 다른 사람이 작업을 맡으면 그 사람을 추가하거나 바꿈 |
-| Type | 반드시 지정("분류 방식") |
-| Project, 우선순위 | 알면 작성자가 넣되 필수 아님. PM이 스프린트 시작 때 Notion 값을 기준으로 지정("분류 방식") |
-| Project 편입 | 이슈를 조직 Project "BOAZ-website project"에 넣음. 자동 편입이 없는 저장소는 작성자가 넣고, 권한이 없으면 이슈만 만들고 PM이 누락 점검 때 넣음. 긴급 이슈는 작성자가 PM에게 바로 알림 |
+| 작업 종류 라벨, Type | 반드시 지정. 제목 `[Type]`에 맞춤("라벨", "분류 방식") |
+| Priority, Project | 반드시 지정. Priority는 조직 이슈 필드, Project는 보드 필드("분류 방식") |
+| 보드 편입 | 반드시 조직 Project "BOAZ-website project"에 넣음. 권한이 없으면 PM에게 알림 |
+| 만드는 방법 | AI·명령줄로 만들 때는 [`tools/new-issue.sh`](../tools/new-issue.sh)를 씀. 6개 값(Assignee, 라벨, Type, Priority, 보드 편입, Project)을 한 번에 지정하고, 하나라도 빠지면 이슈를 만들지 않음 |
 | 본문 | 일반 업무 이슈 템플릿 사용. 체크리스트(`- [ ]`)로 완료 조건을 적음 |
 
-- 이유: 담당자가 없는 이슈는 진행하는 사람 없이 남고, 유형이 없으면 작업 성격을 알 수 없음. Project 밖의 이슈는 우선순위 목록에서 보이지 않으므로 PM이 점검함
+- 이유: 담당자가 없는 이슈는 진행하는 사람 없이 남고, 유형·우선순위·프로젝트가 없으면 보드에서 급한 일을 고를 수 없음. Project 밖의 이슈는 우선순위 목록에서 보이지 않음
+- GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 저장소마다 `.github/workflows/issue-check.yml`(원본 [`tools/issue-check.yml`](../tools/issue-check.yml))이 생성 뒤 검사함. 담당자(작성자), 작업 종류 라벨, Type은 제목에서 자동으로 채우고, Priority가 비면 댓글로 알림. 보드 편입·Project는 저장소 권한으로 확인할 수 없어 PM 스프린트 점검에서 확인함
 - 이슈를 대신 만들어 준 경우(예: 회의 결정을 PM이 이슈로 옮김)에도 만든 사람을 먼저 지정하고, 작업자가 정해지면 작업자를 추가함
 
 ## PR
@@ -125,13 +129,14 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 
 ### 필수 값과 누락 점검
 
-- 이슈 작성자 필수 값은 Type과 Assignee("이슈" 절). Project·Priority는 PM이 지정함("분류 방식")
+- 이슈 작성자 필수 값은 Assignee, 작업 종류 라벨, Type, Priority, 보드 편입, Project("이슈" 절)
 - Notion 티켓 필수 값: Project, 우선순위, GitHub Issue 링크
 - 누락 점검: 스프린트 시작 때 PM이 확인함
   - 핵심: 저장소별 `is:issue is:open no:project` 검색. 보드 밖 이슈는 보드 안 빈 값 뷰에 보이지 않고, 자동 편입 규칙은 1개 저장소만 대상이므로 이 검색이 필요함
   - 보드 안: Project가 빈 항목 뷰. Priority는 조직 이슈 필드라 보드 밖 이슈도 저장소 이슈 검색으로 빈 값을 찾음
   - Notion 두 DB에서 Project가 비었거나 GitHub 링크가 없는 티켓
-  - 대조: 이번 스프린트 Notion Ticket의 Project·우선순위와 연결 이슈의 GitHub 값을 대조하고, 다르면 Notion 값으로 GitHub을 고침
+  - 대조: 이번 스프린트 Notion Ticket의 Project·우선순위와 연결 이슈의 GitHub 값을 대조하고, 다르면 원천 쪽 값으로 고침(개발 작업은 GitHub, 그 밖은 Notion)
+  - `issue-check` 댓글이 달린 이슈
 - 빈 값 필터는 저장 뷰로 만들어 둠
 - 이유: Project 값이 비면 프로젝트 필터 화면에서 빠져 누락을 알아채기 어려움
 
