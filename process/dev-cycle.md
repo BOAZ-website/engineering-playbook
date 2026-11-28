@@ -71,9 +71,9 @@
 생성부터 종료까지 흐름(개발 Ticket)
 
 1. Notion Ticket에 Epic, Project, 우선순위, Sprint를 입력함
-2. GitHub 이슈를 만들고 Type, Project, Priority를 지정한 뒤 이슈 링크를 Notion Ticket에 기록함
-3. PR 본문에 `Closes #번호`를 적고 PR 링크를 Notion Ticket에 기록함
-4. 머지·종료 때 PR 작성자가 Notion Ticket 상태를 완료로 바꿈
+2. GitHub 이슈를 만들고 Type과 Assignee를 지정한 뒤 이슈 링크를 Notion Ticket에 기록함. Project·Priority는 PM이 스프린트 시작 때 Notion 값을 기준으로 지정함
+3. PR 본문에 이슈 연결 키워드를 적고 PR 링크를 Notion Ticket에 기록함. 이슈 전체를 처리하는 마지막 PR만 `Closes #번호`, 일부만 처리하는 PR은 `Refs #번호`([규칙](../conventions/git.md))
+4. 머지·종료 때 PR 작성자가 Notion Ticket 상태를 완료로 바꿈. 연결 이슈가 실제로 닫히고 남은 하위 이슈가 없는지 확인한 뒤 함. 여러 저장소 PR로 끝나는 Ticket은 모든 이슈가 닫힌 뒤 완료
 
 - 필수 값 상세와 누락 점검: `conventions/issue-pr.md` "필수 값과 누락 점검" ([링크](../conventions/issue-pr.md))
 - 같은 영역이라도 영향에 따라 구분이 달라짐. 예: DB 인덱스 추가, 느린 쿼리 개선처럼 서비스 영향이 없는 DB 작업은 단순 작업. DB 버전 업그레이드처럼 서비스가 멈추는 작업은 승인 필요 작업(`org/pm-guide.md` 판단 사례 1)

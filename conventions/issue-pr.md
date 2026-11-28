@@ -12,14 +12,31 @@
 | 무엇을 나누나 | 어디에 기록 | 값 | 필수 |
 |---|---|---|---|
 | 작업 유형 | 이슈 Type(조직 이슈 유형) | `Feature`(기능 추가), `Bug`(오류 수정), `Task`(문서·설정·운영 작업) | 이슈 필수 |
-| 프로젝트 | 조직 Project "BOAZ-website project"의 Project 필드 | 홈페이지 운영 & 유지보수, 관리자 페이지 개발, Product Management, 온보딩, Terraform Migration, SRE & 장애 대응, Design System 구축, 서비스운영팀 업무 | 이슈 필수 |
-| 우선순위 | 같은 Project의 Priority 필드 | 긴급(분홍), 높음(빨강), 중간(노랑), 낮음(파랑) | 이슈 필수 |
+| 프로젝트 | 조직 Project "BOAZ-website project"의 Project 필드 | 홈페이지 운영 & 유지보수, 관리자 페이지 개발, Product Management, 온보딩, Terraform Migration, SRE & 장애 대응, Design System 구축, 서비스운영팀 업무 | PM 지정(스프린트 시작) |
+| 우선순위 | 같은 Project의 Priority 필드 | 긴급(분홍), 높음(빨강), 중간(노랑), 낮음(파랑) | PM 지정(스프린트 시작) |
 | 작업 종류 | 작업 종류 라벨 9종 | 아래 "라벨" | PR 필수(제목에서 자동) |
 | 기능 영역 | 저장소 기능 라벨 | 저장소가 정함(예: backend의 `auth`, `recruitment`) | 선택 |
 
 - 이유: 한 프로젝트가 여러 저장소에 걸침(예: 관리자 페이지 개발 = frontend_admin, backend, backend-docs). 저장소별 라벨로는 저장소마다 같은 라벨을 맞춰야 하고 한 곳에서 빠뜨리면 필터에서 빠지므로, 프로젝트는 조직 Project 필드 한 곳에서 정의함
 - Project 필드 값은 Notion 티켓의 Project 속성과 같은 이름을 씀. 값을 추가·변경할 때 Notion과 함께 바꿈
-- Project 값 판정 기준(위에서부터 먼저 맞는 것)
+- 원천과 입력 책임: Project·우선순위의 원천은 Notion Ticket. GitHub 조직 Project의 Project·Priority 필드는 PM이 스프린트 시작 때 Notion 값을 기준으로 지정함. 이슈 작성자는 Type과 Assignee만 필수로 입력하고, Project·Priority는 알면 넣되 필수 아님
+- 두 값이 다르면 Notion 값으로 GitHub을 고침
+- 이유: 매 기수 인원이 바뀌어 팀원에게 판정 표를 맡기기 어렵고, 계획(Epic·Sprint)은 Notion에서 운영함
+
+저장소 기본값(먼저 확인). 기본값이 있으면 그 값을 쓰고, 아래 판정 표 1~6은 기본값이 없는 저장소와 예외 판정에 씀
+
+| 저장소 | 기본값 |
+|---|---|
+| frontend | 홈페이지 운영 & 유지보수 |
+| frontend_admin, frontend_recruiting_admin | 관리자 페이지 개발 |
+| design system 저장소 | Design System 구축 |
+| product-infra | Terraform Migration(Phase 5 인수 판정 OPS-07 뒤에는 SRE & 장애 대응) |
+| backend, backend-docs, engineering-playbook | 없음(판정 표로 판정) |
+
+- 예외: 기본값 저장소라도 배포 워크플로·CI/CD 작업은 SRE & 장애 대응(규칙 2). product-infra라도 WBS 밖 운영 작업은 SRE & 장애 대응
+- 이유: backend는 홈페이지·관리자 API, DB 운영, 배포를 함께 담아 한 값으로 정할 수 없음. engineering-playbook은 PM 문서와 SRE 문서가 섞임
+
+Project 값 판정 기준(위에서부터 먼저 맞는 것)
 
 | 순서 | 조건 | 값 |
 |---|---|---|
@@ -32,9 +49,9 @@
 
 - SRE & 장애 대응의 정의: 운영 중인 서비스를 안전하게 배포하고, 관측하고, 장애에서 복구하고, 인프라를 유지하는 일
 - Product Management의 정의: 여러 프로젝트에 걸친 운영팀 전체의 계획과 관리. 분기·시즌 로드맵, 프로젝트 간 우선순위와 인력 배분, 진행 보고, 회고, 팀 운영 규칙(R&R, 스프린트, 협업 절차). 특정 제품의 기획(명세서, WBS, IA)은 그 제품 값으로 분류함
-- Terraform Migration은 끝이 있는 프로젝트. product-infra Phase 5 인수 판정(OPS-07)이 끝나면 값을 보관하고 이후 인프라 작업은 SRE & 장애 대응으로 분류함. 두 값을 합치지 않음(이전 이력 보존)
+- Terraform Migration은 끝이 있는 프로젝트. OPS-07 뒤의 분류와 보관은 "새 Project 값 추가"의 종료 항목을 따름
 - 한 이슈에 두 성격이 섞이면 이슈를 나누고 상위 이슈로 묶음. 장애는 원인 수정(앱 코드)은 제품 값, 탐지·복구·재발 방지 체계는 SRE & 장애 대응
-- 옵션을 고칠 때는 Project 웹 화면에서 함. API로 옵션 목록을 바꾸면 이미 지정한 값이 모두 지워짐
+- 옵션 추가·종료 절차(GitHub 옵션은 웹 화면에서만)는 "새 Project 값 추가"를 따름
 - 프로젝트 값에는 기수를 넣지 않음. 기수별 작업 묶음(예: "28기 리크루팅")은 상위 이슈(Parent issue)로 만들고 하위 이슈를 연결함. Notion Epic 링크는 상위 이슈 본문에 둠
 - 여러 프로젝트에 걸치는 이슈는 주된 목적의 프로젝트 하나를 고름
 - 우선순위 기준은 `org/pm-guide.md` "4. 티켓 우선순위"(Notion 티켓과 같음)
@@ -45,11 +62,12 @@
 | 항목 | 규칙 |
 |---|---|
 | 담당자(Assignee) | 반드시 지정. 이슈를 만든 사람. 다른 사람이 작업을 맡으면 그 사람을 추가하거나 바꿈 |
-| Type, 프로젝트, 우선순위 | 반드시 지정("분류 방식") |
-| Project 편입 | 이슈를 조직 Project "BOAZ-website project"에 넣음. 자동 편입이 없는 저장소는 작성자가 넣고, 권한이 없으면 PM이 분류할 때 넣음 |
+| Type | 반드시 지정("분류 방식") |
+| Project, 우선순위 | 알면 작성자가 넣되 필수 아님. PM이 스프린트 시작 때 Notion 값을 기준으로 지정("분류 방식") |
+| Project 편입 | 이슈를 조직 Project "BOAZ-website project"에 넣음. 자동 편입이 없는 저장소는 작성자가 넣고, 권한이 없으면 이슈만 만들고 PM이 누락 점검 때 넣음. 긴급 이슈는 작성자가 PM에게 바로 알림 |
 | 본문 | 일반 업무 이슈 템플릿 사용. 체크리스트(`- [ ]`)로 완료 조건을 적음 |
 
-- 이유: 담당자가 없는 이슈는 진행하는 사람 없이 남고, 유형·프로젝트·우선순위가 없으면 보드에서 급한 일을 고를 수 없음. Project 밖의 이슈는 우선순위 목록에서 보이지 않음
+- 이유: 담당자가 없는 이슈는 진행하는 사람 없이 남고, 유형이 없으면 작업 성격을 알 수 없음. Project 밖의 이슈는 우선순위 목록에서 보이지 않으므로 PM이 점검함
 - 이슈를 대신 만들어 준 경우(예: 회의 결정을 PM이 이슈로 옮김)에도 만든 사람을 먼저 지정하고, 작업자가 정해지면 작업자를 추가함
 
 ## PR
@@ -86,10 +104,14 @@
 - 순서
   1. 제안 이슈(Type `Task`, Project 값 Product Management)에 값의 정의 한 줄과 판정 표에 넣을 행을 적음
   2. PM이 승인함
-  3. 이 문서의 판정 표와 정의를 고치는 PR을 머지함
-  4. Notion 두 DB(Engineering Ticket, 디자인 & FE Ticket)와 GitHub 조직 Project에 같은 이름으로 옵션을 추가함. GitHub 옵션은 웹 화면에서만 추가함(API로 옵션 목록을 바꾸면 기존 값이 모두 지워짐)
-  5. 기존 티켓을 판정 표로 다시 분류함
-- 종료: 정의에 끝 조건을 적음. 끝나면 값을 보관하고 다른 값과 합치지 않음(Terraform Migration 선례). 이후 작업을 넘길 값을 판정 표에 적음
+  3. 변경 전 기존 배정을 내보냄(이슈 번호와 Project 값 목록을 저장)
+  4. Notion 두 DB(Engineering Ticket, 디자인 & FE Ticket)와 GitHub 조직 Project에 같은 이름으로 옵션을 추가함. GitHub 옵션은 웹 화면에서만 추가하고, 기존 옵션은 지우거나 이름을 바꾸지 않음
+  5. 세 곳에 옵션이 생긴 것을 확인한 뒤 이 문서의 판정 표와 정의를 고치는 PR을 머지함
+  6. 기존 티켓을 판정 표로 다시 분류함
+- 중간에 멈추면 어디까지 했는지 제안 이슈 댓글에 기록함
+- 이유: API로 옵션 목록을 덮어쓰면 기존 값이 지워질 수 있음(2026-11 실제로 발생). 그래서 3단계에서 배정을 내보내 둠
+- 종료(보관): 옵션을 삭제하지 않고 세 곳에 남김. 정의에 "신규 사용 중단일"과 "이후 작업을 넘길 값"을 적고, 판정 표에서 그 행에 종료 표시를 함. 다른 값과 합치지 않음(이전 이력 보존)
+- Terraform Migration은 OPS-07 뒤 WBS ID가 붙은 후속 작업도 SRE & 장애 대응으로 분류함(종료 기준이 규칙 1보다 우선)
 
 ### 새 저장소 추가
 
@@ -101,12 +123,13 @@
 
 ### 필수 값과 누락 점검
 
-- 이슈 필수 값(Project, Priority, Assignee, Type)은 위 "이슈" 절 규칙을 따름
+- 이슈 작성자 필수 값은 Type과 Assignee("이슈" 절). Project·Priority는 PM이 지정함("분류 방식")
 - Notion 티켓 필수 값: Project, 우선순위, GitHub Issue 링크
 - 누락 점검: 스프린트 시작 때 PM이 확인함
-  - GitHub Project에서 Project나 Priority가 빈 항목
-  - 저장소별 `is:issue is:open no:project` 검색(저장소별 자동 편입 여부는 아래 "미결" 표)
+  - 핵심: 저장소별 `is:issue is:open no:project` 검색. 보드 밖 이슈는 보드 안 빈 값 뷰에 보이지 않고, 자동 편입 규칙은 1개 저장소만 대상이므로 이 검색이 필요함
+  - 보드 안: Project나 Priority가 빈 항목 뷰
   - Notion 두 DB에서 Project가 비었거나 GitHub 링크가 없는 티켓
+  - 대조: 이번 스프린트 Notion Ticket의 Project·우선순위와 연결 이슈의 GitHub 값을 대조하고, 다르면 Notion 값으로 GitHub을 고침
 - 빈 값 필터는 저장 뷰로 만들어 둠
 - 이유: Project 값이 비면 프로젝트 필터 화면에서 빠져 누락을 알아채기 어려움
 
