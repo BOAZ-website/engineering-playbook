@@ -90,8 +90,10 @@ PM 결정(2026-11-29, `decisions/0006-repo-rule-keeper-v2-and-repo-standards.md`
 | 필수 검사 | `repo-rule-keeper`(`main` 룰셋은 `repo-rule-keeper (main)`)와 저장소 CI 검사(위 "필수 CI 검사" 열) |
 | 필수 검사 출처 | GitHub Actions로 고정함. 아무나 커밋 상태를 써서 검사를 통과시키지 못하게 하기 위함 |
 | 머지 방식 | merge commit만 허용. squash·rebase는 저장소 설정에서 끔 |
+| 우회 | PO 팀(`2nd-po`)만 PR 머지 때 우회 가능(bypass mode: pull_request). 승인·필수 검사 없이 머지할 수 있으나 `main` 직접 push·강제 push·삭제는 그대로 막힘. 다른 팀·개인은 우회 없음. 기수가 바뀌면 그 기수의 PO 팀으로 바꿈 |
 | 태그 | engineering-playbook은 `v*` 태그 보호 룰셋을 둠(관리자만 태그 이동). design-system의 `v*` 태그 보호는 유지 |
 
+- 우회 사용 기준: 리뷰어가 응답할 수 없는데 머지를 미룰 수 없을 때(예: 규칙·자동화 자체를 고치는 PR, 시즌 일정상 급한 문서). 우회해 머지했으면 PR에 `우회 사유: <이유>` 댓글을 남기고, 리뷰어가 사후 리뷰함
 - 커밋 상태 이름: PR 대상이 저장소 기본 브랜치이면 `repo-rule-keeper`, 아니면 `repo-rule-keeper (<대상>)`. 예: `dev`가 기본인 저장소의 `main` 대상 릴리스·hotfix PR은 `repo-rule-keeper (main)`
 - backend-docs는 비공개라 무료 플랜에서 룰셋을 강제할 수 없어 표시만 함(리뷰어가 검사 상태를 확인하고 머지)
 - 저장소 CI 검사 이름은 잡 이름이므로 룰셋을 설정할 때 Actions 화면의 체크 이름으로 확인함
