@@ -21,7 +21,7 @@
 - Project 필드 값은 Notion 티켓의 Project 속성과 같은 이름을 씀. 값을 추가·변경할 때 Notion과 함께 바꿈
 - 조직 이슈 필드 중 Start date, Target date, Effort와 보드의 Size·Estimate·Iteration 필드는 쓰지 않음. 관리할 값이 늘어나 누락만 생기므로 Priority 하나만 씀
 - 작업 순서와 원천
-  - 개발 작업(코드·설정 변경): GitHub 이슈를 먼저 만들고 Notion 티켓을 만듦. Project·우선순위의 원천은 GitHub 이슈. Notion 티켓에는 같은 값과 이슈 링크를 적음
+  - 개발 작업(코드·설정 변경): GitHub 이슈를 먼저 만들고 Notion 티켓을 만듦. Project·우선순위의 원천은 GitHub 이슈. Notion 티켓에는 Epic·Sprint와 이슈 링크만 적고 Project·우선순위는 다시 적지 않음(이중 입력과 불일치 방지)
   - 개발이 아닌 작업(기획, 디자인, 콘텐츠, 운영진 업무): Notion 티켓만 만듦. 원천은 Notion
   - 두 값이 다르면 원천 쪽 값으로 다른 쪽을 고침. 스프린트 시작 때 PM이 대조함
 - 이유: 개발 작업은 AI로 GitHub 이슈부터 만드는 경우가 많아, 이슈를 만들 때 값을 정하면 입력이 한 번으로 끝남. 계획(Epic·Sprint)은 Notion에서 운영함
@@ -36,7 +36,8 @@
 | product-infra | Terraform Migration(Phase 5 인수 판정 OPS-07 뒤에는 SRE & 장애 대응) |
 | backend, backend-docs, engineering-playbook | 없음(판정 표로 판정) |
 
-- 예외: 기본값 저장소라도 배포 워크플로·CI/CD 작업은 SRE & 장애 대응(규칙 2). product-infra라도 WBS 밖 운영 작업은 SRE & 장애 대응
+- 판정 순서(위에서부터 먼저 맞는 것): ① product-infra WBS ID가 붙은 이전 작업(OPS-07 전) → Terraform Migration ② 그 밖의 배포 워크플로·CI/CD·운영 작업 → SRE & 장애 대응 ③ 저장소 기본값 ④ 아래 판정 표 3~6
+- 예: product-infra `DEP-02` 배포 롤 이전은 ①로 Terraform Migration. frontend 배포 워크플로 수정은 ②로 SRE & 장애 대응
 - 이유: backend는 홈페이지·관리자 API, DB 운영, 배포를 함께 담아 한 값으로 정할 수 없음. engineering-playbook은 PM 문서와 SRE 문서가 섞임
 
 Project 값 판정 기준(위에서부터 먼저 맞는 것)
@@ -73,8 +74,11 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | 본문 | 일반 업무 이슈 템플릿 사용. 체크리스트(`- [ ]`)로 완료 조건을 적음 |
 
 - 이유: 담당자가 없는 이슈는 진행하는 사람 없이 남고, 유형·우선순위·프로젝트가 없으면 보드에서 급한 일을 고를 수 없음. Project 밖의 이슈는 우선순위 목록에서 보이지 않음
-- GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 저장소마다 `.github/workflows/issue-check.yml`(원본 [`tools/issue-check.yml`](../tools/issue-check.yml))이 생성 뒤 검사함. 담당자(작성자), 작업 종류 라벨, Type은 제목에서 자동으로 채우고, Priority가 비면 댓글로 알림. 보드 편입·Project는 저장소 권한으로 확인할 수 없어 PM 스프린트 점검에서 확인함
+- GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 생성 뒤 `issue-check`가 검사함. 원본은 playbook의 재사용 워크플로 `.github/workflows/issue-check.yml`이고, 저장소는 호출 파일 견본 [`tools/callers/issue-check.yml`](../tools/callers/issue-check.yml)을 `.github/workflows/`에 복사해 두며 `@v1` 태그로 고정함. 원본을 고치면 `v1` 태그를 옮겨 모든 저장소에 반영함
+- 동작: 담당자(작성자), 작업 종류 라벨, Type은 제목에서 자동으로 채움. 이슈를 만들거나 고치거나 라벨·담당자를 바꿀 때마다 다시 검사하고(생성 직후에는 2분까지 기다림), 비어 있는 값은 마커가 붙은 댓글 1개를 갱신해 알림. 모두 채워지면 그 댓글을 "해결됨"으로 바꾸고 접음
+- Priority 조회에 실패하면 누락으로 보고 job을 실패시킴(조용히 통과하지 않음). 보드 편입·Project는 저장소 권한으로 확인할 수 없어 PM 스프린트 점검에서 확인함
 - 이슈를 대신 만들어 준 경우(예: 회의 결정을 PM이 이슈로 옮김)에도 만든 사람을 먼저 지정하고, 작업자가 정해지면 작업자를 추가함
+- 장애 대응 예외: 운영 장애로 바로 고쳐야 하면 이슈 없이 hotfix PR을 먼저 올리고 머지할 수 있음. 복구 뒤 24시간 안에 이슈(`[Hotfix]`, Type Bug, Priority Urgent, Project SRE & 장애 대응 또는 해당 제품)를 만들어 PR 링크를 적고 닫음. 장애 절차는 `process/incident.md`
 
 ## PR
 
@@ -82,7 +86,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 |---|---|
 | 담당자(Assignee) | 반드시 지정. PR 작성자(작업한 사람) |
 | 리뷰어(Reviewer) | 반드시 지정. 작성자가 아닌 사람 1명 이상(PM 또는 해당 Product의 다른 팀원). 리뷰어가 없는 PR은 리뷰를 시작하지 않음 |
-| 이슈 연결 | PR 하나 = 이슈 하나, 항상 `Closes #번호`로 Development에 연결. 여러 PR로 나뉘는 작업은 하위 이슈로 나눔(`conventions/git.md` "PR 제목") |
+| 이슈 연결 | PR 하나 = 이슈 하나, 본문에 `Closes #번호` 1개로 Development에 연결. 여러 PR로 나뉘는 작업은 하위 이슈로 나눔. 예외: 릴리스(`dev` → `main`)와 hotfix PR은 연결하지 않음(`conventions/git.md` "PR 제목") |
 | 작업 종류 라벨 | 제목의 `[Type]`에 맞는 라벨 1개. 자동으로 붙고, 제목을 고치면 라벨도 바뀜 |
 | 본문 | PR 템플릿 사용 |
 
@@ -92,12 +96,24 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 |---|---|
 | PR 머지 | PR 본문의 체크리스트가 모두 체크되어 있어야 머지함 |
 | 이슈 종료 | 이슈 본문의 체크리스트가 모두 체크되어 있어야 닫음 |
-| 체크하지 못한 항목 | 머지·종료 전에 항목마다 사유를 댓글로 남김. 예: "해당 없음: 엔티티 변경 없음", "후속 이슈 #123으로 옮김". 사유 댓글이 있으면 머지·종료할 수 있음 |
+| 체크하지 못한 항목 | 머지·종료 전에 항목마다 사유를 댓글로 남김. 형식은 `사유: <항목 문구 앞부분> / <이유>`(한 줄에 하나). 예: `사유: 엔티티 변경 여부를 확인했다 / 해당 없음, 엔티티 변경 없음`, `사유: 운영 배포 확인 / 후속 이슈 #123으로 옮김`. 사유 댓글이 있으면 머지·종료할 수 있음 |
 | `Closes`로 자동 종료되는 이슈 | 리뷰어가 승인 전에 연결된 이슈를 열어 모든 항목이 체크됐거나 항목별 사유 댓글이 있는지 확인함. 일부만 처리했다면 PR을 머지하기 전에 남은 일을 하위 이슈로 나눔 |
+| 머지 뒤에만 할 수 있는 확인 | 운영 배포 뒤 동작 확인처럼 머지 전에 체크할 수 없는 항목은 `Closes`로 닫히는 이슈에 넣지 않음. 상위 이슈 체크리스트에 두고, 하위 이슈가 모두 닫히고 확인이 끝나면 상위 이슈를 닫음 |
 | 직접 닫는 이슈 | 닫는 사람이 같은 내용을 확인함 |
 
 - 이유: 체크리스트는 완료 조건이므로, 체크하지 않은 채 머지·종료하면 무엇이 빠졌는지 나중에 알 수 없음
 - 후속으로 미루는 항목은 후속 이슈 번호를 사유 댓글에 적음
+
+### PR 검사 `pr-rules`
+
+- 원본은 playbook의 재사용 워크플로 `.github/workflows/pr-check.yml`. 저장소는 [`tools/callers/pr-check.yml`](../tools/callers/pr-check.yml)을 복사해 `@v1`로 고정함. 결과는 커밋 상태 `pr-rules`로 기록됨
+- 검사 항목 4가지
+  1. `Closes` 이슈 연결: 정확히 1개. 릴리스(`[Release]`, `[Hotfix]`)와 기본 브랜치가 아닌 곳을 향한 PR은 0~1개 허용
+  2. Reviewer: 지정됐거나 작성자가 아닌 사람의 리뷰가 있음
+  3. Assignee: 1명 이상
+  4. 사유 없는 미체크 항목이 없음: PR 본문의 미체크 항목과, `Closes` 이슈가 1개이면 그 이슈 본문의 미체크 항목. 사유는 PR 댓글이나 이슈 댓글(사람이 쓴 것만 인정)의 `사유: <항목 문구 앞부분> / <이유>` 줄로 남김. 항목 문구의 앞 30자가 사유 줄에 들어 있으면 처리된 것으로 봄
+- 규칙을 어기면 상태만 `failure`가 되고, API 오류는 job 실패로 나타남. PR 본문·댓글·리뷰·이슈 본문이 바뀔 때마다 다시 검사함
+- 공개 저장소는 룰셋의 필수 검사로 `pr-rules`를 지정해 머지를 막음. backend-docs(비공개)는 무료 플랜이라 룰셋을 강제할 수 없어 표시만 함(리뷰어가 상태를 확인하고 머지)
 
 ## 프로젝트 값과 저장소 추가
 
@@ -122,7 +138,11 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 ### 새 저장소 추가
 
 - [ ] 기존 이슈를 조직 Project에 넣고 Project 값을 지정함. 자동 추가 규칙은 무료 플랜이라 1개뿐이므로 PM이 일괄로 넣음
-- [ ] 공통 이슈·PR 템플릿과 작업 종류 라벨을 backend와 같게 복사함
+- [ ] `tools/callers/`의 호출 파일 2개(`issue-check.yml`, `pr-check.yml`)를 `.github/workflows/`에 복사함(`@v1` 고정)
+- [ ] `tools/templates/`의 이슈 폼(`task.yml`, `config.yml`)과 PR 템플릿을 `.github/`에 복사하고 PR 템플릿의 저장소별 확인 칸을 채움
+- [ ] 작업 종류 라벨을 backend와 같게 만듦
+- [ ] 공개 저장소면 룰셋(기본 브랜치, dev가 기본 브랜치이면 main도 포함)에 PR 승인 1과 필수 검사 `pr-rules`를 지정함
+- [ ] AI 지침 파일(`AGENTS.md` 또는 `CLAUDE.md`)에 이슈·PR 생성 규칙을 적음(`tools/new-issue.sh` 사용, Closes 1개, Reviewer·Assignee 지정)
 - [ ] 커밋 훅과 PR 제목 검사를 설정함
 - [ ] AWS 배포가 필요하면 배포 롤 신뢰 조건을 `org/aws-access.md` 절차대로 설정함([org/aws-access.md](../org/aws-access.md))
 - [ ] 워크스페이스 루트 `CLAUDE.md`의 저장소 표에 추가함
@@ -130,11 +150,12 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 ### 필수 값과 누락 점검
 
 - 이슈 작성자 필수 값은 Assignee, 작업 종류 라벨, Type, Priority, 보드 편입, Project("이슈" 절)
-- Notion 티켓 필수 값: Project, 우선순위, GitHub Issue 링크
+- Notion 티켓 필수 값: 개발 티켓은 Epic, Sprint, GitHub Issue 링크. 개발이 아닌 티켓은 Epic, Sprint, Project, 우선순위
 - 누락 점검: 스프린트 시작 때 PM이 확인함
   - 핵심: 저장소별 `is:issue is:open no:project` 검색. 보드 밖 이슈는 보드 안 빈 값 뷰에 보이지 않고, 자동 편입 규칙은 1개 저장소만 대상이므로 이 검색이 필요함
   - 보드 안: Project가 빈 항목 뷰. Priority는 조직 이슈 필드라 보드 밖 이슈도 저장소 이슈 검색으로 빈 값을 찾음
-  - Notion 두 DB에서 Project가 비었거나 GitHub 링크가 없는 티켓
+  - Notion 두 DB: 개발 티켓 중 GitHub 링크가 없는 것, 개발이 아닌 티켓 중 Project가 빈 것
+  - 반대 방향: 이번 스프린트에 열린 GitHub 이슈 중 Notion 티켓에 링크되지 않은 것(이슈만 만들고 티켓을 빠뜨린 경우)
   - 대조: 이번 스프린트 Notion Ticket의 Project·우선순위와 연결 이슈의 GitHub 값을 대조하고, 다르면 원천 쪽 값으로 고침(개발 작업은 GitHub, 그 밖은 Notion)
   - `issue-check` 댓글이 달린 이슈
 - 빈 값 필터는 저장 뷰로 만들어 둠
@@ -165,17 +186,18 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 
 | 템플릿 | 섹션(순서 고정) |
 |---|---|
-| 이슈 | 작업 내용(무엇을 왜) / 작업 상세 내용(체크리스트, 완료 조건) / 영향 범위 / 참고 |
+| 이슈 | 작업 내용(무엇을 왜) / 작업 상세 내용(체크리스트, 완료 조건) / 참고 |
 | PR | 개요(`Closes #` 이슈 연결 줄) / 주요 변경 사항 / 상세 내용 / 확인(공통 체크리스트) / 저장소별 확인 / 참고 |
 
-- PR 공통 체크리스트: 연결된 이슈의 모든 항목이 체크됐거나 항목별 사유 댓글이 있다, Assignee와 Reviewer를 지정했다, 공개 저장소 규칙(실명·계정 ID·시크릿 없음)을 지켰다
-- 저장소별 확인 예: backend 마이그레이션 파일, product-infra Terraform plan과 보호 리소스, engineering-playbook 최종 검토일
-- 예외: 특정 절차 전용 이슈 템플릿(예: engineering-playbook의 모집 시즌 체크리스트)은 일반 업무용 템플릿과 따로 둠
+- 원본 위치: playbook의 `.github/`(playbook 자신이 쓰는 파일)와 [`tools/templates/`](../tools/templates/)(다른 저장소용 견본: `task.yml`, `config.yml`, `PULL_REQUEST_TEMPLATE.md`). 저장소는 견본을 복사해 쓰고, 원본을 고치면 각 저장소 복사본을 함께 고침
+- 일반 이슈는 이슈 폼 `task.yml`로 만듦. 빈 이슈는 만들 수 없게 `config.yml`에서 막음(`blank_issues_enabled: false`)
+- PR 공통 체크리스트: Closes 1개로 이슈를 연결했다, Assignee와 Reviewer를 지정했다, 연결된 이슈의 체크리스트를 완료했거나 항목별 사유 댓글이 있다
+- 저장소별 확인 예: backend 마이그레이션 파일, product-infra Terraform plan과 보호 리소스, engineering-playbook 최종 검토일·결정 기록·문서 간 어긋남·공개 저장소 확인(실명·계정 ID·시크릿 없음). 견본에는 `해당 없음(저장소별 항목으로 바꿈)`으로 두고 저장소가 바꿈
+- 예외: 특정 절차 전용 이슈 템플릿(예: engineering-playbook의 모집 시즌 체크리스트)은 일반 업무용 이슈 폼과 따로 둠
 - 모양은 이 문서가 기준. 저장소 템플릿을 바꿀 때 이 문서를 먼저 고침
 
 ## 미결
 
 | 질문 | 결정 필요 주체 | 필요 시점 |
 |---|---|---|
-| 자동화 도입 범위(작성자 자동 Assignee, 저장소별 Project 자동 편입과 프로젝트 기본값, 체크하지 않은 항목이 있고 사유 댓글이 없으면 PR 검사 실패) | PM | 2026-12 시즌 뒤 |
-| 템플릿 원본 위치(조직 `.github` 저장소 기본 템플릿 vs 저장소별 복사와 차이 검사) | PM | 2026-12 시즌 뒤 |
+| 없음 | | |

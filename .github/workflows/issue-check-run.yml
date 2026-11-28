@@ -1,0 +1,9 @@
+# playbook 자신의 이슈 검사 호출 파일(원본: issue-check.yml, 로컬 경로로 호출)
+name: Issue Check
+on:
+  issues: { types: [opened, edited, labeled, unlabeled, assigned, unassigned] }
+permissions: { issues: write }
+concurrency: { group: "issue-check-${{ github.event.issue.number }}", cancel-in-progress: true }
+jobs:
+  check:
+    uses: ./.github/workflows/issue-check.yml
