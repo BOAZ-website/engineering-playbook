@@ -8,6 +8,8 @@ assignees: ''
 
 ## ✨ 작업 내용
 
+<!-- 만든 뒤 Assignee(만든 사람)와 Type(Feature·Bug·Task)을 지정하고, 조직 Project "BOAZ-website project"에 넣어 프로젝트와 Priority를 고릅니다. 체크리스트를 모두 체크하거나 못 한 항목의 사유를 댓글로 남긴 뒤 닫습니다(conventions/issue-pr.md). -->
+
 <!-- 무엇을 왜 고치거나 추가하는지 적어 주세요. 대상 문서 경로를 함께 적으면 좋습니다. -->
 
 ## ✅ 작업 상세 내용(check-list)

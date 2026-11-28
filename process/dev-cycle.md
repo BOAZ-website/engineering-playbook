@@ -67,6 +67,17 @@
 
 - 작업이 어느 구분인지 애매하면 승인 필요 작업으로 보고 PM에게 Ticket 생성과 승인을 요청함
 - 단순 작업은 Product Engineer가 Ticket을 만들고 담당으로 지정한 뒤 PM에게 알림
+
+생성부터 종료까지 흐름(개발 작업)
+
+1. GitHub 이슈를 먼저 만듦. Assignee(본인), 작업 종류 라벨, Type, Priority, 보드 편입, Project 6개를 모두 지정함. AI·명령줄은 `tools/new-issue.sh`를 씀
+2. Notion Ticket을 만들고 이슈와 같은 Project·우선순위, Epic, Sprint, 이슈 링크를 적음
+3. PR을 올림. Assignee는 PR 작성자, Reviewer는 작성자가 아닌 사람 1명 이상을 반드시 지정함. 본문 개요에 이슈 번호를 연결 키워드로 적어 Development에 이슈가 연결되게 함. PR 하나 = 이슈 하나이고 항상 `Closes #번호`를 씀. 작업이 PR 여러 개로 나뉘면 이슈를 하위 이슈로 나누고 PR마다 하위 이슈 하나를 닫음([규칙](../conventions/git.md)). PR 링크를 Notion Ticket에 적음
+4. 머지·종료 때 PR 작성자가 Notion Ticket 상태를 완료로 바꿈. 연결 이슈가 실제로 닫히고 남은 하위 이슈가 없는지 확인한 뒤 함. Notion Ticket에는 상위 이슈 링크를 적음. 여러 저장소 PR로 끝나는 Ticket은 모든 이슈가 닫힌 뒤 완료
+
+개발이 아닌 작업(기획, 디자인, 콘텐츠, 운영진 업무)은 Notion Ticket만 만듦
+
+- 필수 값 상세와 누락 점검: `conventions/issue-pr.md` "필수 값과 누락 점검" ([링크](../conventions/issue-pr.md))
 - 같은 영역이라도 영향에 따라 구분이 달라짐. 예: DB 인덱스 추가, 느린 쿼리 개선처럼 서비스 영향이 없는 DB 작업은 단순 작업. DB 버전 업그레이드처럼 서비스가 멈추는 작업은 승인 필요 작업(`org/pm-guide.md` 판단 사례 1)
 
 Ticket 생성 체크리스트

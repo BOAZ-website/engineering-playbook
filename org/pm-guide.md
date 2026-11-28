@@ -39,6 +39,7 @@
 | 인증 방식 변경 | |
 | 여러 Product에 영향을 주는 변경 | |
 | 시크릿 교체 | |
+| 새 Project 값 추가·보관 승인 | 절차는 `conventions/issue-pr.md` "새 Project 값 추가"([링크](../conventions/issue-pr.md)) |
 
 - 판단 질문: "되돌리는 데 드는 비용이 큰가?" 크면 PM이 결정하고, 작으면(UI 문구, 라이브러리 버전 등) Product Engineer가 빠르게 결정 (참고: 되돌릴 수 있는 결정과 없는 결정의 구분)
 - PM 결정은 결정 기록(`decisions/`)에 남김
