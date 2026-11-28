@@ -1,0 +1,92 @@
+# PR 규칙 검사 재사용 워크플로 원본(workflow_call). 직접 실행되지 않음
+# 호출 파일 견본: tools/callers/pr-check.yml (저장소마다 복사, @v1 태그로 고정)
+# conventions/issue-pr.md "체크리스트 완료와 머지·종료"
+# 검사 항목: Closes 이슈 연결, Reviewer, Assignee, 미체크 항목의 사유 댓글(PR과 연결 이슈)
+# - 결과는 커밋 상태 'pr-rules'로 기록함. 규칙 위반은 상태만 failure, API 오류는 job 실패
+# - 공개 저장소는 룰셋의 필수 검사로 'pr-rules'를 지정해 머지를 막음
+# - 사유 댓글 형식(한 줄에 하나): 사유: <항목 문구 앞부분> / <이유>
+# 호출 쪽이 permissions를 줌
+name: PR Check (reusable)
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+  statuses: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo, p = context.payload;
+            const norm = s => s.replace(/[`*_]/g, '').replace(/\s+/g, ' ').trim();
+            const items = b => (b || '').replace(/<!--[\s\S]*?-->/g, '').replace(/```[\s\S]*?```/g, '').split('\n').map(l => l.match(/^\s*[-*] \[ \]\s+(\S.*)$/)).filter(Boolean).map(m => norm(m[1]));
+            const reasons = cs => cs.filter(c => c.user?.type !== 'Bot').flatMap(c => (c.body || '').split('\n')).map(norm).filter(l => l.startsWith('사유:'));
+            const uncovered = (its, rs) => its.filter(i => !rs.some(r => r.includes(i.slice(0, 30))));
+            const comments = (o, r, n) => github.paginate(github.rest.issues.listComments, { owner: o, repo: r, issue_number: n });
+
+            // 검사할 PR 번호 결정
+            let nums = [];
+            if (p.pull_request) nums = [p.pull_request.number];
+            else if (p.issue?.pull_request) nums = [p.issue.number];
+            else if (p.issue) {
+              const r = await github.graphql(`query($o:String!,$r:String!,$n:Int!){repository(owner:$o,name:$r){issue(number:$n){
+                closedByPullRequestsReferences(first:5,includeClosedPrs:false){nodes{number state repository{nameWithOwner}}}}}}`,
+                { o: owner, r: repo, n: p.issue.number });
+              nums = r.repository.issue.closedByPullRequestsReferences.nodes
+                .filter(x => x.state === 'OPEN' && x.repository.nameWithOwner === `${owner}/${repo}`).map(x => x.number);
+            }
+
+            const CLOSES = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*:?\s+(?:([\w.-]+)\/([\w.-]+))?#(\d+)/gi;
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+
+            for (const n of nums) {
+              const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: n });
+              const body = (pr.body || '').replace(/<!--[\s\S]*?-->/g, '');
+              const exempt = /^\[(Release|Hotfix)\]/i.test(pr.title) || pr.base.ref !== pr.base.repo.default_branch;
+              const closes = [...body.matchAll(CLOSES)];
+              const fails = [];
+
+              if (exempt ? closes.length > 1 : closes.length !== 1) {
+                fails.push(exempt ? 'Closes 이슈는 0~1개' : 'Closes 이슈 1개 필요');
+              }
+
+              const reviews = await github.paginate(github.rest.pulls.listReviews, { owner, repo, pull_number: n });
+              const hasReviewer = pr.requested_reviewers.length > 0 || pr.requested_teams.length > 0
+                || reviews.some(r => r.user && r.user.login !== pr.user.login);
+              if (!hasReviewer) fails.push('Reviewer 지정 필요');
+              if (pr.assignees.length < 1) fails.push('Assignee 지정 필요');
+
+              const prComments = await comments(owner, repo, n);
+              const prMiss = uncovered(items(pr.body), reasons(prComments));
+              if (prMiss.length) fails.push(`PR 미체크 항목 ${prMiss.length}개에 사유 없음`);
+
+              let issueMiss = [];
+              if (closes.length === 1) {
+                const [, o, r, num] = closes[0];
+                const io = o || owner, ir = r || repo;
+                const { data: issue } = await github.rest.issues.get({ owner: io, repo: ir, issue_number: Number(num) });
+                const issueComments = await comments(io, ir, Number(num));
+                issueMiss = uncovered(items(issue.body), reasons([...prComments, ...issueComments]));
+                if (issueMiss.length) fails.push(`연결 이슈 미체크 항목 ${issueMiss.length}개에 사유 없음`);
+              }
+
+              const ok = fails.length === 0;
+              await core.summary
+                .addHeading(`PR #${n} pr-rules: ${ok ? '통과' : '실패'}`, 3)
+                .addList(ok ? ['모든 규칙 충족'] : fails)
+                .addList([...prMiss.map(i => `PR 미체크: ${i}`), ...issueMiss.map(i => `이슈 미체크: ${i}`)])
+                .write();
+              await github.rest.repos.createCommitStatus({
+                owner, repo, sha: pr.head.sha, context: 'pr-rules',
+                state: ok ? 'success' : 'failure',
+                description: (ok ? '모든 규칙 충족' : fails.join(', ')).slice(0, 140),
+                target_url: runUrl,
+              });
+            }
