@@ -28,9 +28,9 @@ jobs:
                              style: '🧁 STYLE', test: '🔎 TEST', release: '🚀 RELEASE', chore: '🧹 CHORE' };
             const TYPE_OF = { '⭐️ FEAT': 'Feature', '🐛 FIX': 'Bug', '🚑 HOTFIX': 'Bug' };
 
-            // 생성 직후에는 new-issue.sh가 필드를 채우는 중이므로 생성 2분 뒤까지 기다림
+            // 생성 직후에는 new-issue.sh가 필드를 채우는 중이므로 opened 이벤트에서만 생성 2분 뒤까지 기다림(편집 등에서는 기다리지 않음)
             const age = Date.now() - new Date(context.payload.issue.created_at);
-            if (age < 120000) await new Promise(r => setTimeout(r, 120000 - age));
+            if (context.payload.action === 'opened' && age < 120000) await new Promise(r => setTimeout(r, 120000 - age));
 
             const q = await github.graphql(`query($o:String!,$r:String!,$n:Int!){
               repository(owner:$o,name:$r){issue(number:$n){id title author{login}
@@ -43,21 +43,24 @@ jobs:
               await github.rest.issues.addAssignees({ owner, repo, issue_number: number, assignees: [issue.author.login] });
             }
 
-            let typeLabel = issue.labels.nodes.map(l => l.name).find(n => Object.values(LABELS).includes(n));
-            if (!typeLabel) {
-              const m = issue.title.match(/^\[([A-Za-z]+)\]/);
-              typeLabel = m && LABELS[m[1].toLowerCase()];
-              if (typeLabel) await github.rest.issues.addLabels({ owner, repo, issue_number: number, labels: [typeLabel] });
-              else missing.push('제목 접두어와 작업 종류 라벨(`[Feat]`·`[Fix]`·`[Docs]`·`[Chore]` 등)');
+            // 이벤트마다(제목 수정 포함) 제목에서 기대 라벨을 계산해, 작업 종류 라벨 9종 중 기대값이 아닌 것은 떼고 기대값을 붙임(9종 밖 라벨은 보존)
+            const m = issue.title.match(/^\[([A-Za-z]+)\]/);
+            const typeLabel = m && LABELS[m[1].toLowerCase()];
+            const have = issue.labels.nodes.map(l => l.name);
+            for (const l of have.filter(x => Object.values(LABELS).includes(x) && x !== typeLabel)) {
+              await github.rest.issues.removeLabel({ owner, repo, issue_number: number, name: l }).catch(() => {});
             }
+            if (typeLabel && !have.includes(typeLabel)) await github.rest.issues.addLabels({ owner, repo, issue_number: number, labels: [typeLabel] });
+            if (!typeLabel) missing.push('제목 접두어와 작업 종류 라벨(`[Feat]`·`[Fix]`·`[Docs]`·`[Chore]` 등)');
 
-            if (!issue.issueType) {
+            // Type: 현재 Type이 기대 Type과 다르면 변경 시도, 실패하면 누락으로 알림
+            const wantType = TYPE_OF[typeLabel] || 'Task';
+            if (issue.issueType?.name !== wantType) {
               try {
                 const t = await github.graphql(`query($o:String!){organization(login:$o){issueTypes(first:10){nodes{id name}}}}`, { o: owner });
-                const want = TYPE_OF[typeLabel] || 'Task';
-                const id = t.organization.issueTypes.nodes.find(x => x.name === want)?.id;
+                const id = t.organization.issueTypes.nodes.find(x => x.name === wantType)?.id;
                 await github.graphql(`mutation($i:ID!,$t:ID!){updateIssue(input:{id:$i,issueTypeId:$t}){clientMutationId}}`, { i: issue.id, t: id });
-              } catch (e) { missing.push('Type(Feature·Bug·Task)'); }
+              } catch (e) { missing.push(`Type 불일치(기대 ${wantType}, 현재 ${issue.issueType?.name || '없음'})`); }
             }
 
             core.setOutput('missing', JSON.stringify(missing));
