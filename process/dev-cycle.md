@@ -97,7 +97,7 @@ Ticket 생성 체크리스트
 
 ## 이슈 TO-DO 관리
 
-체크 시점, 하지 않기로 한 항목의 사유 댓글, 머지·종료 조건, 자동 검사는 `conventions/issue-pr.md` "체크리스트 완료와 머지·종료"와 "PR 검사 `pr-rules`"를 따름([링크](../conventions/issue-pr.md))
+체크 시점, 하지 않기로 한 항목의 사유 댓글, 머지·종료 조건, 자동 검사는 `conventions/issue-pr.md` "체크리스트 완료와 머지·종료"와 "PR 검사 `repo-rule-keeper`"를 따름([링크](../conventions/issue-pr.md))
 
 dev-cycle에서 추가로 지키는 것
 

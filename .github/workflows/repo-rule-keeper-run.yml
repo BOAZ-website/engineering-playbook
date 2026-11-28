@@ -1,4 +1,4 @@
-# 규칙 검사 호출 파일 견본(.github/workflows/boaz-rules.yml로 복사). 원본 변경은 v1 태그 이동으로 반영됨
+# playbook 자신의 규칙 검사 호출 파일(원본: repo-rule-keeper.yml, 로컬 경로로 호출)
 name: "🛡️ repo-rule-keeper"
 on:
   issues: { types: [opened, edited, labeled, unlabeled, assigned, unassigned] }
@@ -7,8 +7,8 @@ on:
   issue_comment: { types: [created, edited, deleted] }
 permissions: { contents: read, issues: write, pull-requests: write, statuses: write }
 concurrency:
-  group: "boaz-rules-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number }}"
+  group: "repo-rule-keeper-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number }}"
   cancel-in-progress: true
 jobs:
   rules:
-    uses: BOAZ-website/engineering-playbook/.github/workflows/boaz-rules.yml@v1
+    uses: ./.github/workflows/repo-rule-keeper.yml

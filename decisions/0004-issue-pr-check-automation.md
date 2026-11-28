@@ -24,7 +24,7 @@
 
 | 선택지 | 내용 | 장점 | 단점 | 채택 | 탈락 사유 |
 |---|---|---|---|---|---|
-| A | playbook에 재사용 워크플로 원본을 두고 저장소는 `@v1`로 호출. PR 검사는 커밋 상태 `pr-rules`와 룰셋 필수 검사로 강제. 템플릿은 playbook 원본과 저장소 복사본 | 검사 로직이 한 곳이고 태그 이동으로 일괄 반영됨 | 템플릿은 복사본이라 수동으로 맞춰야 함 | 예 | 해당 없음 |
+| A | playbook에 재사용 워크플로 원본을 두고 저장소는 `@v1`로 호출. PR 검사는 커밋 상태 `repo-rule-keeper`와 룰셋 필수 검사로 강제. 템플릿은 playbook 원본과 저장소 복사본 | 검사 로직이 한 곳이고 태그 이동으로 일괄 반영됨 | 템플릿은 복사본이라 수동으로 맞춰야 함 | 예 | 해당 없음 |
 | B | 조직 `.github` 저장소에 워크플로와 기본 템플릿을 둠 | 저장소가 파일을 복사하지 않아도 됨 | 아래 3가지 이유 | 아니오 | 조직 `.github` 저장소는 쓰지 않기로 함 |
 | C | 저장소마다 검사 파일을 복사해 각자 유지 | 저장소가 독립적임 | 원본 수정이 저장소마다 어긋남 | 아니오 | 일괄 반영이 안 됨 |
 
@@ -33,7 +33,7 @@
 ## 결정
 
 - 이슈 검사(`issue-check`)와 PR 검사(`pr-check`)는 playbook의 재사용 워크플로를 `@v1` 태그로 호출함. 호출 파일 견본은 `tools/callers/`
-- PR 검사는 커밋 상태 `pr-rules`로 기록하고, 공개 저장소는 룰셋의 필수 검사로 지정해 머지를 막음. 비공개 저장소(backend-docs)는 표시만 함
+- PR 검사는 커밋 상태 `repo-rule-keeper`로 기록하고, 공개 저장소는 룰셋의 필수 검사로 지정해 머지를 막음. 비공개 저장소(backend-docs)는 표시만 함
 - 템플릿은 playbook의 `.github/`와 `tools/templates/`를 원본으로 두고 저장소는 복사본을 씀. 일반 이슈는 이슈 폼 `task.yml`, 빈 이슈는 금지
 - 조직 `.github` 저장소는 쓰지 않음. 이유 3가지
   - 조직 기본 템플릿은 저장소에 `.github/ISSUE_TEMPLATE` 폴더가 있으면 적용되지 않음. playbook처럼 절차 전용 템플릿(모집 시즌)이 있는 저장소는 결국 일반 템플릿도 직접 둬야 함
@@ -61,4 +61,4 @@
 |---|---|---|
 | 없음 | | |
 
-갱신(2026-11-28): issue-check·pr-check와 저장소별 auto-label·auto-assign·pr-base-guard·title-guard를 재사용 워크플로 `boaz-rules.yml`("🛡️ repo-rule-keeper") 하나로 합침. 이유: 모든 저장소 공통 규칙이라 한 파일·한 이름으로 관리
+갱신(2026-11-28): issue-check·pr-check와 저장소별 auto-label·auto-assign·pr-base-guard·title-guard를 재사용 워크플로 `repo-rule-keeper.yml`("🛡️ repo-rule-keeper") 하나로 합침. 이유: 모든 저장소 공통 규칙이라 한 파일·한 이름으로 관리

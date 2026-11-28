@@ -42,7 +42,7 @@
 - `main` 직접 push 금지. 관리자도 예외 없음
 - `release/*` 브랜치는 쓰지 않음
 - 대상 브랜치 규칙은 repo-rule-keeper가 검사함([issue-pr.md](issue-pr.md) "PR 검사")
-- 강제 방법: 저장소별 룰셋으로 `main` 직접 push를 막고, 필수 검사 `pr-rules`로 머지를 차단함(`conventions/issue-pr.md` "PR 검사"). 저장소별 적용 현황과 일정은 `conventions/repos.md`
+- 강제 방법: 저장소별 룰셋으로 `main` 직접 push를 막고, 필수 검사 `repo-rule-keeper`로 머지를 차단함(`conventions/issue-pr.md` "PR 검사"). 저장소별 적용 현황과 일정은 `conventions/repos.md`
 - hotfix 역머지 방법: 같은 `hotfix/*` 브랜치로 `dev` 대상 PR을 하나 더 올림(backend 선례: `main` 대상 PR과 `dev` 대상 PR을 한 쌍으로 올림)
 - 다른 작업 브랜치 위에 작업 브랜치를 만들지 않음
 - PR 1건에는 이슈 1건의 변경만 포함(연결 방법은 `conventions/issue-pr.md` "PR 제목과 이슈 연결")

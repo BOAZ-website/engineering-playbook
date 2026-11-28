@@ -33,7 +33,7 @@
 - 모든 저장소의 PR·이슈 제목은 `[Type] 내용`. Type 9종은 Feat, Fix, Hotfix, Docs, Refactor, Style, Test, Release, Chore(작업 종류 라벨 9종과 같음)
 - 영역 표기는 Type 뒤에 허용함. 예: `[Feat] [서류 평가] 내용`
 - 기존 type 13종은 9종으로 정리함: ci와 build는 Chore, perf는 Refactor, revert는 Chore로 씀
-- 제목 검사는 재사용 워크플로 `pr-check`의 검사 항목으로 넣음. 필수 검사는 `pr-rules`
+- 제목 검사는 재사용 워크플로 `pr-check`의 검사 항목으로 넣음. 필수 검사는 `repo-rule-keeper`
 - 커밋 메시지 형식은 저장소별로 유지함. 공통 원칙(한국어, 이슈 번호 권장)만 `conventions/git.md`에 두고 저장소별 형식은 `conventions/repos.md`에 둠
 - 각 저장소의 `AGENTS.md`와 `CONTRIBUTING.md`는 `conventions/repos.md`의 견본으로 playbook을 가리키고, `CLAUDE.md`는 `@AGENTS.md` 한 줄로 둠
 
@@ -58,4 +58,4 @@
 |---|---|---|
 | 없음 | | |
 
-갱신(2026-11-28): issue-check·pr-check와 저장소별 auto-label·auto-assign·pr-base-guard·title-guard를 재사용 워크플로 `boaz-rules.yml`("🛡️ repo-rule-keeper") 하나로 합침. 이유: 모든 저장소 공통 규칙이라 한 파일·한 이름으로 관리
+갱신(2026-11-28): issue-check·pr-check와 저장소별 auto-label·auto-assign·pr-base-guard·title-guard를 재사용 워크플로 `repo-rule-keeper.yml`("🛡️ repo-rule-keeper") 하나로 합침. 이유: 모든 저장소 공통 규칙이라 한 파일·한 이름으로 관리

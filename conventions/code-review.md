@@ -15,7 +15,7 @@
 | 작성자 단독 머지 | 금지. 작성자는 자신의 PR을 승인하지 않음 |
 | 새 커밋 | 승인 후 새 커밋이 올라오면 기존 승인 무효화 |
 | PR 없이 병합 | 금지. 문서만 바뀌어도 PR 사용 |
-| 머지 방식 | merge commit. 승인과 필수 검사 `pr-rules` 통과를 확인한 뒤 머지(현황: 5개 저장소는 merge commit으로 머지 중이고, design-system 외 4개는 설정에서 squash·rebase도 허용 상태) |
+| 머지 방식 | merge commit. 승인과 필수 검사 `repo-rule-keeper` 통과를 확인한 뒤 머지(현황: 5개 저장소는 merge commit으로 머지 중이고, design-system 외 4개는 설정에서 squash·rebase도 허용 상태) |
 
 - 근거: 팀 Notion의 FE 리뷰 규칙(머지 승인 1명)과 frontend_admin 보호 설정 제안 기본값 일치
 - 브랜치 보호 설정 반영: 저장소 관리자(권한은 `org/roles-and-authority.md`)

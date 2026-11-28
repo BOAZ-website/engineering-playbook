@@ -18,7 +18,7 @@
 | 영역 | Type 뒤에 영역 표기를 허용. 예: `[Feat] [서류 평가] 내용` |
 | 예 | `[Feat] 로그인 API 구현` |
 | 본문 | 저장소 PR 템플릿의 섹션 이름과 순서 유지("템플릿") |
-| 검사 | 재사용 워크플로 repo-rule-keeper("PR 규칙" 잡)의 검사 항목. 필수 검사는 `pr-rules`("PR 검사 `pr-rules`") |
+| 검사 | 재사용 워크플로 repo-rule-keeper의 검사 항목. 필수 검사는 `repo-rule-keeper`("PR 검사 `repo-rule-keeper`") |
 
 - 이유: 제목 형식을 맞춰 두면 어느 저장소에서든 목록만 보고 변경 종류를 알 수 있고, 라벨·Type 자동 지정이 제목의 `[Type]`에 의존함
 - 이전 type을 9종으로 정리함: `ci`·`build`는 Chore, `perf`는 Refactor, `revert`는 Chore로 씀. `hotfix`는 커밋 type이 아니라 PR 제목에만 씀
@@ -101,7 +101,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | 본문 | 일반 업무 이슈 템플릿 사용. 체크리스트(`- [ ]`)로 완료 조건을 적음 |
 
 - 이유: 담당자가 없는 이슈는 진행하는 사람 없이 남고, 유형·우선순위·프로젝트가 없으면 보드에서 급한 일을 고를 수 없음. Project 밖의 이슈는 우선순위 목록에서 보이지 않음
-- GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 생성 뒤 repo-rule-keeper("이슈 규칙" 잡)가 검사함. 원본은 playbook의 재사용 워크플로 `.github/workflows/boaz-rules.yml`(화면 표시 이름 "🛡️ repo-rule-keeper")이고, 저장소는 호출 파일 견본 [`tools/callers/boaz-rules.yml`](../tools/callers/boaz-rules.yml)을 `.github/workflows/boaz-rules.yml`로 복사해 두며 `@v1` 태그로 고정함. 호출 파일은 이것 1개뿐이고 이슈·PR 검사가 모두 이 파일로 동작함. playbook은 로컬 호출 파일 `.github/workflows/boaz-rules-run.yml`을 씀. 원본을 고치면 `v1` 태그를 옮겨 모든 저장소에 반영함
+- GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 생성 뒤 repo-rule-keeper가 검사함. 원본은 playbook의 재사용 워크플로 `.github/workflows/repo-rule-keeper.yml`(화면 표시 이름 "🛡️ repo-rule-keeper")이고, 저장소는 호출 파일 견본 [`tools/callers/repo-rule-keeper.yml`](../tools/callers/repo-rule-keeper.yml)을 `.github/workflows/repo-rule-keeper.yml`로 복사해 두며 `@v1` 태그로 고정함. 호출 파일은 이것 1개뿐이고 이슈·PR 검사가 모두 이 파일로 동작함. playbook은 로컬 호출 파일 `.github/workflows/repo-rule-keeper-run.yml`을 씀. 원본을 고치면 `v1` 태그를 옮겨 모든 저장소에 반영함
 - 동작: 담당자는 작성자로, 작업 종류 라벨은 제목에서 자동으로 채우고 Type 지정도 시도함(실패하면 누락으로 알림). 이슈를 만들거나 고치거나 라벨·담당자를 바꿀 때마다 다시 검사하고(생성 직후에는 2분까지 기다림), 비어 있는 값은 마커가 붙은 댓글 1개를 갱신해 알림. 모두 채워지면 그 댓글을 "해결됨"으로 바꾸고 접음
 - Priority 조회에 실패하면 누락으로 보고 job을 실패시킴(조용히 통과하지 않음). 보드 편입·Project는 저장소 권한으로 확인할 수 없어 PM 스프린트 점검에서 확인함
 - 이슈를 대신 만들어 준 경우(예: 회의 결정을 PM이 이슈로 옮김)에도 만든 사람을 먼저 지정하고, 작업자가 정해지면 작업자를 추가함
@@ -131,10 +131,11 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 - 이유: 체크리스트는 완료 조건이므로, 체크하지 않은 채 머지·종료하면 무엇이 빠졌는지 나중에 알 수 없음
 - 후속으로 미루는 항목은 후속 이슈 번호를 사유 댓글에 적음
 
-### PR 검사 `pr-rules`
+### PR 검사 `repo-rule-keeper`
 
-- 원본은 playbook의 재사용 워크플로 `.github/workflows/boaz-rules.yml`("🛡️ repo-rule-keeper")의 "PR 규칙" 잡. 저장소는 [`tools/callers/boaz-rules.yml`](../tools/callers/boaz-rules.yml)을 `.github/workflows/boaz-rules.yml`로 복사해 `@v1`로 고정함. 결과는 커밋 상태 `pr-rules`로 기록됨
-- 같은 잡이 제목 검사(title-guard), 자동 라벨(auto-label), 작성자 자동 지정(auto-assign), 대상 브랜치 경고(pr-base-guard)를 모두 맡으므로 저장소에 이 기능의 별도 워크플로를 두지 않음
+- 원본은 playbook의 재사용 워크플로 `.github/workflows/repo-rule-keeper.yml`("🛡️ repo-rule-keeper"). 저장소는 [`tools/callers/repo-rule-keeper.yml`](../tools/callers/repo-rule-keeper.yml)을 `.github/workflows/repo-rule-keeper.yml`로 복사해 `@v1`로 고정함. 결과는 커밋 상태 `repo-rule-keeper`로 기록됨
+- 이 워크플로가 제목 검사(title-guard), 자동 라벨(auto-label), 작성자 자동 지정(auto-assign), 대상 브랜치 경고(pr-base-guard)를 모두 맡으므로 저장소에 이 기능의 별도 워크플로를 두지 않음
+- 이슈 규칙과 PR 규칙은 잡 하나("규칙 검사")에서 이벤트에 따라 나눠 실행함. PR 검사 목록에는 워크플로 실행 "🛡️ repo-rule-keeper / rules / 규칙 검사"와 커밋 상태 `repo-rule-keeper` 두 줄이 보이며, 룰셋 필수 검사는 커밋 상태 `repo-rule-keeper`로 지정함(댓글로 다시 검사한 결과도 이 상태에 반영되기 때문)
 - 실행 시점: PR을 만들거나 고칠 때, 리뷰·댓글이 달릴 때, 연결된 이슈를 고칠 때
 - 검사 항목 7가지
   1. 제목 형식: `[Type] 내용`이고 Type이 9종 중 하나("제목")
@@ -145,7 +146,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
   6. Reviewer: 지정됐거나 작성자가 아닌 사람(팀 포함)의 리뷰가 있음
   7. 사유 없는 미체크 항목이 없음: PR 본문의 미체크 항목과, `Closes` 이슈가 1개이면 그 이슈 본문의 미체크 항목. 사유는 PR 댓글이나 이슈 댓글(사람이 쓴 것만 인정)의 `사유: <항목 문구 앞부분> / <이유>` 줄로 남김. 항목 문구의 앞 30자가 사유 줄에 들어 있으면 처리된 것으로 봄
 - 규칙을 어기면 상태만 `failure`가 되고, API 오류는 job 실패로 나타남. PR 본문·댓글·리뷰·이슈 본문이 바뀔 때마다 다시 검사함
-- 공개 저장소는 룰셋의 필수 검사로 `pr-rules`를 지정해 머지를 막음. backend-docs(비공개)는 무료 플랜이라 룰셋을 강제할 수 없어 표시만 함(리뷰어가 상태를 확인하고 머지)
+- 공개 저장소는 룰셋의 필수 검사로 `repo-rule-keeper`를 지정해 머지를 막음. backend-docs(비공개)는 무료 플랜이라 룰셋을 강제할 수 없어 표시만 함(리뷰어가 상태를 확인하고 머지)
 
 ## 프로젝트 값과 저장소 추가
 
