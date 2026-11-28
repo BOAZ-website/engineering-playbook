@@ -8,7 +8,7 @@ on:
 permissions: { contents: read, issues: write, pull-requests: write, statuses: write }
 concurrency:
   group: "repo-rule-keeper-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number }}"
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   rules:
     uses: ./.github/workflows/repo-rule-keeper.yml
