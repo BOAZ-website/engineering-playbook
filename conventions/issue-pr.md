@@ -98,7 +98,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | Priority, Project | 반드시 지정. Priority는 조직 이슈 필드, Project는 보드 필드("분류 방식") |
 | 보드 편입 | 반드시 조직 Project "BOAZ-website project"에 넣음. 권한이 없으면 PM에게 알림 |
 | 만드는 방법 | AI·명령줄로 만들 때는 [`tools/new-issue.sh`](../tools/new-issue.sh)를 씀. 6개 값(Assignee, 라벨, Type, Priority, 보드 편입, Project)을 한 번에 지정하고, 하나라도 빠지면 이슈를 만들지 않음 |
-| 본문 | 일반 업무 이슈 템플릿 사용. 체크리스트(`- [ ]`)로 완료 조건을 적음 |
+| 본문 | 이슈 폼 `task.yml`("템플릿") 사용. 체크리스트(`- [ ]`)로 머지 전에 확인할 수 있는 완료 조건만 적음(머지 뒤 확인은 상위 이슈) |
 
 - 이유: 담당자가 없는 이슈는 진행하는 사람 없이 남고, 유형·우선순위·프로젝트가 없으면 보드에서 급한 일을 고를 수 없음. Project 밖의 이슈는 우선순위 목록에서 보이지 않음
 - GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 생성 뒤 repo-rule-keeper가 검사함. 원본은 playbook의 재사용 워크플로 2개(PR용 `.github/workflows/repo-rule-keeper.yml`, 이슈·댓글용 `.github/workflows/repo-rule-keeper-issue.yml`)이고, 화면 표시 이름은 호출 파일 둘 다 "🛡️ repo-rule-keeper"임. 저장소는 호출 파일 견본 [`tools/callers/repo-rule-keeper.yml`](../tools/callers/repo-rule-keeper.yml)(PR용)과 [`tools/callers/repo-rule-keeper-issue.yml`](../tools/callers/repo-rule-keeper-issue.yml)(이슈용)을 `.github/workflows/`에 같은 이름으로 복사해 두며 `@v2` 태그로 고정함. 호출 파일은 이 2개이고 playbook은 로컬 호출 파일 `.github/workflows/repo-rule-keeper-run.yml`(PR용), `.github/workflows/repo-rule-keeper-issue-run.yml`(이슈용)을 씀. 원본을 고치면 `v2` 태그를 옮겨 모든 저장소에 반영함
@@ -115,7 +115,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | 리뷰어(Reviewer) | 반드시 지정. 작성자가 아닌 사람 1명 이상(PM 또는 해당 Product의 다른 팀원). 리뷰어가 없는 PR은 리뷰를 시작하지 않음 |
 | 이슈 연결 | PR 하나 = 이슈 하나, 본문에 `Closes #번호` 1개로 Development에 연결. 여러 PR로 나뉘는 작업은 하위 이슈로 나눔. 예외: 릴리스(`dev` → `main`)와 hotfix PR은 연결하지 않음("PR 제목과 이슈 연결") |
 | 작업 종류 라벨 | 제목의 `[Type]`에 맞는 라벨 1개. 자동으로 붙고, 제목을 고치면 라벨도 바뀜 |
-| 본문 | PR 템플릿 사용 |
+| 본문 | PR 템플릿 사용. "🔍 확인" 공통 항목과 "🧩 저장소별 확인" 항목을 체크하거나 항목마다 `사유:` 댓글을 남김 |
 
 ## 체크리스트 완료와 머지·종료
 
