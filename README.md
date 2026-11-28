@@ -87,7 +87,7 @@ BOAZ-website 조직의 저장소 8개 전부임. 앞의 5개는 Product, 나머�
 | [frontend_admin](https://github.com/BOAZ-website/frontend_admin) | 운영진용 관리자 콘솔(Product: 관리자 페이지) | 공개 | `dev` | Product Engineer | [products/admin.md](products/admin.md) |
 | [product-infra](https://github.com/BOAZ-website/product-infra) | AWS 인프라와 Terraform(Product: 인프라) | 공개 | `dev` | Product Engineer | [products/infra.md](products/infra.md) |
 | [design-system](https://github.com/BOAZ-website/design-system) | 공통 디자인 토큰과 컴포넌트(Product: 디자인 시스템) | 공개 | `dev` | Product Engineer | [products/design-system.md](products/design-system.md) |
-| [frontend_recruiting_admin](https://github.com/BOAZ-website/frontend_recruiting_admin) | 28기 서류 평가 앱. 관리자 콘솔과 분리함 | 공개 | `main` | Product Engineer | [conventions/repos.md](conventions/repos.md) 행 |
+| [frontend_recruiting_admin](https://github.com/BOAZ-website/frontend_recruiting_admin) | 28기 서류 평가 앱. 관리자 콘솔과 분리함. 임시 저장소로 서류 평가 기간(~2026-12-25)이 끝나면 보관(archive)함 | 공개 | `main` | Product Engineer | [conventions/repos.md](conventions/repos.md) 행 |
 | [backend-docs](https://github.com/BOAZ-website/backend-docs) | 백엔드 기능 명세서, ERD, API 명세 저장소. backend 코드를 바꾸면 명세를 함께 동기화함(backend의 Docs Sync Reminder가 알림). 담당 Product는 backend(관리자·홈페이지 API) | 비공개 | `main` | Backend 담당 | [products/backend.md](products/backend.md) "비공개 저장소 참조", [conventions/repos.md](conventions/repos.md) 행 |
 | [engineering-playbook](https://github.com/BOAZ-website/engineering-playbook) | 모든 저장소의 공통 개발 규칙 원천: 브랜치·이슈·PR·리뷰·릴리스·장애 절차, 템플릿, repo-rule-keeper 재사용 워크플로, `tools/new-issue.sh`. 이 저장소 자체임 | 공개 | `main` | PM | 이 문서, [conventions/repos.md](conventions/repos.md) 행 |
 

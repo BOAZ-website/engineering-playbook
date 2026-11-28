@@ -97,9 +97,11 @@ PM 결정(2026-11-29, `decisions/0006-repo-rule-keeper-v2-and-repo-standards.md`
 - 저장소 CI 검사 이름은 잡 이름이므로 룰셋을 설정할 때 Actions 화면의 체크 이름으로 확인함
 - frontend_recruiting_admin은 임시 저장소라 CI 필수 검사를 도입하지 않음. engineering-playbook은 CI 검사가 없음
 
-### 비밀값
+### 보안 설정
 
-- 공개 저장소 전부 secret scanning과 push protection을 켬(현재 engineering-playbook만 켜짐)
+- 공개 저장소 전부 secret scanning과 push protection을 켬(2026-11-29 현황: product-infra, engineering-playbook, design-system만 켜짐)
+- Actions `GITHUB_TOKEN` 기본 권한은 읽기 전용으로 둠. 쓰기가 필요한 워크플로는 파일의 `permissions:`에 직접 적음(2026-11-29 현황: 7개 공개 저장소 모두 읽기 전용)
+- Dependabot 보안 알림(alerts)은 켜고, 자동 보안 업데이트 PR은 켜지 않음. 알림은 담당 Product Engineer가 확인하고 필요하면 `[Chore]` 이슈를 만듦(2026-11-29 현황: 7개 공개 저장소 모두 알림 켜짐, 자동 PR 꺼짐)
 - 시크릿은 코드, 문서, PR, 이슈, AI 도구에 넣지 않음(`conventions/doc-writing.md`, `conventions/ai-usage.md`)
 
 ## 새 저장소 추가
@@ -109,7 +111,7 @@ PM 결정(2026-11-29, `decisions/0006-repo-rule-keeper-v2-and-repo-standards.md`
 - [ ] `tools/templates/`의 이슈 폼(`task.yml`, `config.yml`)과 PR 템플릿을 `.github/`에 복사하고 PR 템플릿의 저장소별 확인 칸을 채움
 - [ ] GitHub 기본 라벨을 지우고 작업 종류 라벨 9종을 이름·색·설명까지 같게 만듦(`conventions/issue-pr.md` "라벨")
 - [ ] 룰셋을 "룰셋 표준" 절대로 설정함(공개 저장소만. 필수 검사는 기본 브랜치 룰셋 `repo-rule-keeper`, `main` 룰셋 `repo-rule-keeper (main)`과 저장소 CI 검사)
-- [ ] 공개 저장소면 secret scanning과 push protection을 켬("룰셋 표준" 절의 "비밀값")
+- [ ] 공개 저장소면 secret scanning과 push protection을 켬("룰셋 표준" 절의 "보안 설정"). Dependabot 알림을 켜고 Actions 기본 권한이 읽기 전용인지 확인함
 - [ ] 저장소 설정에서 merge commit만 허용하고 squash·rebase는 끔
 - [ ] 저장소 설정 "Automatically delete head branches"를 켬(`conventions/git.md` "브랜치")
 - [ ] 커밋 훅을 설정하거나 커밋 형식을 이 문서의 표에 적음

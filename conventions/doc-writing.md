@@ -74,7 +74,7 @@ product-infra의 문서 작성 규칙과 공개 저장소 보안 규칙을 팀 �
 | 비밀 검사 실패(CI) | 같은 방식으로 값 제거 |
 | 검사식 변경 | 테스트 사례를 함께 추가 |
 
-- 공개 저장소 전부 secret scanning과 push protection을 켬(현재 이 저장소만 켜짐, 표준은 `conventions/repos.md` "룰셋 표준"의 "비밀값"). 시크릿은 코드, 문서, PR, 이슈, AI 도구에 넣지 않음(`conventions/ai-usage.md`)
+- 공개 저장소 전부 secret scanning과 push protection을 켬(현재 이 저장소만 켜짐, 표준은 `conventions/repos.md` "룰셋 표준"의 "보안 설정"). 시크릿은 코드, 문서, PR, 이슈, AI 도구에 넣지 않음(`conventions/ai-usage.md`)
 - 이 저장소의 검사: GitHub의 secret scanning과 push protection을 켬. 전용 검사 스크립트는 모집 시즌이 끝난 뒤 조직 `.github` 재사용 워크플로와 함께 도입
 
 ## 미결
