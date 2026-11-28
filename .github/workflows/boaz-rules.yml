@@ -6,7 +6,7 @@
 # issue 잡(이슈 이벤트): 담당자=작성자, 작업 종류 라벨, Type 자동 지정. Priority 등 누락은 마커 댓글 1개로 알리고 채워지면 접음
 # pr 잡(PR·리뷰·댓글·연결 이슈 편집): 제목 [Type] 9종, 라벨 자동, Assignee 자동, 대상 브랜치,
 #   Closes 1개, Reviewer, 미체크 항목의 사유 댓글 → 커밋 상태 pr-rules(룰셋 필수 검사)
-name: BOAZ Rules (reusable)
+name: repo-rule-keeper-Choonsik (reusable)
 
 on:
   workflow_call:
@@ -23,6 +23,7 @@ jobs:
             const { owner, repo } = context.repo;
             const number = context.issue.number;
             const MARK = '<!-- issue-check -->';
+            const KEEPER = '<img src="https://t1.kakaocdn.net/brunch/service/user/cnoC/image/5mazSO7Ouexw-TZN0tmlrXXUj30.JPG" width="40" align="left" alt="repo-rule-keeper-Choonsik"> **repo-rule-keeper-Choonsik**<br clear="left">';
             const LABELS = { feat: '⭐️ FEAT', fix: '🐛 FIX', hotfix: '🚑 HOTFIX', docs: '✏️ DOCS', refactor: '🛠️ REFACTOR',
                              style: '🧁 STYLE', test: '🔎 TEST', release: '🚀 RELEASE', chore: '🧹 CHORE' };
             const TYPE_OF = { '⭐️ FEAT': 'Feature', '🐛 FIX': 'Bug', '🚑 HOTFIX': 'Bug' };
@@ -72,10 +73,10 @@ jobs:
             // 봇 댓글은 마커로 찾아 하나만 갱신함
             const all = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: number });
             const existing = all.find(c => c.user?.type === 'Bot' && c.body.startsWith(MARK));
-            const RESOLVED = `${MARK}\n필수 값이 모두 채워졌습니다(해결됨).`;
+            const RESOLVED = `${MARK}\n${KEEPER}\n\n필수 값이 모두 채워졌습니다(해결됨).`;
 
             if (missing.length) {
-              const body = `${MARK}\n` +
+              const body = `${MARK}\n${KEEPER}\n\n` +
                 `@${issue.author.login} 이슈 필수 값이 비어 있습니다: ${missing.join(', ')}.\n` +
                 `보드 "BOAZ-website project" 편입과 Project 값도 확인해 주세요. ` +
                 `AI로 만들 때는 engineering-playbook \`tools/new-issue.sh\`를 쓰면 한 번에 지정됩니다(\`conventions/issue-pr.md\` "이슈").`;
@@ -122,6 +123,7 @@ jobs:
                 .filter(x => x.state === 'OPEN' && x.repository.nameWithOwner === `${owner}/${repo}`).map(x => x.number);
             }
 
+            const KEEPER = '<img src="https://t1.kakaocdn.net/brunch/service/user/cnoC/image/5mazSO7Ouexw-TZN0tmlrXXUj30.JPG" width="40" align="left" alt="repo-rule-keeper-Choonsik"> **repo-rule-keeper-Choonsik**<br clear="left">';
             const CLOSES = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*:?\s+(?:([\w.-]+)\/([\w.-]+))?#(\d+)/gi;
             const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
 
@@ -195,6 +197,7 @@ jobs:
 
               const ok = fails.length === 0;
               await core.summary
+                .addRaw(KEEPER, true)
                 .addHeading(`PR #${n} pr-rules: ${ok ? '통과' : '실패'}`, 3)
                 .addList(ok ? ['모든 규칙 충족'] : fails)
                 .addList([...prMiss.map(i => `PR 미체크: ${i}`), ...issueMiss.map(i => `이슈 미체크: ${i}`)])
