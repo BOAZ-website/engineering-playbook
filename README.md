@@ -38,7 +38,8 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 | API 응답 형식, 인증, 배포 순서를 확인한다 | [contracts/api.md](contracts/api.md), [contracts/auth.md](contracts/auth.md), [contracts/release-order.md](contracts/release-order.md) |
 | 장애가 났다 | [process/incident.md](process/incident.md) |
 | 모집 시즌을 준비한다 | [process/recruiting-season.md](process/recruiting-season.md) |
-| 권한을 요청하거나 회수한다 | [org/access.md](org/access.md) |
+| 권한을 요청한다(저장소, 조직, 시크릿 등) | [org/access.md](org/access.md) |
+| AWS 계정을 발급하거나 회수한다 | [org/aws-access.md](org/aws-access.md) |
 | 팀에 합류하거나 기수를 인수인계한다 | [org/onboarding.md](org/onboarding.md), [org/handover.md](org/handover.md) |
 | 문서, 이슈, PR 본문을 쓴다 | [conventions/doc-writing.md](conventions/doc-writing.md) |
 | 규칙이 왜 이렇게 됐는지 궁금하다 | [decisions/](decisions/) |
@@ -120,4 +121,4 @@ BOAZ 서비스운영팀이 일하는 방식을 모아 둔 저장소입니다. �
 
 ## 문서 상태
 
-2026-11-25 기준으로 관리자 페이지 문서를 뺀 모든 문서가 확정 상태입니다. 확정 문서는 27&28기부터 팀이 지켜야 하는 규칙입니다. 관리자 페이지 문서는 백엔드 연동이 시작되면 확정합니다. 2026-11-27에 추가한 [process/recruiting-season.md](process/recruiting-season.md)와 [decisions/0003](decisions/0003-recruiting-season-roles-and-checklist.md)은 같은 날 채택되어 확정 상태입니다. 체크리스트의 `(초기 기준)` 수치는 매 시즌 회고에서 실측값으로 고칩니다. 각 문서 맨 위에 담당 역할, 최종 검토일, 적용 범위, 상태가 적혀 있습니다. 통일 기준을 각 저장소에 실제로 적용하는 일정은 [conventions/git.md](conventions/git.md)의 "적용 일정"에 있습니다.
+2026-11-25 기준으로 관리자 페이지 문서를 뺀 모든 문서가 확정 상태입니다. 확정 문서는 27&28기부터 팀이 지켜야 하는 규칙입니다. 관리자 페이지 문서는 백엔드 연동이 시작되면 확정합니다. 2026-11-27에 추가한 [process/recruiting-season.md](process/recruiting-season.md)와 [decisions/0003](decisions/0003-recruiting-season-roles-and-checklist.md)은 같은 날 채택되어 확정 상태입니다. 체크리스트의 `(초기 기준)` 수치는 매 시즌 회고에서 실측값으로 고칩니다. 2026-11-28에 추가한 [org/aws-access.md](org/aws-access.md)도 확정 상태입니다. 각 문서 맨 위에 담당 역할, 최종 검토일, 적용 범위, 상태가 적혀 있습니다. 통일 기준을 각 저장소에 실제로 적용하는 일정은 [conventions/git.md](conventions/git.md)의 "적용 일정"에 있습니다.
