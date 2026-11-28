@@ -1,211 +1,279 @@
-# repo-rule-keeper: 모든 저장소 공통 규칙 검사 재사용 워크플로 원본(workflow_call). 직접 실행되지 않음
-# 이 파일 하나만 고치고 v1 태그를 옮기면 모든 저장소에 반영됨
-# 호출 파일 견본: tools/callers/repo-rule-keeper.yml (저장소마다 .github/workflows/repo-rule-keeper.yml로 복사)
+# repo-rule-keeper: 모든 저장소 공통 PR 규칙 검사 재사용 워크플로 원본(workflow_call). 직접 실행되지 않음
+# 이 파일 하나만 고치고 v2 태그를 옮기면 모든 저장소에 반영됨
+# 호출 파일 견본: tools/callers/repo-rule-keeper.yml (저장소 .github/workflows/에 같은 이름으로 복사)
 # 규칙: conventions/issue-pr.md, conventions/git.md
 #
-# 이슈 규칙(이슈 이벤트): 담당자=작성자, 작업 종류 라벨, Type 지정 시도. 누락은 마커 댓글 1개로 알리고 채워지면 접음
-# PR 규칙(PR·리뷰·댓글·연결 이슈 편집): 제목 [Type] 9종, 라벨 자동, Assignee 자동, 대상 브랜치,
-#   Closes 1개, Reviewer, 미체크 항목의 사유 댓글 → 커밋 상태 repo-rule-keeper(룰셋 필수 검사)
-# 이슈·PR 규칙을 잡 하나에 두어 PR 검사 목록에 건너뛴 잡이 보이지 않게 함
-name: repo-rule-keeper (reusable)
+# 잡 구성: prep(PR 정리) → title·base·closes·people·checklist(검사 5개, 병렬) → verdict(최종 판정)
+# 최종 판정이 커밋 상태 repo-rule-keeper(룰셋 필수 검사)를 기록함. 검사 잡은 위반이면 실패로 표시됨
+# 제목·본문은 신뢰할 수 없는 입력이므로 prep이 JSON 문자열 outputs.pr로 넘기고 다음 잡은 env로만 받음(스크립트에 ${{ }}로 넣지 않음)
+name: repo-rule-keeper PR (reusable)
 
 on:
   workflow_call:
+    inputs:
+      pr:
+        description: "검사할 PR 번호. 0이면 이벤트의 PR"
+        type: number
+        default: 0
 
 jobs:
-  check:
-    name: 규칙 검사
+  prep:
+    name: PR 정리
+    runs-on: ubuntu-latest
+    outputs:
+      pr: ${{ steps.prep.outputs.pr }}
+      sha: ${{ steps.prep.outputs.sha }}
+    steps:
+      - id: prep
+        uses: actions/github-script@v7
+        env:
+          INPUT_PR: ${{ inputs.pr }}
+        with:
+          script: |
+            const { owner, repo } = context.repo, p = context.payload;
+            const n = Number(process.env.INPUT_PR) || p.pull_request?.number || (p.issue?.pull_request ? p.issue.number : 0);
+            if (!n) { core.setFailed('검사할 PR 번호를 찾지 못함'); return; }
+
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: n });
+            // 이후 단계가 실패해도 최종 판정이 상태를 기록할 수 있도록 SHA를 먼저 넘김
+            core.setOutput('sha', pr.head.sha);
+
+            // 커밋 상태를 먼저 pending으로 기록(최종 판정이 덮어씀)
+            await github.rest.repos.createCommitStatus({
+              owner, repo, sha: pr.head.sha, context: 'repo-rule-keeper', state: 'pending', description: '검사 중',
+              target_url: `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`,
+            });
+
+            // 작업 종류 라벨: 제목 [Type]에 맞는 라벨 1개만 남김
+            const LABELS = { feat: '⭐️ FEAT', fix: '🐛 FIX', hotfix: '🚑 HOTFIX', docs: '✏️ DOCS', refactor: '🛠️ REFACTOR',
+                             style: '🧁 STYLE', test: '🔎 TEST', release: '🚀 RELEASE', chore: '🧹 CHORE' };
+            const tm = pr.title.match(/^\[([A-Za-z]+)\]/);
+            const want = tm && LABELS[tm[1].toLowerCase()];
+            const have = pr.labels.map(l => l.name);
+            for (const l of have.filter(x => Object.values(LABELS).includes(x) && x !== want)) {
+              await github.rest.issues.removeLabel({ owner, repo, issue_number: n, name: l }).catch(() => {});
+            }
+            if (want && !have.includes(want)) await github.rest.issues.addLabels({ owner, repo, issue_number: n, labels: [want] });
+
+            // Assignee: 비어 있으면 PR 작성자를 지정
+            const assignees = pr.assignees.map(a => a.login);
+            if (assignees.length < 1 && pr.user.type !== 'Bot') {
+              await github.rest.issues.addAssignees({ owner, repo, issue_number: n, assignees: [pr.user.login] });
+              assignees.push(pr.user.login);
+            }
+
+            // 라벨·담당자 정리 뒤의 updated_at을 기준으로 삼아, 판정 전에 PR이 다시 바뀌었는지 확인함
+            const { data: after } = await github.rest.pulls.get({ owner, repo, pull_number: n });
+            core.setOutput('pr', JSON.stringify({
+              number: n, sha: pr.head.sha, updatedAt: after.updated_at, title: pr.title, body: pr.body || '', baseRef: pr.base.ref, headRef: pr.head.ref,
+              defaultBranch: pr.base.repo.default_branch, user: pr.user.login, assignees,
+            }));
+
+  title:
+    name: 제목
+    needs: prep
+    runs-on: ubuntu-latest
+    outputs:
+      fail: ${{ steps.check.outputs.fail }}
+    steps:
+      - id: check
+        uses: actions/github-script@v7
+        env:
+          PR: ${{ needs.prep.outputs.pr }}
+        with:
+          script: |
+            const pr = JSON.parse(process.env.PR);
+            const fails = [];
+            // 제목 규칙: [Type] 내용, Type 9종(conventions/issue-pr.md "분류 기준")
+            if (!/^\[(Feat|Fix|Hotfix|Docs|Refactor|Style|Test|Release|Chore)\]\s+\S/i.test(pr.title)) {
+              fails.push('제목은 [Feat]·[Fix]·[Hotfix]·[Docs]·[Refactor]·[Style]·[Test]·[Release]·[Chore] 중 하나로 시작');
+            }
+            const msg = fails.join(', ');
+            core.setOutput('fail', msg);
+            await core.summary.addHeading(`PR #${pr.number} 제목: ${msg ? '실패' : '통과'}`, 3).addList(msg ? fails : ['모든 규칙 충족']).write();
+            if (msg) core.setFailed(msg);
+
+  base:
+    name: 대상 브랜치
+    needs: prep
+    runs-on: ubuntu-latest
+    outputs:
+      fail: ${{ steps.check.outputs.fail }}
+    steps:
+      - id: check
+        uses: actions/github-script@v7
+        env:
+          PR: ${{ needs.prep.outputs.pr }}
+        with:
+          script: |
+            const pr = JSON.parse(process.env.PR);
+            const fails = [];
+            // 대상 브랜치: 기본 브랜치가 아닌 곳으로 보내는 PR은 dev(릴리스), hotfix/*에서만(release/* 브랜치는 쓰지 않음, conventions/git.md)
+            if (pr.baseRef !== pr.defaultBranch && !(pr.headRef === 'dev' || /^hotfix\//i.test(pr.headRef))) {
+              fails.push(`대상 브랜치는 ${pr.defaultBranch}(기능 PR). ${pr.baseRef}는 릴리스(dev)·hotfix/*만`);
+            }
+            const msg = fails.join(', ');
+            core.setOutput('fail', msg);
+            await core.summary.addHeading(`PR #${pr.number} 대상 브랜치: ${msg ? '실패' : '통과'}`, 3).addList(msg ? fails : ['모든 규칙 충족']).write();
+            if (msg) core.setFailed(msg);
+
+  closes:
+    name: 이슈 연결
+    needs: prep
+    runs-on: ubuntu-latest
+    outputs:
+      fail: ${{ steps.check.outputs.fail }}
+    steps:
+      - id: check
+        uses: actions/github-script@v7
+        env:
+          PR: ${{ needs.prep.outputs.pr }}
+        with:
+          script: |
+            const pr = JSON.parse(process.env.PR);
+            const body = pr.body.replace(/<!--[\s\S]*?-->/g, '');
+            const CLOSES = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*:?\s+(?:([\w.-]+)\/([\w.-]+))?#(\d+)/gi;
+            const closes = [...body.matchAll(CLOSES)];
+            const exempt = /^\[(Release|Hotfix)\]/i.test(pr.title) || pr.baseRef !== pr.defaultBranch;
+            const fails = [];
+            if (exempt ? closes.length > 1 : closes.length !== 1) {
+              fails.push(exempt ? 'Closes 이슈는 0~1개' : 'Closes 이슈 1개 필요');
+            }
+            const msg = fails.join(', ');
+            core.setOutput('fail', msg);
+            await core.summary.addHeading(`PR #${pr.number} 이슈 연결: ${msg ? '실패' : '통과'}`, 3).addList(msg ? fails : ['모든 규칙 충족']).write();
+            if (msg) core.setFailed(msg);
+
+  people:
+    name: 담당자·리뷰어
+    needs: prep
+    runs-on: ubuntu-latest
+    outputs:
+      fail: ${{ steps.check.outputs.fail }}
+    steps:
+      - id: check
+        uses: actions/github-script@v7
+        env:
+          PR: ${{ needs.prep.outputs.pr }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const info = JSON.parse(process.env.PR), n = info.number;
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: n });
+            const reviews = await github.paginate(github.rest.pulls.listReviews, { owner, repo, pull_number: n });
+            // 팀 리뷰 요청은 저장소 토큰에 requested_teams로 보이지 않을 수 있어 타임라인의 요청·취소 기록으로도 셈
+            const timeline = await github.paginate(github.rest.issues.listEventsForTimeline, { owner, repo, issue_number: n });
+            const req = new Map();
+            for (const e of timeline) {
+              if (e.event !== 'review_requested' && e.event !== 'review_request_removed') continue;
+              const key = e.requested_team ? 'team:' + e.requested_team.slug : 'user:' + (e.requested_reviewer?.login || '');
+              req.set(key, e.event === 'review_requested');
+            }
+            const hasReviewer = pr.requested_reviewers.length > 0 || pr.requested_teams.length > 0
+              || [...req.values()].some(Boolean)
+              || reviews.some(r => r.user && r.user.login !== pr.user.login);
+            const fails = [];
+            if (!hasReviewer) fails.push('Reviewer 지정 필요');
+            if (info.assignees.length < 1) fails.push('Assignee 지정 필요');
+            const msg = fails.join(', ');
+            core.setOutput('fail', msg);
+            await core.summary.addHeading(`PR #${n} 담당자·리뷰어: ${msg ? '실패' : '통과'}`, 3).addList(msg ? fails : ['모든 규칙 충족']).write();
+            if (msg) core.setFailed(msg);
+
+  checklist:
+    name: 체크리스트 사유
+    needs: prep
+    runs-on: ubuntu-latest
+    outputs:
+      fail: ${{ steps.check.outputs.fail }}
+    steps:
+      - id: check
+        uses: actions/github-script@v7
+        env:
+          PR: ${{ needs.prep.outputs.pr }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = JSON.parse(process.env.PR), n = pr.number;
+            const norm = s => s.replace(/[`*_]/g, '').replace(/\s+/g, ' ').trim();
+            const items = b => (b || '').replace(/<!--[\s\S]*?-->/g, '').replace(/```[\s\S]*?```/g, '').split('\n').map(l => l.match(/^\s*[-*] \[ \]\s+(\S.*)$/)).filter(Boolean).map(m => norm(m[1]));
+            const reasons = cs => cs.filter(c => c.user?.type !== 'Bot').flatMap(c => (c.body || '').split('\n')).map(norm).filter(l => l.startsWith('사유:'));
+            const uncovered = (its, rs) => its.filter(i => !rs.some(r => r.includes(i.slice(0, 30))));
+            const comments = (o, r, num) => github.paginate(github.rest.issues.listComments, { owner: o, repo: r, issue_number: num });
+            const CLOSES = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*:?\s+(?:([\w.-]+)\/([\w.-]+))?#(\d+)/gi;
+            const closes = [...pr.body.replace(/<!--[\s\S]*?-->/g, '').matchAll(CLOSES)];
+            const fails = [];
+
+            const prComments = await comments(owner, repo, n);
+            const prMiss = uncovered(items(pr.body), reasons(prComments));
+            if (prMiss.length) fails.push(`PR 미체크 항목 ${prMiss.length}개에 사유 없음`);
+
+            let issueMiss = [];
+            if (closes.length === 1) {
+              const [, o, r, num] = closes[0];
+              const io = o || owner, ir = r || repo;
+              const { data: issue } = await github.rest.issues.get({ owner: io, repo: ir, issue_number: Number(num) });
+              const issueComments = await comments(io, ir, Number(num));
+              issueMiss = uncovered(items(issue.body), reasons([...prComments, ...issueComments]));
+              if (issueMiss.length) fails.push(`연결 이슈 미체크 항목 ${issueMiss.length}개에 사유 없음`);
+            }
+
+            const msg = fails.join(', ');
+            core.setOutput('fail', msg);
+            await core.summary
+              .addHeading(`PR #${n} 체크리스트 사유: ${msg ? '실패' : '통과'}`, 3)
+              .addList(msg ? fails : ['모든 규칙 충족'])
+              .addList([...prMiss.map(i => `PR 미체크: ${i}`), ...issueMiss.map(i => `이슈 미체크: ${i}`)])
+              .write();
+            if (msg) core.setFailed(msg);
+
+  verdict:
+    name: 최종 판정
+    needs: [prep, title, base, closes, people, checklist]
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/github-script@v7
+        env:
+          PR: ${{ needs.prep.outputs.pr }}
+          SHA: ${{ needs.prep.outputs.sha }}
+          NEEDS: ${{ toJSON(needs) }}
         with:
           script: |
-            const ev = context.eventName, act = context.payload.action;
-
-            // 이슈 규칙: 이슈 생성·수정 때
-            async function issueRules() {
-              const { owner, repo } = context.repo;
-              const number = context.issue.number;
-              const MARK = '<!-- issue-check -->';
-              const LABELS = { feat: '⭐️ FEAT', fix: '🐛 FIX', hotfix: '🚑 HOTFIX', docs: '✏️ DOCS', refactor: '🛠️ REFACTOR',
-                               style: '🧁 STYLE', test: '🔎 TEST', release: '🚀 RELEASE', chore: '🧹 CHORE' };
-              const TYPE_OF = { '⭐️ FEAT': 'Feature', '🐛 FIX': 'Bug', '🚑 HOTFIX': 'Bug' };
-
-              // 생성 직후에는 new-issue.sh가 필드를 채우는 중이므로 생성 2분 뒤까지 기다림
-              const age = Date.now() - new Date(context.payload.issue.created_at);
-              if (age < 120000) await new Promise(r => setTimeout(r, 120000 - age));
-
-              const q = await github.graphql(`query($o:String!,$r:String!,$n:Int!){
-                repository(owner:$o,name:$r){issue(number:$n){id title author{login}
-                  assignees(first:5){totalCount} labels(first:20){nodes{name}} issueType{name}}}}`,
-                { o: owner, r: repo, n: number });
-              const issue = q.repository.issue;
-              const missing = [];
-              let priErr = null;
-
-              if (issue.assignees.totalCount === 0 && issue.author) {
-                await github.rest.issues.addAssignees({ owner, repo, issue_number: number, assignees: [issue.author.login] });
-              }
-
-              let typeLabel = issue.labels.nodes.map(l => l.name).find(n => Object.values(LABELS).includes(n));
-              if (!typeLabel) {
-                const m = issue.title.match(/^\[([A-Za-z]+)\]/);
-                typeLabel = m && LABELS[m[1].toLowerCase()];
-                if (typeLabel) await github.rest.issues.addLabels({ owner, repo, issue_number: number, labels: [typeLabel] });
-                else missing.push('제목 접두어와 작업 종류 라벨(`[Feat]`·`[Fix]`·`[Docs]`·`[Chore]` 등)');
-              }
-
-              if (!issue.issueType) {
-                try {
-                  const t = await github.graphql(`query($o:String!){organization(login:$o){issueTypes(first:10){nodes{id name}}}}`, { o: owner });
-                  const want = TYPE_OF[typeLabel] || 'Task';
-                  const id = t.organization.issueTypes.nodes.find(x => x.name === want)?.id;
-                  await github.graphql(`mutation($i:ID!,$t:ID!){updateIssue(input:{id:$i,issueTypeId:$t}){clientMutationId}}`, { i: issue.id, t: id });
-                } catch (e) { missing.push('Type(Feature·Bug·Task)'); }
-              }
-
-              try {
-                const f = await github.graphql(`query($i:ID!){node(id:$i){... on Issue{issueFieldValues(first:10){nodes{
-                  ... on IssueFieldSingleSelectValue{field{... on IssueFieldSingleSelect{name}}}}}}}}`, { i: issue.id });
-                if (!f.node.issueFieldValues.nodes.some(v => v.field?.name === 'Priority')) missing.push('Priority(사이드바 Fields)');
-              } catch (e) {
-                priErr = e;
-                missing.push('Priority(조회 실패)');
-              }
-
-              // 봇 댓글은 마커로 찾아 하나만 갱신함
-              const all = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: number });
-              const existing = all.find(c => c.user?.type === 'Bot' && c.body.startsWith(MARK));
-              const RESOLVED = `${MARK}\n필수 값이 모두 채워졌습니다(해결됨).`;
-
-              if (missing.length) {
-                const body = `${MARK}\n` +
-                  `@${issue.author.login} 이슈 필수 값이 비어 있습니다: ${missing.join(', ')}.\n` +
-                  `보드 "BOAZ-website project" 편입과 Project 값도 확인해 주세요. ` +
-                  `AI로 만들 때는 engineering-playbook \`tools/new-issue.sh\`를 쓰면 한 번에 지정됩니다(\`conventions/issue-pr.md\` "이슈").`;
-                if (!existing) {
-                  await github.rest.issues.createComment({ owner, repo, issue_number: number, body });
-                } else {
-                  if (existing.body !== body) await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
-                  // 해결됨으로 접었던 댓글이 다시 필요해졌으면 펼침
-                  try {
-                    await github.graphql(`mutation($i:ID!){unminimizeComment(input:{subjectId:$i}){clientMutationId}}`, { i: existing.node_id });
-                  } catch (e) { core.warning('댓글 펼치기 실패: ' + e.message); }
-                }
-              } else if (existing && existing.body !== RESOLVED) {
-                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body: RESOLVED });
-                await github.graphql(`mutation($i:ID!){minimizeComment(input:{subjectId:$i,classifier:RESOLVED}){clientMutationId}}`, { i: existing.node_id });
-              }
-
-              if (priErr) core.setFailed('Priority 조회 실패: ' + priErr.message);
+            const { owner, repo } = context.repo;
+            const pr = process.env.PR ? JSON.parse(process.env.PR) : null;
+            const sha = pr?.sha || process.env.SHA;
+            if (!sha) { core.setFailed('PR을 조회하지 못해 커밋 상태를 기록할 수 없음'); return; }
+            const needs = JSON.parse(process.env.NEEDS);
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            if (!pr) {
+              // PR 정리 잡이 SHA만 남기고 실패한 경우: pending이 남지 않도록 failure로 기록
+              await github.rest.repos.createCommitStatus({ owner, repo, sha, context: 'repo-rule-keeper', state: 'failure',
+                description: 'PR 정리 잡 실패(재실행 필요)', target_url: runUrl });
+              core.setFailed('PR 정리 잡 실패'); return;
             }
-
-            // PR 규칙: PR·리뷰·댓글 이벤트와 연결 이슈 수정 때
-            async function prRules() {
-              const { owner, repo } = context.repo, p = context.payload;
-              const norm = s => s.replace(/[`*_]/g, '').replace(/\s+/g, ' ').trim();
-              const items = b => (b || '').replace(/<!--[\s\S]*?-->/g, '').replace(/```[\s\S]*?```/g, '').split('\n').map(l => l.match(/^\s*[-*] \[ \]\s+(\S.*)$/)).filter(Boolean).map(m => norm(m[1]));
-              const reasons = cs => cs.filter(c => c.user?.type !== 'Bot').flatMap(c => (c.body || '').split('\n')).map(norm).filter(l => l.startsWith('사유:'));
-              const uncovered = (its, rs) => its.filter(i => !rs.some(r => r.includes(i.slice(0, 30))));
-              const comments = (o, r, n) => github.paginate(github.rest.issues.listComments, { owner: o, repo: r, issue_number: n });
-
-              // 검사할 PR 번호 결정
-              let nums = [];
-              if (p.pull_request) nums = [p.pull_request.number];
-              else if (p.issue?.pull_request) nums = [p.issue.number];
-              else if (p.issue) {
-                const r = await github.graphql(`query($o:String!,$r:String!,$n:Int!){repository(owner:$o,name:$r){issue(number:$n){
-                  closedByPullRequestsReferences(first:5,includeClosedPrs:false){nodes{number state repository{nameWithOwner}}}}}}`,
-                  { o: owner, r: repo, n: p.issue.number });
-                nums = r.repository.issue.closedByPullRequestsReferences.nodes
-                  .filter(x => x.state === 'OPEN' && x.repository.nameWithOwner === `${owner}/${repo}`).map(x => x.number);
-              }
-
-              const CLOSES = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*:?\s+(?:([\w.-]+)\/([\w.-]+))?#(\d+)/gi;
-              const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
-
-              for (const n of nums) {
-                const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: n });
-                const body = (pr.body || '').replace(/<!--[\s\S]*?-->/g, '');
-                const exempt = /^\[(Release|Hotfix)\]/i.test(pr.title) || pr.base.ref !== pr.base.repo.default_branch;
-                const closes = [...body.matchAll(CLOSES)];
-                const fails = [];
-
-                // 작업 종류 라벨: 제목 [Type]에 맞는 라벨 1개만 남김
-                const LABELS = { feat: '⭐️ FEAT', fix: '🐛 FIX', hotfix: '🚑 HOTFIX', docs: '✏️ DOCS', refactor: '🛠️ REFACTOR',
-                                 style: '🧁 STYLE', test: '🔎 TEST', release: '🚀 RELEASE', chore: '🧹 CHORE' };
-                const tm = pr.title.match(/^\[([A-Za-z]+)\]/);
-                const want = tm && LABELS[tm[1].toLowerCase()];
-                const have = pr.labels.map(l => l.name);
-                for (const l of have.filter(x => Object.values(LABELS).includes(x) && x !== want)) {
-                  await github.rest.issues.removeLabel({ owner, repo, issue_number: n, name: l }).catch(() => {});
-                }
-                if (want && !have.includes(want)) await github.rest.issues.addLabels({ owner, repo, issue_number: n, labels: [want] });
-
-                // Assignee: 비어 있으면 PR 작성자를 지정
-                if (pr.assignees.length < 1 && pr.user.type !== 'Bot') {
-                  await github.rest.issues.addAssignees({ owner, repo, issue_number: n, assignees: [pr.user.login] });
-                  pr.assignees.push(pr.user);
-                }
-
-                // 대상 브랜치: 기본 브랜치가 아닌 main으로 보내는 PR은 dev(릴리스), hotfix/*에서만(release/* 브랜치는 쓰지 않음, conventions/git.md)
-                const def = pr.base.repo.default_branch;
-                if (pr.base.ref !== def && !(pr.head.ref === 'dev' || /^hotfix\//i.test(pr.head.ref))) {
-                  fails.push(`대상 브랜치는 ${def}(기능 PR). ${pr.base.ref}는 릴리스(dev)·hotfix/*만`);
-                }
-
-                // 제목 규칙: [Type] 내용, Type 9종(conventions/issue-pr.md "분류 기준")
-                if (!/^\[(Feat|Fix|Hotfix|Docs|Refactor|Style|Test|Release|Chore)\]\s+\S/i.test(pr.title)) {
-                  fails.push('제목은 [Feat]·[Fix]·[Hotfix]·[Docs]·[Refactor]·[Style]·[Test]·[Release]·[Chore] 중 하나로 시작');
-                }
-
-                if (exempt ? closes.length > 1 : closes.length !== 1) {
-                  fails.push(exempt ? 'Closes 이슈는 0~1개' : 'Closes 이슈 1개 필요');
-                }
-
-                const reviews = await github.paginate(github.rest.pulls.listReviews, { owner, repo, pull_number: n });
-                // 팀 리뷰 요청은 저장소 토큰에 requested_teams로 보이지 않을 수 있어 타임라인의 요청·취소 기록으로도 셈
-                const timeline = await github.paginate(github.rest.issues.listEventsForTimeline, { owner, repo, issue_number: n });
-                const req = new Map();
-                for (const e of timeline) {
-                  if (e.event !== 'review_requested' && e.event !== 'review_request_removed') continue;
-                  const key = e.requested_team ? 'team:' + e.requested_team.slug : 'user:' + (e.requested_reviewer?.login || '');
-                  req.set(key, e.event === 'review_requested');
-                }
-                const hasReviewer = pr.requested_reviewers.length > 0 || pr.requested_teams.length > 0
-                  || [...req.values()].some(Boolean)
-                  || reviews.some(r => r.user && r.user.login !== pr.user.login);
-                if (!hasReviewer) fails.push('Reviewer 지정 필요');
-                if (pr.assignees.length < 1) fails.push('Assignee 지정 필요');
-
-                const prComments = await comments(owner, repo, n);
-                const prMiss = uncovered(items(pr.body), reasons(prComments));
-                if (prMiss.length) fails.push(`PR 미체크 항목 ${prMiss.length}개에 사유 없음`);
-
-                let issueMiss = [];
-                if (closes.length === 1) {
-                  const [, o, r, num] = closes[0];
-                  const io = o || owner, ir = r || repo;
-                  const { data: issue } = await github.rest.issues.get({ owner: io, repo: ir, issue_number: Number(num) });
-                  const issueComments = await comments(io, ir, Number(num));
-                  issueMiss = uncovered(items(issue.body), reasons([...prComments, ...issueComments]));
-                  if (issueMiss.length) fails.push(`연결 이슈 미체크 항목 ${issueMiss.length}개에 사유 없음`);
-                }
-
-                const ok = fails.length === 0;
-                await core.summary
-                  .addHeading(`PR #${n} repo-rule-keeper: ${ok ? '통과' : '실패'}`, 3)
-                  .addList(ok ? ['모든 규칙 충족'] : fails)
-                  .addList([...prMiss.map(i => `PR 미체크: ${i}`), ...issueMiss.map(i => `이슈 미체크: ${i}`)])
-                  .write();
-                await github.rest.repos.createCommitStatus({
-                  owner, repo, sha: pr.head.sha, context: 'repo-rule-keeper',
-                  state: ok ? 'success' : 'failure',
-                  description: (ok ? '모든 규칙 충족' : fails.join(', ')).slice(0, 140),
-                  target_url: runUrl,
-                });
-              }
+            const NAMES = { title: '제목', base: '대상 브랜치', closes: '이슈 연결', people: '담당자·리뷰어', checklist: '체크리스트 사유' };
+            const fails = [];
+            for (const [k, name] of Object.entries(NAMES)) {
+              const r = needs[k]?.result;
+              if (r === 'success') continue;
+              // 검사 잡이 위반으로 실패하면 outputs.fail 문구를 쓰고, 문구가 없으면(API 오류·취소 등) 잡 이름으로 표시
+              fails.push(needs[k]?.outputs?.fail || `${name} 잡 ${r || '결과 없음'}`);
             }
-
-            if (ev === 'issues' && !context.payload.issue.pull_request) await issueRules();
-            if (ev !== 'issues' || act === 'edited') await prRules();
+            const ok = fails.length === 0;
+            // 검사 중에 PR이 바뀌었으면(제목·본문 편집, 새 커밋 등) 오래된 결과로 최신 결과를 덮지 않음. 바뀐 이벤트의 새 실행이 기록함
+            const { data: now } = await github.rest.pulls.get({ owner, repo, pull_number: pr.number });
+            if (now.head.sha !== pr.sha || now.updated_at !== pr.updatedAt) {
+              core.notice(`PR #${pr.number}이 검사 중에 바뀌어 상태를 기록하지 않음(새 실행이 기록)`);
+            } else {
+              await github.rest.repos.createCommitStatus({
+                owner, repo, sha: pr.sha, context: 'repo-rule-keeper',
+                state: ok ? 'success' : 'failure',
+                description: (ok ? '모든 규칙 충족' : fails.join(', ')).slice(0, 140),
+                target_url: runUrl,
+              });
+            }
+            await core.summary
+              .addHeading(`PR #${pr.number} repo-rule-keeper: ${ok ? '통과' : '실패'}`, 3)
+              .addList(ok ? ['모든 규칙 충족'] : fails)
+              .write();

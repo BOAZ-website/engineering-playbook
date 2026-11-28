@@ -1,0 +1,168 @@
+# repo-rule-keeper 이슈·댓글 규칙 재사용 워크플로 원본(workflow_call). 직접 실행되지 않음
+# 이 파일 하나만 고치고 v2 태그를 옮기면 모든 저장소에 반영됨
+# 호출 파일 견본: tools/callers/repo-rule-keeper-issue.yml (저장소 .github/workflows/에 같은 이름으로 복사)
+# 규칙: conventions/issue-pr.md
+#
+# 이슈 이벤트: issue-fix(담당자=작성자, 작업 종류 라벨, Type 지정 시도) → issue-notice(필수 값 누락 마커 댓글 1개)
+# 이슈 댓글·이슈 편집: find-pr(연결된 열린 PR 찾기) → recheck(repo-rule-keeper.yml로 PR 재검사)
+name: repo-rule-keeper 이슈 (reusable)
+
+on:
+  workflow_call:
+
+jobs:
+  issue-fix:
+    name: 이슈 자동 정리
+    if: github.event_name == 'issues' && !github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    outputs:
+      missing: ${{ steps.fix.outputs.missing }}
+    steps:
+      - id: fix
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const number = context.issue.number;
+            const LABELS = { feat: '⭐️ FEAT', fix: '🐛 FIX', hotfix: '🚑 HOTFIX', docs: '✏️ DOCS', refactor: '🛠️ REFACTOR',
+                             style: '🧁 STYLE', test: '🔎 TEST', release: '🚀 RELEASE', chore: '🧹 CHORE' };
+            const TYPE_OF = { '⭐️ FEAT': 'Feature', '🐛 FIX': 'Bug', '🚑 HOTFIX': 'Bug' };
+
+            // 생성 직후에는 new-issue.sh가 필드를 채우는 중이므로 생성 2분 뒤까지 기다림
+            const age = Date.now() - new Date(context.payload.issue.created_at);
+            if (age < 120000) await new Promise(r => setTimeout(r, 120000 - age));
+
+            const q = await github.graphql(`query($o:String!,$r:String!,$n:Int!){
+              repository(owner:$o,name:$r){issue(number:$n){id title author{login}
+                assignees(first:5){totalCount} labels(first:20){nodes{name}} issueType{name}}}}`,
+              { o: owner, r: repo, n: number });
+            const issue = q.repository.issue;
+            const missing = [];
+
+            if (issue.assignees.totalCount === 0 && issue.author) {
+              await github.rest.issues.addAssignees({ owner, repo, issue_number: number, assignees: [issue.author.login] });
+            }
+
+            let typeLabel = issue.labels.nodes.map(l => l.name).find(n => Object.values(LABELS).includes(n));
+            if (!typeLabel) {
+              const m = issue.title.match(/^\[([A-Za-z]+)\]/);
+              typeLabel = m && LABELS[m[1].toLowerCase()];
+              if (typeLabel) await github.rest.issues.addLabels({ owner, repo, issue_number: number, labels: [typeLabel] });
+              else missing.push('제목 접두어와 작업 종류 라벨(`[Feat]`·`[Fix]`·`[Docs]`·`[Chore]` 등)');
+            }
+
+            if (!issue.issueType) {
+              try {
+                const t = await github.graphql(`query($o:String!){organization(login:$o){issueTypes(first:10){nodes{id name}}}}`, { o: owner });
+                const want = TYPE_OF[typeLabel] || 'Task';
+                const id = t.organization.issueTypes.nodes.find(x => x.name === want)?.id;
+                await github.graphql(`mutation($i:ID!,$t:ID!){updateIssue(input:{id:$i,issueTypeId:$t}){clientMutationId}}`, { i: issue.id, t: id });
+              } catch (e) { missing.push('Type(Feature·Bug·Task)'); }
+            }
+
+            core.setOutput('missing', JSON.stringify(missing));
+
+  issue-notice:
+    name: 이슈 필수 값 알림
+    needs: issue-fix
+    # 자동 정리가 실패해도 알림은 남김(이슈 이벤트일 때만)
+    if: always() && github.event_name == 'issues' && !github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          MISSING: ${{ needs.issue-fix.outputs.missing }}
+          FIX_RESULT: ${{ needs.issue-fix.result }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const number = context.issue.number;
+            const MARK = '<!-- issue-check -->';
+            const missing = JSON.parse(process.env.MISSING || '[]');
+            if (process.env.FIX_RESULT !== 'success') missing.push('자동 정리 실패(담당자·라벨·Type을 직접 확인)');
+            let priErr = null;
+
+            const q = await github.graphql(`query($o:String!,$r:String!,$n:Int!){
+              repository(owner:$o,name:$r){issue(number:$n){id author{login}}}}`, { o: owner, r: repo, n: number });
+            const issue = q.repository.issue;
+
+            try {
+              const f = await github.graphql(`query($i:ID!){node(id:$i){... on Issue{issueFieldValues(first:10){nodes{
+                ... on IssueFieldSingleSelectValue{field{... on IssueFieldSingleSelect{name}}}}}}}}`, { i: issue.id });
+              if (!f.node.issueFieldValues.nodes.some(v => v.field?.name === 'Priority')) missing.push('Priority(사이드바 Fields)');
+            } catch (e) {
+              priErr = e;
+              missing.push('Priority(조회 실패)');
+            }
+
+            // 봇 댓글은 마커로 찾아 하나만 갱신함
+            const all = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number: number });
+            const existing = all.find(c => c.user?.type === 'Bot' && c.body.startsWith(MARK));
+            const RESOLVED = `${MARK}\n필수 값이 모두 채워졌습니다(해결됨).`;
+
+            if (missing.length) {
+              const body = `${MARK}\n` +
+                `@${issue.author.login} 이슈 필수 값이 비어 있습니다: ${missing.join(', ')}.\n` +
+                `보드 "BOAZ-website project" 편입과 Project 값도 확인해 주세요. ` +
+                `AI로 만들 때는 engineering-playbook \`tools/new-issue.sh\`를 쓰면 한 번에 지정됩니다(\`conventions/issue-pr.md\` "이슈").`;
+              if (!existing) {
+                await github.rest.issues.createComment({ owner, repo, issue_number: number, body });
+              } else {
+                if (existing.body !== body) await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+                // 해결됨으로 접었던 댓글이 다시 필요해졌으면 펼침
+                try {
+                  await github.graphql(`mutation($i:ID!){unminimizeComment(input:{subjectId:$i}){clientMutationId}}`, { i: existing.node_id });
+                } catch (e) { core.warning('댓글 펼치기 실패: ' + e.message); }
+              }
+            } else if (existing && existing.body !== RESOLVED) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body: RESOLVED });
+              await github.graphql(`mutation($i:ID!){minimizeComment(input:{subjectId:$i,classifier:RESOLVED}){clientMutationId}}`, { i: existing.node_id });
+            }
+
+            if (priErr) core.setFailed('Priority 조회 실패: ' + priErr.message);
+
+  find-pr:
+    name: 연결 PR 찾기
+    if: github.event_name == 'issue_comment' || (github.event_name == 'issues' && github.event.action == 'edited')
+    runs-on: ubuntu-latest
+    outputs:
+      prs: ${{ steps.find.outputs.prs }}
+    steps:
+      - id: find
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo, p = context.payload;
+            let nums = [];
+            if (p.issue?.pull_request) nums = [p.issue.number];
+            else if (p.issue) {
+              // 연결 PR을 마지막 페이지까지 조회
+              let after = null;
+              do {
+                const r = await github.graphql(`query($o:String!,$r:String!,$n:Int!,$a:String){repository(owner:$o,name:$r){issue(number:$n){
+                  closedByPullRequestsReferences(first:50,after:$a,includeClosedPrs:false){pageInfo{hasNextPage endCursor} nodes{number state repository{nameWithOwner}}}}}}`,
+                  { o: owner, r: repo, n: p.issue.number, a: after });
+                const c = r.repository.issue.closedByPullRequestsReferences;
+                nums.push(...c.nodes.filter(x => x.state === 'OPEN' && x.repository.nameWithOwner === `${owner}/${repo}`).map(x => x.number));
+                after = c.pageInfo.hasNextPage ? c.pageInfo.endCursor : null;
+              } while (after);
+            }
+            core.setOutput('prs', JSON.stringify(nums));
+
+  recheck:
+    name: PR 재검사
+    needs: find-pr
+    if: needs.find-pr.outputs.prs != '[]' && needs.find-pr.outputs.prs != ''
+    strategy:
+      fail-fast: false
+      matrix:
+        pr: ${{ fromJSON(needs.find-pr.outputs.prs) }}
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+      statuses: write
+    # 같은 저장소 상대 경로는 이 파일과 같은 커밋의 PR 원본을 부름(이슈·PR 원본 버전이 어긋나지 않음)
+    uses: ./.github/workflows/repo-rule-keeper.yml
+    with:
+      pr: ${{ matrix.pr }}

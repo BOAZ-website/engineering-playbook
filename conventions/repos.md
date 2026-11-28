@@ -36,7 +36,7 @@
 | frontend_recruiting_admin | 없음(템플릿 없음) | 미적용(PR #7) | 없음 | 없음 |
 | product-infra | 없음 | 미적용(PR #140) | 없음 | `CLAUDE.md` |
 | backend-docs(비공개) | `docs_task.md`(유지) | 미적용(PR #27) | 없음(무료 플랜 비공개라 강제할 수 없어 표시만 함) | `AGENTS.md` |
-| engineering-playbook | `recruiting-season.md`(유지) | 적용(로컬 호출 `repo-rule-keeper-run`) | `main` 보호(2026-11-28 작업 중 일시 비활성) | 없음 |
+| engineering-playbook | `recruiting-season.md`(유지) | 적용(로컬 호출 `repo-rule-keeper-run`, `repo-rule-keeper-issue-run`) | `main` 보호(2026-11-28 작업 중 일시 비활성) | 없음 |
 | design-system | 없음 | 미적용(PR #100) | `v*` 태그 보호만 | `AGENTS.md` |
 
 - 모든 저장소의 PR 머지 시 브랜치 자동 삭제가 켜져 있음(2026-11-28). 작업 종류 라벨 9종은 8개 저장소 모두 있음
@@ -58,6 +58,8 @@
 | design-system | 차이: repo-rule-keeper 미적용, `dev`·`main` 룰셋 없음(`v*` 태그만 보호). 흡수 대상 워크플로 남음: `auto-assign`, `auto-label`, `pr-base-guard`, `title-guard` |
 
 - 제목 검사, 자동 라벨, 작성자 자동 지정, 대상 브랜치 경고는 모두 repo-rule-keeper에 들어 있으므로 repo-rule-keeper 적용이 끝나면 저장소별 `title-guard.yml`, `auto-label.yml`, `auto-assign.yml`, `pr-base-guard.yml`은 삭제함. 빌드·테스트·배포 워크플로(ci, cd, deploy 등)는 저장소 고유라 유지함
+- 저장소 고유라 repo-rule-keeper로 대체하지 않고 유지하는 워크플로: backend의 `docs-sync-reminder`, backend-docs의 `generated-files`, design-system의 `release-check`, 각 저장소의 CI·배포 워크플로
+- frontend의 사람 이름 라벨(윤지·지선·태영)은 2026-11-28 삭제함(PM 결정, 담당자는 Assignee로 봄). frontend `🎉 INIT`(15건)·`🚀 Deploy`(9건), product-infra `🚀 DEPLOY`(3건)는 기존 이슈·PR에 `🧹 CHORE`·`🚀 RELEASE`를 붙인 뒤 삭제함(2026-11-28). GitHub 기본 라벨 9개(bug, documentation, enhancement 등)도 모든 저장소에서 삭제함. 남는 라벨은 작업 종류 9종과 backend 기능 라벨뿐
 - 저장소 PR이 머지되면 이 표를 같은 PR에서 고치고 "최종 검토일"을 갱신함
 
 ## 적용 일정
@@ -75,9 +77,9 @@
 ## 새 저장소 추가
 
 - [ ] 기존 이슈를 조직 Project에 넣고 Project 값을 지정함. 자동 추가 규칙은 무료 플랜이라 1개뿐이므로 PM이 일괄로 넣음
-- [ ] `tools/callers/`의 호출 파일 1개(`repo-rule-keeper.yml`)를 `.github/workflows/repo-rule-keeper.yml`로 복사함(`@v1` 고정). 제목 검사·자동 라벨·Assignee 자동 지정·대상 브랜치 경고는 repo-rule-keeper에 들어 있으므로 저장소별 파일(`title-guard.yml`, `auto-label.yml`, `auto-assign.yml`, `pr-base-guard.yml`)을 따로 두지 않음
+- [ ] `tools/callers/`의 호출 파일 2개(`repo-rule-keeper.yml` PR용, `repo-rule-keeper-issue.yml` 이슈용)를 `.github/workflows/`에 같은 이름으로 복사함(`@v2` 고정). 제목 검사·자동 라벨·Assignee 자동 지정·대상 브랜치 경고는 repo-rule-keeper에 들어 있으므로 저장소별 파일(`title-guard.yml`, `auto-label.yml`, `auto-assign.yml`, `pr-base-guard.yml`)을 따로 두지 않음
 - [ ] `tools/templates/`의 이슈 폼(`task.yml`, `config.yml`)과 PR 템플릿을 `.github/`에 복사하고 PR 템플릿의 저장소별 확인 칸을 채움
-- [ ] 작업 종류 라벨 9종을 backend와 같게 만듦(`conventions/issue-pr.md` "라벨")
+- [ ] GitHub 기본 라벨을 지우고 작업 종류 라벨 9종을 이름·색·설명까지 같게 만듦(`conventions/issue-pr.md` "라벨")
 - [ ] 공개 저장소면 룰셋(기본 브랜치, `dev`가 기본 브랜치이면 `main`도 포함)에 PR 승인 1과 필수 검사 `repo-rule-keeper`를 지정함
 - [ ] 저장소 설정 "Automatically delete head branches"를 켬(`conventions/git.md` "브랜치")
 - [ ] 커밋 훅을 설정하거나 커밋 형식을 이 문서의 표에 적음

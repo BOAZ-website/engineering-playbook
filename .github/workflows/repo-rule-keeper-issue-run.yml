@@ -1,0 +1,12 @@
+# playbook 자신의 이슈·댓글 규칙 호출 파일(원본: repo-rule-keeper-issue.yml, 로컬 경로로 호출)
+name: "🛡️ repo-rule-keeper"
+on:
+  issues: { types: [opened, edited, labeled, unlabeled, assigned, unassigned] }
+  issue_comment: { types: [created, edited, deleted] }
+permissions: { contents: read, issues: write, pull-requests: write, statuses: write }
+concurrency:
+  group: "rrk-issue-${{ github.event.issue.number }}"
+  cancel-in-progress: false
+jobs:
+  issue:
+    uses: ./.github/workflows/repo-rule-keeper-issue.yml

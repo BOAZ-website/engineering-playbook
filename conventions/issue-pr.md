@@ -101,9 +101,9 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 | 본문 | 일반 업무 이슈 템플릿 사용. 체크리스트(`- [ ]`)로 완료 조건을 적음 |
 
 - 이유: 담당자가 없는 이슈는 진행하는 사람 없이 남고, 유형·우선순위·프로젝트가 없으면 보드에서 급한 일을 고를 수 없음. Project 밖의 이슈는 우선순위 목록에서 보이지 않음
-- GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 생성 뒤 repo-rule-keeper가 검사함. 원본은 playbook의 재사용 워크플로 `.github/workflows/repo-rule-keeper.yml`(화면 표시 이름 "🛡️ repo-rule-keeper")이고, 저장소는 호출 파일 견본 [`tools/callers/repo-rule-keeper.yml`](../tools/callers/repo-rule-keeper.yml)을 `.github/workflows/repo-rule-keeper.yml`로 복사해 두며 `@v1` 태그로 고정함. 호출 파일은 이것 1개뿐이고 이슈·PR 검사가 모두 이 파일로 동작함. playbook은 로컬 호출 파일 `.github/workflows/repo-rule-keeper-run.yml`을 씀. 원본을 고치면 `v1` 태그를 옮겨 모든 저장소에 반영함
-- 동작: 담당자는 작성자로, 작업 종류 라벨은 제목에서 자동으로 채우고 Type 지정도 시도함(실패하면 누락으로 알림). 이슈를 만들거나 고치거나 라벨·담당자를 바꿀 때마다 다시 검사하고(생성 직후에는 2분까지 기다림), 비어 있는 값은 마커가 붙은 댓글 1개를 갱신해 알림. 모두 채워지면 그 댓글을 "해결됨"으로 바꾸고 접음
-- Priority 조회에 실패하면 누락으로 보고 job을 실패시킴(조용히 통과하지 않음). 보드 편입·Project는 저장소 권한으로 확인할 수 없어 PM 스프린트 점검에서 확인함
+- GitHub은 필수 값 없이도 이슈를 만들 수 있어 생성 자체를 막지 못함. 생성 뒤 repo-rule-keeper가 검사함. 원본은 playbook의 재사용 워크플로 2개(PR용 `.github/workflows/repo-rule-keeper.yml`, 이슈·댓글용 `.github/workflows/repo-rule-keeper-issue.yml`)이고, 화면 표시 이름은 호출 파일 둘 다 "🛡️ repo-rule-keeper"임. 저장소는 호출 파일 견본 [`tools/callers/repo-rule-keeper.yml`](../tools/callers/repo-rule-keeper.yml)(PR용)과 [`tools/callers/repo-rule-keeper-issue.yml`](../tools/callers/repo-rule-keeper-issue.yml)(이슈용)을 `.github/workflows/`에 같은 이름으로 복사해 두며 `@v2` 태그로 고정함. 호출 파일은 이 2개이고 playbook은 로컬 호출 파일 `.github/workflows/repo-rule-keeper-run.yml`(PR용), `.github/workflows/repo-rule-keeper-issue-run.yml`(이슈용)을 씀. 원본을 고치면 `v2` 태그를 옮겨 모든 저장소에 반영함
+- 동작: 이슈를 만들거나 고치거나 라벨·담당자를 바꿀 때마다 "이슈 자동 정리" 잡이 담당자를 작성자로, 작업 종류 라벨을 제목에서 채우고 Type 지정도 시도함(생성 직후에는 2분까지 기다림). 이어서 "이슈 필수 값 알림" 잡이 비어 있는 값(라벨·Type 실패, Priority)을 마커가 붙은 댓글 1개로 갱신해 알림하고, 모두 채워지면 그 댓글을 "해결됨"으로 바꾸고 접음
+- Priority 조회에 실패하면 누락으로 보고 "이슈 필수 값 알림" 잡을 실패시킴(조용히 통과하지 않음). 보드 편입·Project는 저장소 권한으로 확인할 수 없어 PM 스프린트 점검에서 확인함
 - 이슈를 대신 만들어 준 경우(예: 회의 결정을 PM이 이슈로 옮김)에도 만든 사람을 먼저 지정하고, 작업자가 정해지면 작업자를 추가함
 - 장애 대응 예외: 운영 장애로 바로 고쳐야 하면 이슈 없이 hotfix PR을 먼저 올리고 머지할 수 있음. 복구 뒤 24시간 안에 이슈(`[Hotfix]`, Type Bug, Priority Urgent, Project SRE & 장애 대응 또는 해당 제품)를 만들어 PR 링크를 적고 닫음. 장애 절차는 `process/incident.md`
 
@@ -133,20 +133,29 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 
 ### PR 검사 `repo-rule-keeper`
 
-- 원본은 playbook의 재사용 워크플로 `.github/workflows/repo-rule-keeper.yml`("🛡️ repo-rule-keeper"). 저장소는 [`tools/callers/repo-rule-keeper.yml`](../tools/callers/repo-rule-keeper.yml)을 `.github/workflows/repo-rule-keeper.yml`로 복사해 `@v1`로 고정함. 결과는 커밋 상태 `repo-rule-keeper`로 기록됨
+- 원본은 playbook의 재사용 워크플로 `.github/workflows/repo-rule-keeper.yml`(PR용, "🛡️ repo-rule-keeper")과 `.github/workflows/repo-rule-keeper-issue.yml`(이슈·댓글용, 같은 이름). 저장소는 [`tools/callers/repo-rule-keeper.yml`](../tools/callers/repo-rule-keeper.yml), [`tools/callers/repo-rule-keeper-issue.yml`](../tools/callers/repo-rule-keeper-issue.yml)을 `.github/workflows/`에 같은 이름으로 복사해 `@v2`로 고정함. 결과는 커밋 상태 `repo-rule-keeper`로 기록됨
 - 이 워크플로가 제목 검사(title-guard), 자동 라벨(auto-label), 작성자 자동 지정(auto-assign), 대상 브랜치 경고(pr-base-guard)를 모두 맡으므로 저장소에 이 기능의 별도 워크플로를 두지 않음
-- 이슈 규칙과 PR 규칙은 잡 하나("규칙 검사")에서 이벤트에 따라 나눠 실행함. PR 검사 목록에는 워크플로 실행 "🛡️ repo-rule-keeper / rules / 규칙 검사"와 커밋 상태 `repo-rule-keeper` 두 줄이 보이며, 룰셋 필수 검사는 커밋 상태 `repo-rule-keeper`로 지정함(댓글로 다시 검사한 결과도 이 상태에 반영되기 때문)
-- 실행 시점: PR을 만들거나 고칠 때, 리뷰·댓글이 달릴 때, 연결된 이슈를 고칠 때
-- 검사 항목 7가지
-  1. 제목 형식: `[Type] 내용`이고 Type이 9종 중 하나("제목")
-  2. 라벨 자동: 제목의 `[Type]`에 맞는 작업 종류 라벨 1개만 남김(다른 작업 종류 라벨은 뗌)
-  3. Assignee 자동: 비어 있으면 PR 작성자를 지정함. 지정되지 않으면 실패
-  4. 대상 브랜치: 기본 브랜치가 아닌 곳을 향한 PR은 `dev`(릴리스)나 `hotfix/*` 브랜치에서 올 때만 허용함. 그 밖이면 실패로 표시함("브랜치 흐름", [git.md](git.md))
-  5. `Closes` 이슈 연결: 정확히 1개. 릴리스(`[Release]`, `[Hotfix]`)와 기본 브랜치가 아닌 곳을 향한 PR은 0~1개 허용
-  6. Reviewer: 지정됐거나 작성자가 아닌 사람(팀 포함)의 리뷰가 있음
-  7. 사유 없는 미체크 항목이 없음: PR 본문의 미체크 항목과, `Closes` 이슈가 1개이면 그 이슈 본문의 미체크 항목. 사유는 PR 댓글이나 이슈 댓글(사람이 쓴 것만 인정)의 `사유: <항목 문구 앞부분> / <이유>` 줄로 남김. 항목 문구의 앞 30자가 사유 줄에 들어 있으면 처리된 것으로 봄
-- 규칙을 어기면 상태만 `failure`가 되고, API 오류는 job 실패로 나타남. PR 본문·댓글·리뷰·이슈 본문이 바뀔 때마다 다시 검사함
+- 검사를 잡별로 나눠 PR 검사 목록에서 어느 규칙을 어겼는지 잡 이름으로 바로 보임. PR 검사 목록에는 아래 잡 7줄과 커밋 상태 `repo-rule-keeper` 1줄이 보임
+- 실행 시점: PR을 만들거나 고칠 때, 리뷰가 달릴 때. 이슈나 PR에 댓글이 달리거나 연결된 이슈를 고칠 때는 이슈용 호출 파일이 연결된 열린 PR을 찾아 PR 검사를 다시 실행함("PR 재검사" 잡)
+
+| 잡 화면 이름 | 하는 일 | 자동 수정·검사 |
+|---|---|---|
+| PR 정리 | PR을 한 번 조회해 다음 잡에 넘김. 커밋 상태를 `pending`("검사 중")으로 기록 | 자동 수정: 제목 `[Type]`에 맞는 작업 종류 라벨 1개만 남기고 나머지 작업 종류 라벨은 뗌, Assignee가 비면 PR 작성자를 지정 |
+| 제목 | `[Type] 내용`이고 Type이 9종 중 하나("제목") | 검사 |
+| 대상 브랜치 | 기본 브랜치가 아닌 곳을 향한 PR은 `dev`(릴리스)나 `hotfix/*` 브랜치에서 올 때만 허용("브랜치 흐름", [git.md](git.md)) | 검사 |
+| 이슈 연결 | `Closes` 이슈 정확히 1개. 릴리스(`[Release]`, `[Hotfix]`)와 기본 브랜치가 아닌 곳을 향한 PR은 0~1개 허용 | 검사 |
+| 담당자·리뷰어 | Assignee가 있음. Reviewer가 지정됐거나(요청·취소 기록의 최종 상태 기준, 팀 포함) 작성자가 아닌 사람의 리뷰가 있음 | 검사 |
+| 체크리스트 사유 | PR 본문의 미체크 항목과, `Closes` 이슈가 1개이면 그 이슈 본문의 미체크 항목마다 사유가 있음. 사유는 PR 댓글이나 이슈 댓글(사람이 쓴 것만 인정)의 `사유: <항목 문구 앞부분> / <이유>` 줄로 남김. 항목 문구의 앞 30자가 사유 줄에 들어 있으면 처리된 것으로 봄 | 검사 |
+| 최종 판정 | 앞의 검사 잡 결과를 모아 커밋 상태 `repo-rule-keeper`를 `success`("모든 규칙 충족") 또는 `failure`(위반 문구 140자)로 기록 | 이 잡은 규칙 위반으로 실패하지 않고 상태만 `failure`로 둠 |
+
+- 검사 잡(제목, 대상 브랜치, 이슈 연결, 담당자·리뷰어, 체크리스트 사유)은 규칙을 어기면 그 잡이 실패로 표시되고 잡 요약에 상세가 남음
+- 필수 검사는 커밋 상태 `repo-rule-keeper`. 댓글로 사유를 단 뒤에는 PR 재검사가 상태를 갱신하지만, "체크리스트 사유" 잡 표시는 다음 PR 이벤트까지 예전 결과로 남을 수 있음. 머지 기준은 잡 표시가 아니라 상태임
+- PR 본문·댓글·리뷰·이슈 본문이 바뀔 때마다 다시 검사함
 - 공개 저장소는 룰셋의 필수 검사로 `repo-rule-keeper`를 지정해 머지를 막음. backend-docs(비공개)는 무료 플랜이라 룰셋을 강제할 수 없어 표시만 함(리뷰어가 상태를 확인하고 머지)
+- backend-docs(비공개)는 Actions 사용 분이 듦(무료 월 2000분). PR 이벤트 1번에 잡 7개, 댓글 재검사 1번에 "연결 PR 찾기" 1개와 대상 PR마다 7개. 부족하면 그 저장소 호출 파일 두 개의 이벤트 종류를 함께 줄임(PR 이벤트만 줄여서는 댓글 재검사 비용이 줄지 않음)
+- 최종 판정은 상태를 쓰기 전에 PR을 다시 조회해, 검사 중에 제목·본문·커밋이 바뀌었으면 기록하지 않음(오래된 결과가 최신 결과를 덮지 않게 함). 바뀐 이벤트의 새 실행이 기록함
+- PR 정리 잡이 실패하면 최종 판정이 상태를 failure("PR 정리 잡 실패")로 기록해 pending이 남지 않게 함. 실패한 실행을 다시 돌리면 됨
+- 원본은 `v2` 태그로 호출함. 잡 분리 전 단일 호출 방식(`v1`)과 인터페이스가 달라 태그를 나눔
 
 ## 프로젝트 값과 저장소 추가
 
@@ -234,22 +243,23 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 
 ## 라벨
 
-| 작업 종류 라벨 | PR 제목 | 색 |
+| 작업 종류 라벨 | 색 | 설명(라벨에 그대로 적음) |
 |---|---|---|
-| `⭐️ FEAT` | `[Feat]` 새로운 기능 | `#A2EEEF` |
-| `🐛 FIX` | `[Fix]` 버그 수정 | `#D73A4A` |
-| `🚑 HOTFIX` | `[Hotfix]` 운영 긴급 수정 | `#B60205` |
-| `✏️ DOCS` | `[Docs]` 문서 | `#0075CA` |
-| `🛠️ REFACTOR` | `[Refactor]` 동작 변경 없는 구조 개선 | `#FBCA04` |
-| `🧁 STYLE` | `[Style]` 포맷팅 등 동작 변경 없음 | `#F9D0C4` |
-| `🔎 TEST` | `[Test]` 테스트 코드 | `#C5DEF5` |
-| `🚀 RELEASE` | `[Release]` `dev` → `main` 릴리스 | `#0E8A16` |
-| `🧹 CHORE` | `[Chore]` 빌드·설정 등 부수 작업 | `#BFD4F2` |
+| `⭐️ FEAT` | `#A2EEEF` | `[Feat] 새로운 기능` |
+| `🐛 FIX` | `#D73A4A` | `[Fix] 버그 수정` |
+| `🚑 HOTFIX` | `#B60205` | `[Hotfix] 운영 긴급 수정(main 머지 뒤 dev에 역머지)` |
+| `✏️ DOCS` | `#0075CA` | `[Docs] 문서` |
+| `🛠️ REFACTOR` | `#FBCA04` | `[Refactor] 동작 변경 없는 구조 개선` |
+| `🧁 STYLE` | `#F9D0C4` | `[Style] 포맷팅 등 동작 변경 없음` |
+| `🔎 TEST` | `#C5DEF5` | `[Test] 테스트 코드` |
+| `🚀 RELEASE` | `#0E8A16` | `[Release] dev → main 릴리스` |
+| `🧹 CHORE` | `#BFD4F2` | `[Chore] 빌드·CI·의존성·설정 등 부수 작업` |
 
-- 이름·색·설명은 모든 저장소에서 같게 둠(backend 기준)
+- 이름·색·설명은 모든 저장소에서 위 표와 같게 둠(2026-11-28 8개 저장소 일괄 적용). 저장소에서 바꾸지 않음
 - repo-rule-keeper의 제목 검사와 자동 라벨은 이 표를 대응표로 씀. 제목 검사가 허용하는 접두어는 모두 이 표에 있어야 함
 - 기능 라벨(예: backend의 `auth`, `recruitment`, `monitoring`)은 저장소가 쓰고 싶을 때만 만들고 붙임. 조직 공통 규칙이 아니며, 프로젝트 구분에 쓰지 않음(프로젝트는 Project 필드)
-- 사람 이름 라벨은 쓰지 않음(담당자는 Assignee)
+- 사람 이름 라벨은 쓰지 않음(담당자는 Assignee). frontend의 사람 이름 라벨 3개는 2026-11-28 삭제함
+- GitHub 기본 라벨(bug, documentation, enhancement, duplicate 등)은 쓰지 않음. 작업 종류 라벨과 겹치므로 2026-11-28 모든 저장소에서 삭제함. 새 저장소를 만들면 기본 라벨을 지우고 9종을 만듦
 
 ## 템플릿
 
