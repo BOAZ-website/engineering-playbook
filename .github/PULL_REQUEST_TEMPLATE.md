@@ -1,6 +1,6 @@
 ## 💡 개요
 
-* Issue Number: #
+* Issue Number: Closes #
 
 ## 🪐 주요 변경 사항
 -

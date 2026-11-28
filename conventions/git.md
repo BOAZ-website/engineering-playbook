@@ -1,5 +1,5 @@
 > 담당 역할: PM | Product Engineer
-> 최종 검토일: 2026-11-26
+> 최종 검토일: 2026-11-28
 > 적용 범위: backend, frontend, frontend_admin, product-infra, design-system
 > 상태: 확정
 
@@ -91,11 +91,15 @@
 | Type | 위 type의 첫 글자 대문자(`[Feat]`, `[Fix]`, `[Docs]`). PR 제목에만 `[Hotfix]`, `[Release]`를 추가로 허용 |
 | 예 | `[Feat] 로그인 API 구현` |
 | 본문 | 저장소 PR 템플릿의 섹션 이름과 순서 유지 |
-| 이슈 연결 | 일부 처리는 `Refs #번호`, 전체 처리는 `Closes #번호` |
+| 이슈 연결 | 일부 처리는 `Refs #번호`, 전체 처리는 `Closes #번호`. PR 템플릿의 이슈 줄에 씀 |
 
 - 이유: PR 제목과 본문의 형식을 맞춰 두면 어느 저장소에서든 PR 목록만 보고 변경 종류를 알 수 있음
 - 방법: PR 제목은 `[Feat] 로그인 API 구현`처럼 쓰고, 이슈 일부만 처리하면 `Refs #번호`, 전부 처리하면 `Closes #번호`를 본문에 적음
-- 5개 저장소의 기본 브랜치는 모두 `dev`(2026-11-24 조회). `dev`에 머지되면 `Closes #번호`로 이슈가 자동 종료됨
+- `Closes #번호`를 쓰면 PR 화면 Development에 이슈가 자동으로 연결되고, 머지하면 이슈가 자동으로 닫힘. 손으로 연결하지 않음. `Refs #번호`는 연결·닫힘이 없음
+- 키워드는 `Closes`, `Fixes`, `Resolves`(대소문자 무관, 콜론 허용). 다른 저장소 이슈는 `Closes BOAZ-website/frontend#209`. 이슈가 여러 개면 `Closes #10, closes #11`처럼 이슈마다 키워드를 반복함(`Closes #10, #11`은 #10만 연결)
+- 키워드는 PR 본문이나 커밋 메시지에서만 동작함(PR 댓글은 동작하지 않음). PR을 올린 뒤 본문을 고쳐도 연결됨
+- 키워드는 PR 대상이 저장소 기본 브랜치일 때만 동작함. 기능 PR은 기본 브랜치로 보냄. hotfix·릴리스 PR(`main` 대상)은 연결하지 않아도 됨
+- 기본 브랜치(2026-11-28 조회): backend, frontend, frontend_admin, product-infra, design-system은 `dev`. engineering-playbook, backend-docs, frontend_recruiting_admin은 `main`(`dev` 없음)
 - `hotfix`는 커밋 type이 아님. hotfix 브랜치의 커밋은 `fix` 등 허용 type으로 쓰고, PR 제목만 `[Hotfix]`로 씀(backend 훅은 `hotfix:` 커밋을 거부함)
 
 ### 머지
