@@ -143,6 +143,7 @@ Project 값 판정 기준(위에서부터 먼저 맞는 것)
 - [ ] 작업 종류 라벨을 backend와 같게 만듦
 - [ ] 공개 저장소면 룰셋(기본 브랜치, dev가 기본 브랜치이면 main도 포함)에 PR 승인 1과 필수 검사 `pr-rules`를 지정함
 - [ ] AI 지침 파일(`AGENTS.md` 또는 `CLAUDE.md`)에 이슈·PR 생성 규칙을 적음(`tools/new-issue.sh` 사용, Closes 1개, Reviewer·Assignee 지정)
+- [ ] 저장소 설정 "Automatically delete head branches"를 켬(머지한 브랜치 자동 삭제, `conventions/git.md` "브랜치")
 - [ ] 커밋 훅과 PR 제목 검사를 설정함
 - [ ] AWS 배포가 필요하면 배포 롤 신뢰 조건을 `org/aws-access.md` 절차대로 설정함([org/aws-access.md](../org/aws-access.md))
 - [ ] 워크스페이스 루트 `CLAUDE.md`의 저장소 표에 추가함
