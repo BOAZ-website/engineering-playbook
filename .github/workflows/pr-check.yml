@@ -58,7 +58,16 @@ jobs:
               }
 
               const reviews = await github.paginate(github.rest.pulls.listReviews, { owner, repo, pull_number: n });
+              // 팀 리뷰 요청은 저장소 토큰에 requested_teams로 보이지 않을 수 있어 타임라인의 요청·취소 기록으로도 셈
+              const timeline = await github.paginate(github.rest.issues.listEventsForTimeline, { owner, repo, issue_number: n });
+              const req = new Map();
+              for (const e of timeline) {
+                if (e.event !== 'review_requested' && e.event !== 'review_request_removed') continue;
+                const key = e.requested_team ? 'team:' + e.requested_team.slug : 'user:' + (e.requested_reviewer?.login || '');
+                req.set(key, e.event === 'review_requested');
+              }
               const hasReviewer = pr.requested_reviewers.length > 0 || pr.requested_teams.length > 0
+                || [...req.values()].some(Boolean)
                 || reviews.some(r => r.user && r.user.login !== pr.user.login);
               if (!hasReviewer) fails.push('Reviewer 지정 필요');
               if (pr.assignees.length < 1) fails.push('Assignee 지정 필요');
